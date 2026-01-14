@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String   @id @default(cuid())
+  firstName     String
+  lastName      String
+  username      String   @unique
+  email         String   @unique
+  profilePicUrl String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  Profile     Profile?
+  followers   Follow[]      @relation("follower")
+  following   Follow[]      @relation("following")
+  pending_req Follow[]      @relation("pending_req")
+  likes       Like[]
+  saved_post  Saved_Think[]
+  blocked     Block[]       @relation("blocked")
+  blocker     Block[]       @relation("blocker")
+  reporter    Report[]      @relation("reporter")
+  reported    Report[]      @relation("reported")
+
+  @@map("users")
+}
+
+model Profile {
+  id        String   @id @default(cuid())
+  user_id   String   @unique
+  bio       String?
+  gender    String   @default("not specified")
+  accState  String   @default("Public")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Follow {
+  id             String   @id @default(cuid())
+  follower_id    String
+  following_id   String
+  pending_status String
+  createdAt      DateTime @default(now())
+  follower       User     @relation("follower", fields: [follower_id], references: [id], onDelete: Cascade)
+  following      User     @relation("following", fields: [following_id], references: [id], onDelete: Cascade)
+  pending_req    User     @relation("pending_req", fields: [pending_status], references: [id], onDelete: Cascade)
+
+  @@unique([follower_id, following_id, pending_status])
+  @@map("follows")
+}
+
+model Like {
+  id             String @id @default(cuid())
+  user_id        String
+  interaction_id String
+  user           User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, interaction_id])
+  @@map("likes")
+}
+
+model Saved_Think {
+  id      String   @id @default(cuid())
+  user_id String
+  post_id String
+  savedAt DateTime @default(now())
+  user    User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, post_id])
+  @@map("saved_posts")
+}
+
+model Block {
+  id         String   @id @default(cuid())
+  blocked_id String
+  blocker_id String
+  created    DateTime @default(now())
+  blocker    User     @relation("blocker", fields: [blocker_id], references: [id], onDelete: Cascade)
+  blocked    User     @relation("blocked", fields: [blocked_id], references: [id], onDelete: Cascade)
+
+  @@unique([blocked_id, blocker_id])
+  @@map("blocks")
+}
+
+model Report {
+  id               String   @id @default(cuid())
+  reporter_id      String
+  reported_user_id String?
+  reported_post_id String?
+  reason           String
+  status           String   @default("pending")
+  createdAt        DateTime @default(now())
+  reporter         User     @relation("reporter", fields: [reporter_id], references: [id], onDelete: Cascade)
+  reported         User?    @relation("reported", fields: [reported_user_id], references: [id], onDelete: Cascade)
+
+  @@unique([reported_post_id, reported_user_id, reporter_id])
+  @@map("reports")
+}
