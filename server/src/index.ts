@@ -54,7 +54,7 @@ import userRouter from "./routes/user.route.js";
 import profileRouter from "./routes/profile.route.js";
 import postRouter from "./routes/post.route.js";
 
-app.use("/api/", express.raw({ type: "application/json" }), userRouter);
+app.use("/api", express.raw({ type: "application/json" }), userRouter);
 
 //CORS configuration
 app.use(

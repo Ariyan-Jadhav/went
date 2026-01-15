@@ -4,7 +4,6 @@ import {
   createProfile,
   getProfile,
   getProfilebyusername,
-  healthcheck,
   updateProfile,
 } from "../controllers/profile.controller.js";
 
@@ -12,7 +11,6 @@ const router = express.Router();
 
 router.post("/createprofile", createProfile);
 router.get("/me", requireAuth(), getProfile);
-router.get("/health", healthcheck);
 router.get("/:username", getProfilebyusername);
 router.put("/me/updateprofile", updateProfile);
 

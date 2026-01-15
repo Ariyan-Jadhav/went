@@ -23,16 +23,15 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  Profile     Profile?
-  followers   Follow[]      @relation("follower")
-  following   Follow[]      @relation("following")
-  pending_req Follow[]      @relation("pending_req")
-  likes       Like[]
-  saved_post  Saved_Think[]
-  blocked     Block[]       @relation("blocked")
-  blocker     Block[]       @relation("blocker")
-  reporter    Report[]      @relation("reporter")
-  reported    Report[]      @relation("reported")
+  Profile    Profile?
+  followers  Follow[]      @relation("follower")
+  following  Follow[]      @relation("following")
+  likes      Like[]
+  saved_post Saved_Think[]
+  blocked    Block[]       @relation("blocked")
+  blocker    Block[]       @relation("blocker")
+  reporter   Report[]      @relation("reporter")
+  reported   Report[]      @relation("reported")
 
   @@map("users")
 }
@@ -42,7 +41,8 @@ model Profile {
   user_id   String   @unique
   bio       String?
   gender    String   @default("not specified")
-  accState  String   @default("Public")
+  zodiac    String
+  birthday  DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -51,16 +51,14 @@ model Profile {
 }
 
 model Follow {
-  id             String   @id @default(cuid())
-  follower_id    String
-  following_id   String
-  pending_status String
-  createdAt      DateTime @default(now())
-  follower       User     @relation("follower", fields: [follower_id], references: [id], onDelete: Cascade)
-  following      User     @relation("following", fields: [following_id], references: [id], onDelete: Cascade)
-  pending_req    User     @relation("pending_req", fields: [pending_status], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  follower_id  String
+  following_id String
+  createdAt    DateTime @default(now())
+  follower     User     @relation("follower", fields: [follower_id], references: [id], onDelete: Cascade)
+  following    User     @relation("following", fields: [following_id], references: [id], onDelete: Cascade)
 
-  @@unique([follower_id, following_id, pending_status])
+  @@unique([follower_id, following_id])
   @@map("follows")
 }
 

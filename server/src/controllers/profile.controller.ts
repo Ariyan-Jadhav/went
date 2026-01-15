@@ -14,9 +14,7 @@ export const createProfile = catchAsync(async (req: Request, res: Response) => {
     throw new AppError("Please fill all the credentials", 401);
 
   const { userId, isAuthenticated } = getAuth(req);
-
   if (!isAuthenticated) throw new AppError("User not authenticated", 401);
-
   if (!userId) throw new AppError("User not found", 401);
 
   const userExists = await prisma.user.findUnique({
@@ -102,9 +100,4 @@ export const updateProfile = catchAsync(async (req: Request, res: Response) => {
     create: { user_id: userId, bio, gender, accState },
   });
   res.json(profile);
-});
-
-export const healthcheck = catchAsync(async (req: Request, res: Response) => {
-  const { userId, isAuthenticated } = getAuth(req);
-  res.json({ message: isAuthenticated });
 });
