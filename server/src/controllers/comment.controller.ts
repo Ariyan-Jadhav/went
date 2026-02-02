@@ -6,35 +6,38 @@ import { Comment } from "../models/comment.model.js";
 import { Post } from "../models/post.model.js";
 import { Think } from "../models/think.model.js";
 
-export const createCommentPost = catchAsync(
-  async (req: Request, res: Response) => {
-    const { isAuthenticated, userId } = getAuth(req);
-    if (!isAuthenticated) throw new AppError("User not authenticated", 401);
-    if (!userId) throw new AppError("User not found", 401);
+export const createComment = catchAsync(async (req: Request, res: Response) => {
+  const { isAuthenticated, userId } = getAuth(req);
+  if (!isAuthenticated) throw new AppError("User not authenticated", 401);
+  if (!userId) throw new AppError("User not found", 401);
 
-    const { content, interaction_id, type } = req.body;
-    if (!content) throw new AppError("content not found", 400);
+  const { content, interaction_id, type } = req.body;
+  if (!content) throw new AppError("content not found", 400);
 
-    if (type === "post") {
-      const post = await Post.findById(interaction_id);
-      if (!post) throw new AppError("Post not found", 404);
-    } else if (type === "think") {
-      const think = await Think.findById(interaction_id);
-      if (!think) throw new AppError("Think not found", 404);
-    }
-
-    const comment = await Comment.create({
-      user_id: userId,
-      interaction_id: interaction_id,
-      type: type,
-      content: content,
-      likesCount: 0,
-    });
-
-    if (comment)
-      res.status(200).json({ message: "comment added successfully" });
+  if (type === "post") {
+    const post = await Post.findById(interaction_id);
+    if (!post) throw new AppError("Post not found", 404);
+  } else if (type === "think") {
+    const think = await Think.findById(interaction_id);
+    if (!think) throw new AppError("Think not found", 404);
   }
-);
+
+  const comment = await Comment.create({
+    user_id: userId,
+    interaction_id: interaction_id,
+    type: type,
+    content: content,
+    likesCount: 0,
+  });
+  // const followers = prisma.cp.findMany({
+  //   where: {
+  //     following_id: userId,
+  //   },
+  // });
+  // await createNotification();
+
+  if (comment) res.status(200).json({ message: "comment added successfully" });
+});
 
 export const updateComment = catchAsync(async (req: Request, res: Response) => {
   const { isAuthenticated, userId } = getAuth(req);

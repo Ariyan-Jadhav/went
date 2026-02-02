@@ -4,6 +4,8 @@ import { AppError, catchAsync } from "../middleware/error.middleware.js";
 import { uploadmedia, deleteMediafromCloudinary } from "../utils/cloudinary.js";
 import { promises as fs } from "fs";
 import { Think } from "../models/think.model.js";
+import { createNotification } from "../utils/notification.js";
+import prisma from "../../lib/prisma.js";
 
 interface thinkBody {
   content: string;
@@ -52,6 +54,7 @@ export const createThink = catchAsync(async (req: Request, res: Response) => {
         rethinkCount: 0,
       });
       await Promise.all(files.map((file) => fs.unlink(file.path)));
+
       res.status(201).json({ message: think });
     } catch (error) {
       if (files)

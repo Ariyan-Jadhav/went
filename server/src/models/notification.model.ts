@@ -6,7 +6,9 @@ export interface INotification extends Document {
   type: string;
   message: string;
   reference_id?: string;
+  read: boolean;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const notificationSchema = new Schema<INotification>(
@@ -25,20 +27,28 @@ const notificationSchema = new Schema<INotification>(
       type: String,
       index: true,
       required: [true, "type is required"],
+      enum: ["follow", "like", "comment", "mention"], // Add more types as needed
     },
     message: {
       type: String,
+      required: [true, "message is required"],
     },
     reference_id: {
       type: String,
       index: true,
-      required: [true, "reference_id is required"],
+    },
+    read: {
+      type: Boolean,
+      default: false,
+      index: true,
     },
   },
   { timestamps: true }
 );
 
+// Compound index for efficient queries
 notificationSchema.index({ recipient_id: 1, createdAt: -1 });
+notificationSchema.index({ recipient_id: 1, read: 1 });
 
 export const Notification = mongoose.model<INotification>(
   "Notification",

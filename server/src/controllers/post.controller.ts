@@ -10,7 +10,7 @@ export const createPost = catchAsync(async (req: Request, res: Response) => {
   if (!isAuthenticated) throw new AppError("User not authenticated", 401);
   if (!userId) throw new AppError("User not found", 401);
 
-  const { caption } = req.body;
+  const { caption, location } = req.body;
 
   const files = req.files as Express.Multer.File[];
   if (!files || files.length === 0)
@@ -32,6 +32,7 @@ export const createPost = catchAsync(async (req: Request, res: Response) => {
       user_id: userId,
       imageUrl: imageUrl,
       caption: caption,
+      location: location,
       likesCount: 0,
       commentsCount: 0,
     });

@@ -19,17 +19,30 @@ const PORT = process.env.PORT || 6969;
 // websocket server //
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: { origin: "http://localhost:5173" },
+  cors: {
+    origin: "http://localhost:5173", // Your client URL
+    credentials: true, // 🔥 THIS WAS MISSING! Very important for cookies/auth
+    methods: ["GET", "POST"],
+  },
 });
 
 const userSockets = new Map();
 
 io.on("connection", (socket) => {
+  console.log(`🔌 Socket connected: ${socket.id}`);
+
   const userId = socket.handshake.auth.userId;
-  userSockets.set(userId, socket.id);
+
+  if (userId) {
+    userSockets.set(userId, socket.id);
+    console.log(`✅ User ${userId} authenticated with socket ${socket.id}`);
+  }
 
   socket.on("disconnect", () => {
-    userSockets.delete(userId);
+    if (userId) {
+      userSockets.delete(userId);
+      console.log(`👋 User ${userId} disconnected`);
+    }
   });
 });
 
@@ -41,26 +54,11 @@ app.use(helmet());
 // logging middleware //
 if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 
-// Raw body for webhook routes
-app.use("/api", express.raw({ type: "application/json" }));
-
-// Body Parser Middleware //
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-app.use(cookieParser());
-app.use(clerkMiddleware());
-
-import userRouter from "./routes/user.route.js";
-import profileRouter from "./routes/profile.route.js";
-import postRouter from "./routes/post.route.js";
-
-app.use("/api", express.raw({ type: "application/json" }), userRouter);
-
-//CORS configuration
+//CORS configuration - FIXED: Must allow credentials and use correct origin
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
+    origin: "http://localhost:5173", // 🔥 FIXED: Was process.env.CLIENT_URL which might be wrong
+    credentials: true, // 🔥 THIS IS CRITICAL!
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
     allowedHeaders: [
       "Content-Type",
@@ -74,6 +72,21 @@ app.use(
   })
 );
 
+// Body Parser Middleware - MUST COME BEFORE ROUTES //
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(cookieParser());
+app.use(clerkMiddleware());
+
+// Import routes
+import userRouter from "./routes/user.route.js";
+import profileRouter from "./routes/profile.route.js";
+import postRouter from "./routes/post.route.js";
+import commentRouter from "./routes/comment.route.js";
+import thinkRouter from "./routes/think.route.js";
+import notificationRouter from "./routes/notification.routes.js";
+import followRouter from "./routes/follow.route.js";
+
 // global rate limiter //
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -83,9 +96,18 @@ const limiter = rateLimit({
 
 app.use("/api", limiter);
 
-//routes
+// Special route for webhooks that need raw body (if you have any)
+// This should come BEFORE the regular routes
+// app.use("/api/webhooks", express.raw({ type: "application/json" }), userRouter);
+
+// Regular routes - these will use the JSON body parser above
 app.use("/profile", profileRouter);
 app.use("/post", postRouter);
+app.use("/comment", commentRouter);
+app.use("/think", thinkRouter);
+app.use("/notification", notificationRouter);
+app.use("/follow", followRouter);
+
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "success",
@@ -115,8 +137,11 @@ app.use(((err, req, res, next) => {
 }) as ErrorRequestHandler);
 
 // start server //
-app.listen(PORT, () => {
+// 🚨 CRITICAL FIX: Listen on httpServer, not app!
+httpServer.listen(PORT, () => {
   console.log(
-    ` Server running on port ${PORT} in ${process.env.NODE_ENV} mode`
+    `🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`
   );
+  console.log(`🔌 Socket.IO is ready for connections`);
+  console.log(`🌐 Accepting requests from http://localhost:5173`);
 });

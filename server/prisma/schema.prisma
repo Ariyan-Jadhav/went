@@ -37,15 +37,17 @@ model User {
 }
 
 model Profile {
-  id        String   @id @default(cuid())
-  user_id   String   @unique
-  bio       String?
-  gender    String   @default("not specified")
-  zodiac    String
-  birthday  DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  user_id    String   @unique
+  bio        String?
+  gender     String   @default("not specified")
+  zodiac     String
+  film       String
+  profession String
+  birthday   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("profiles")
 }

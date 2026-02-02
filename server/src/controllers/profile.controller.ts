@@ -9,8 +9,8 @@ import { Response, Request } from "express";
 import { getAuth } from "@clerk/express";
 
 export const createProfile = catchAsync(async (req: Request, res: Response) => {
-  const { bio, gender, accState } = req.body;
-  if (!bio || !gender || !accState)
+  const { bio, gender, zodiac, birthday, film, profession } = req.body;
+  if (!bio || !gender || !birthday)
     throw new AppError("Please fill all the credentials", 401);
 
   const { userId, isAuthenticated } = getAuth(req);
@@ -33,7 +33,10 @@ export const createProfile = catchAsync(async (req: Request, res: Response) => {
       user_id: userId,
       bio: bio,
       gender: gender,
-      accState: accState,
+      zodiac: zodiac,
+      birthday: birthday,
+      film: film,
+      profession: profession,
     },
   });
   res.json(profile);
@@ -84,8 +87,8 @@ export const getProfilebyusername = catchAsync(
 );
 
 export const updateProfile = catchAsync(async (req: Request, res: Response) => {
-  const { bio, gender, accState } = req.body;
-  if (!bio || !gender || !accState)
+  const { bio, gender, birthday, zodiac, film, profession } = req.body;
+  if (!bio || !gender || !birthday)
     throw new AppError("Please fill all the credentials", 401);
 
   const { userId, isAuthenticated } = getAuth(req);
@@ -96,8 +99,16 @@ export const updateProfile = catchAsync(async (req: Request, res: Response) => {
 
   const profile = await prisma.profile.upsert({
     where: { user_id: userId },
-    update: { bio, gender, accState },
-    create: { user_id: userId, bio, gender, accState },
+    update: { bio, gender, birthday, zodiac },
+    create: {
+      user_id: userId,
+      bio,
+      gender,
+      birthday,
+      zodiac,
+      film,
+      profession,
+    },
   });
   res.json(profile);
 });

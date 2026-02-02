@@ -6,6 +6,7 @@ export interface IPost extends Document {
   caption?: string;
   likesCount: number;
   commentsCount: number;
+  location: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +35,9 @@ const postSchema = new Schema<IPost>(
       type: Number,
       default: 0,
       min: 0,
+    },
+    location: {
+      type: String,
     },
     commentsCount: {
       type: Number,
