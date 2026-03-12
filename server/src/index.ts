@@ -14,7 +14,11 @@ import { createServer } from "http";
 dotenv.config();
 await connectDB();
 const app = express();
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 6969;
+
+import userRouter from "./routes/user.route.js";
+app.use("/api", express.raw({ type: "application/json" }), userRouter);
 
 // websocket server //
 const httpServer = createServer(app);
@@ -69,8 +73,10 @@ app.use(
       "Origin",
       "Accept",
     ],
-  })
+  }),
 );
+
+// Webhook route needs raw body BEFORE json parser
 
 // Body Parser Middleware - MUST COME BEFORE ROUTES //
 app.use(express.json({ limit: "10mb" }));
@@ -79,7 +85,6 @@ app.use(cookieParser());
 app.use(clerkMiddleware());
 
 // Import routes
-import userRouter from "./routes/user.route.js";
 import profileRouter from "./routes/profile.route.js";
 import postRouter from "./routes/post.route.js";
 import commentRouter from "./routes/comment.route.js";
@@ -88,19 +93,16 @@ import notificationRouter from "./routes/notification.routes.js";
 import followRouter from "./routes/follow.route.js";
 
 // global rate limiter //
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: process.env.NODE_ENV === "development" ? 100 : 1000,
   message: "Too many request from IP, please try again later",
 });
 
-app.use("/api", limiter);
-
-// Special route for webhooks that need raw body (if you have any)
-// This should come BEFORE the regular routes
-// app.use("/api/webhooks", express.raw({ type: "application/json" }), userRouter);
-
+// app.use("/api", limiter);
 // Regular routes - these will use the JSON body parser above
+
 app.use("/profile", profileRouter);
 app.use("/post", postRouter);
 app.use("/comment", commentRouter);
@@ -140,7 +142,7 @@ app.use(((err, req, res, next) => {
 // 🚨 CRITICAL FIX: Listen on httpServer, not app!
 httpServer.listen(PORT, () => {
   console.log(
-    `🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`
+    `🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`,
   );
   console.log(`🔌 Socket.IO is ready for connections`);
   console.log(`🌐 Accepting requests from http://localhost:5173`);
