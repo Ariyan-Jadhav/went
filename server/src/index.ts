@@ -14,6 +14,7 @@ import { createServer } from "http";
 dotenv.config();
 await connectDB();
 const app = express();
+
 app.set("trust proxy", 1);
 const PORT = process.env.PORT || 6969;
 
@@ -21,6 +22,7 @@ import userRouter from "./routes/user.route.js";
 app.use("/api", express.raw({ type: "application/json" }), userRouter);
 
 // websocket server //
+
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -100,7 +102,8 @@ const limiter = rateLimit({
   message: "Too many request from IP, please try again later",
 });
 
-// app.use("/api", limiter);
+app.use("/api", limiter);
+
 // Regular routes - these will use the JSON body parser above
 
 app.use("/profile", profileRouter);
