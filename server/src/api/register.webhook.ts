@@ -23,6 +23,9 @@ export const SignUpUsers = async (req: Request, res: Response) => {
       error: "Error occured - no svix headers",
     });
   }
+  if (!Buffer.isBuffer(req.body)) {
+    return res.status(400).json({ error: "Raw body not available - check body parser setup" });
+  }
   const body = req.body.toString("utf8");
   const wh = new Webhook(WEBHOOK_SECRET);
   let evt: WebhookEvent;

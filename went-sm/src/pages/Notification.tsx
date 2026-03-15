@@ -91,7 +91,7 @@ function Notification() {
 
       // Count unread notifications
       const unread = data.notifications.filter(
-        (n: Notification) => !n.read
+        (n: Notification) => !n.read,
       ).length;
       setUnreadCount(unread);
     } catch (error) {
@@ -112,14 +112,14 @@ function Notification() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (!response.ok) throw new Error("Failed to mark as read");
 
       // Update local state
       setNotifications((prev) =>
-        prev.map((n) => (n._id === notificationId ? { ...n, read: true } : n))
+        prev.map((n) => (n._id === notificationId ? { ...n, read: true } : n)),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
@@ -137,7 +137,7 @@ function Notification() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (!response.ok) throw new Error("Failed to mark all as read");
@@ -162,7 +162,7 @@ function Notification() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (!response.ok) throw new Error("Failed to delete notification");
@@ -178,7 +178,7 @@ function Notification() {
 
   const formatTimeAgo = (date: string) => {
     const seconds = Math.floor(
-      (new Date().getTime() - new Date(date).getTime()) / 1000
+      (new Date().getTime() - new Date(date).getTime()) / 1000,
     );
 
     if (seconds < 60) return "just now";

@@ -8,7 +8,6 @@ export interface Ithink extends Document {
     publicId: string;
   }>;
   hashtags?: string[];
-  mentions?: string[];
   likesCount: number;
   commentsCount: number;
   rethinkCount: number;
@@ -46,11 +45,6 @@ const thinkSchema = new Schema<Ithink>(
         type: String,
       },
     ],
-    mentions: [
-      {
-        type: String,
-      },
-    ],
     likesCount: {
       type: Number,
       default: 0,
@@ -69,7 +63,7 @@ const thinkSchema = new Schema<Ithink>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 thinkSchema.index({ user_id: 1, createdAt: -1 });

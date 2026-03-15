@@ -4,6 +4,8 @@ import SignIn from "./pages/SignIn";
 import Feed from "./pages/Feed";
 import Noti from "./pages/Notification";
 import DynamicIsland from "./pages/DynamicIsland";
+import Home from "./pages/Home";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
@@ -13,7 +15,9 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/feed" element={<Feed />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/noti" element={<Noti />} />
+          <Route path="/home" element={<Home />} />
         </Route>
       </Routes>
     </div>

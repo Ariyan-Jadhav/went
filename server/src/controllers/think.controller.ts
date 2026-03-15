@@ -20,20 +20,23 @@ export const createThink = catchAsync(async (req: Request, res: Response) => {
   if (!isAuthenticated) throw new AppError("User not authenticated", 401);
   if (!userId) throw new AppError("User not found", 401);
 
-  const { content, hashtags, mentions }: thinkBody = req.body;
+  const { content, hashtags }: thinkBody = req.body;
   if (!content) throw new AppError("content not found", 400);
 
-  const fixedHashtags = hashtags?.map((tag: string) =>
-    tag.startsWith("#") ? tag : `#${tag}`
-  );
+  let fixedHashtags: string[] = [];
 
+  if (hashtags) {
+    fixedHashtags = hashtags?.map((tag: string) =>
+      tag.startsWith("#") ? tag : `#${tag}`,
+    );
+  }
   const files = req.files as Express.Multer.File[];
   if (files?.length > 0) {
     if (files.length > 5)
       throw new AppError("you can only upload upto 5 images", 400);
 
     const uploadPromise = files.map((file) =>
-      uploadmedia(file.path, "went/thinks")
+      uploadmedia(file.path, "went/thinks"),
     );
     const uploadResult = await Promise.all(uploadPromise);
 
@@ -48,7 +51,6 @@ export const createThink = catchAsync(async (req: Request, res: Response) => {
         content: content,
         imageUrl: imageUrl,
         hashtags: fixedHashtags,
-        mentions: mentions,
         likesCount: 0,
         commentsCount: 0,
         rethinkCount: 0,
@@ -59,7 +61,7 @@ export const createThink = catchAsync(async (req: Request, res: Response) => {
     } catch (error) {
       if (files)
         await Promise.all(
-          files.map((file) => fs.unlink(file.path).catch(console.error))
+          files.map((file) => fs.unlink(file.path).catch(console.error)),
         );
       throw new AppError(`Could not create post : ${error}`, 401);
     }
@@ -79,7 +81,7 @@ export const updateThink = catchAsync(async (req: Request, res: Response) => {
     throw new AppError("You can only edit your own thinks", 403);
   }
   const fixedHashtags = hashtags?.map((tag: string) =>
-    tag.startsWith("#") ? tag : `#${tag}`
+    tag.startsWith("#") ? tag : `#${tag}`,
   );
 
   const availableUpdates: {
@@ -118,7 +120,7 @@ export const deleteThink = catchAsync(async (req: Request, res: Response) => {
       }
 
       const publicIds = think.imageUrl?.map((publicId) =>
-        deleteMediafromCloudinary(publicId.publicId)
+        deleteMediafromCloudinary(publicId.publicId),
       );
       if (publicIds) await Promise.all(publicIds);
 

@@ -11,23 +11,21 @@ import connectDB from "./database/db.mongo.js";
 import { Server } from "socket.io";
 import { createServer } from "http";
 
-dotenv.config();
+// ─── 1. ENV & DB ────────────────────────────────────────────────────────────
+dotenv.config({ override: true });
 await connectDB();
-const app = express();
 
+// ─── 2. APP & HTTP SERVER (needed for Socket.IO) ────────────────────────────
+const app = express();
+const httpServer = createServer(app);
 app.set("trust proxy", 1);
 const PORT = process.env.PORT || 6969;
 
-import userRouter from "./routes/user.route.js";
-app.use("/api", express.raw({ type: "application/json" }), userRouter);
-
-// websocket server //
-
-const httpServer = createServer(app);
+// ─── 3. SOCKET.IO ───────────────────────────────────────────────────────────
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173", // Your client URL
-    credentials: true, // 🔥 THIS WAS MISSING! Very important for cookies/auth
+    origin: "http://localhost:5173",
+    credentials: true,
     methods: ["GET", "POST"],
   },
 });
@@ -54,17 +52,15 @@ io.on("connection", (socket) => {
 
 export { io, userSockets };
 
-// security middleware //
+// ─── 4. SECURITY & LOGGING MIDDLEWARE ───────────────────────────────────────
 app.use(helmet());
-
-// logging middleware //
 if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 
-//CORS configuration - FIXED: Must allow credentials and use correct origin
+// ─── 5. CORS ─────────────────────────────────────────────────────────────────
 app.use(
   cors({
-    origin: "http://localhost:5173", // 🔥 FIXED: Was process.env.CLIENT_URL which might be wrong
-    credentials: true, // 🔥 THIS IS CRITICAL!
+    origin: "http://localhost:5173",
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
     allowedHeaders: [
       "Content-Type",
@@ -78,15 +74,27 @@ app.use(
   }),
 );
 
-// Webhook route needs raw body BEFORE json parser
+// ─── 6. WEBHOOK ROUTE (raw body — MUST be before express.json()) ─────────────
+import userRouter from "./routes/user.route.js";
+app.use("/api", express.raw({ type: "application/json" }), userRouter);
 
-// Body Parser Middleware - MUST COME BEFORE ROUTES //
+// ─── 7. BODY PARSERS (after webhook route) ───────────────────────────────────
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
+
+// ─── 8. CLERK MIDDLEWARE ─────────────────────────────────────────────────────
 app.use(clerkMiddleware());
 
-// Import routes
+// ─── 9. RATE LIMITER ─────────────────────────────────────────────────────────
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env.NODE_ENV === "development" ? 100 : 1000,
+  message: "Too many requests from this IP, please try again later",
+});
+app.use("/api", limiter);
+
+// ─── 10. ROUTES ──────────────────────────────────────────────────────────────
 import profileRouter from "./routes/profile.route.js";
 import postRouter from "./routes/post.route.js";
 import commentRouter from "./routes/comment.route.js";
@@ -94,18 +102,7 @@ import thinkRouter from "./routes/think.route.js";
 import notificationRouter from "./routes/notification.routes.js";
 import followRouter from "./routes/follow.route.js";
 
-// global rate limiter //
-
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === "development" ? 100 : 1000,
-  message: "Too many request from IP, please try again later",
-});
-
-app.use("/api", limiter);
-
-// Regular routes - these will use the JSON body parser above
-
+app.use("/api/user", userRouter);
 app.use("/profile", profileRouter);
 app.use("/post", postRouter);
 app.use("/comment", commentRouter);
@@ -121,7 +118,7 @@ app.get("/health", (req, res) => {
   });
 });
 
-// 404 handler //
+// ─── 11. 404 HANDLER ─────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({
     status: "error",
@@ -129,7 +126,7 @@ app.use((req, res) => {
   });
 });
 
-//  Global error handler //
+// ─── 12. GLOBAL ERROR HANDLER ────────────────────────────────────────────────
 app.use(((err, req, res, next) => {
   console.log(err);
   return res.status(err.statusCode || 500).json({
@@ -141,8 +138,7 @@ app.use(((err, req, res, next) => {
   });
 }) as ErrorRequestHandler);
 
-// start server //
-// 🚨 CRITICAL FIX: Listen on httpServer, not app!
+// ─── 13. START SERVER ────────────────────────────────────────────────────────
 httpServer.listen(PORT, () => {
   console.log(
     `🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`,
