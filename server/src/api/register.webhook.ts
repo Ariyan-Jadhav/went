@@ -24,7 +24,9 @@ export const SignUpUsers = async (req: Request, res: Response) => {
     });
   }
   if (!Buffer.isBuffer(req.body)) {
-    return res.status(400).json({ error: "Raw body not available - check body parser setup" });
+    return res
+      .status(400)
+      .json({ error: "Raw body not available - check body parser setup" });
   }
   const body = req.body.toString("utf8");
   const wh = new Webhook(WEBHOOK_SECRET);
@@ -70,7 +72,7 @@ export const SignUpUsers = async (req: Request, res: Response) => {
       }
 
       const primaryEmail = email_addresses.find(
-        (email) => email.id === primary_email_address_id
+        (email) => email.id === primary_email_address_id,
       );
       if (!primaryEmail) {
         console.error("No primary Email found");

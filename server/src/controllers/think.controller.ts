@@ -25,17 +25,23 @@ export const createThink = catchAsync(async (req: Request, res: Response) => {
 
   let fixedHashtags: string[] = [];
 
+  const parsedHashtags = Array.isArray(hashtags)
+    ? hashtags
+    : hashtags
+      ? [hashtags]
+      : [];
+
   if (hashtags) {
-    fixedHashtags = hashtags?.map((tag: string) =>
+    fixedHashtags = parsedHashtags?.map((tag: string) =>
       tag.startsWith("#") ? tag : `#${tag}`,
     );
   }
-  const files = req.files as Express.Multer.File[];
-  if (files?.length > 0) {
-    if (files.length > 5)
+  const images = req.files as Express.Multer.File[];
+  if (images?.length > 0) {
+    if (images.length > 5)
       throw new AppError("you can only upload upto 5 images", 400);
 
-    const uploadPromise = files.map((file) =>
+    const uploadPromise = images.map((file) =>
       uploadmedia(file.path, "went/thinks"),
     );
     const uploadResult = await Promise.all(uploadPromise);
@@ -55,13 +61,13 @@ export const createThink = catchAsync(async (req: Request, res: Response) => {
         commentsCount: 0,
         rethinkCount: 0,
       });
-      await Promise.all(files.map((file) => fs.unlink(file.path)));
+      await Promise.all(images.map((file) => fs.unlink(file.path)));
 
       res.status(201).json({ message: think });
     } catch (error) {
-      if (files)
+      if (images)
         await Promise.all(
-          files.map((file) => fs.unlink(file.path).catch(console.error)),
+          images.map((file) => fs.unlink(file.path).catch(console.error)),
         );
       throw new AppError(`Could not create post : ${error}`, 401);
     }
@@ -73,7 +79,7 @@ export const updateThink = catchAsync(async (req: Request, res: Response) => {
   if (!isAuthenticated) throw new AppError("User not authenticated", 401);
   if (!userId) throw new AppError("User not found", 401);
 
-  const { content, hashtags, mentions, think_id }: thinkBody = req.body;
+  const { content, hashtags, think_id }: thinkBody = req.body;
 
   const thinkForUpdate = await Think.findById(think_id);
   if (!thinkForUpdate) throw new AppError("Think not found", 404);
@@ -92,7 +98,7 @@ export const updateThink = catchAsync(async (req: Request, res: Response) => {
 
   if (content !== undefined) availableUpdates.content = content;
   if (hashtags !== undefined) availableUpdates.hashtags = fixedHashtags;
-  if (mentions !== undefined) availableUpdates.mentions = mentions;
+  // if (mentions !== undefined) availableUpdates.mentions = mentions;
 
   if (availableUpdates) {
     const think = await Think.findByIdAndUpdate(think_id, availableUpdates, {

@@ -118,6 +118,13 @@ app.get("/health", (req, res) => {
   });
 });
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "FUCK THIS SHIT",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // ─── 11. 404 HANDLER ─────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).json({
