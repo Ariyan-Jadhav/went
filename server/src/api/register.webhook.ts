@@ -90,6 +90,12 @@ export const SignUpUsers = async (req: Request, res: Response) => {
         },
       });
       console.log(" New user created:", newUser);
+      const newProfile = await prisma.profile.create({
+        data: {
+          user_id: id,
+        },
+      });
+      console.log(" Profile created:", newProfile);
     } catch (error) {
       console.error("Error creating user in database", error);
       return res.status(500).json({ error: "Error creating user" });

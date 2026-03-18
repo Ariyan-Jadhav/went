@@ -37,19 +37,83 @@ model User {
 }
 
 model Profile {
-  id         String   @id @default(cuid())
-  user_id    String   @unique
+  id         String    @id @default(cuid())
+  user_id    String    @unique
   bio        String?
-  gender     String   @default("not specified")
-  zodiac     String
-  film       String
-  profession String
-  birthday   String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  gender     String    @default("not specified")
+  profession String    @default("Berozgar")
+  location   String?
+  hobby      String[]
+  birthday   DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user    User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  movies  ProfileMovie[]
+  tracks  ProfileTrack[]
+  albums  ProfileAlbum[]
+  artists ProfileArtist[]
 
   @@map("profiles")
+}
+
+// Stores a movie the user has pinned to their profile (from OMDB)
+model ProfileMovie {
+  id         String   @id @default(cuid())
+  profile_id String
+  title      String
+  year       String
+  type       String // "movie" | "series" | "episode"
+  poster     String? // can be null/N/A — handled in UI
+  createdAt  DateTime @default(now())
+
+  profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+
+  @@unique([profile_id])
+  @@map("profile_movies")
+}
+
+// Stores a Spotify track the user has pinned to their profile
+model ProfileTrack {
+  id         String   @id @default(cuid())
+  profile_id String
+  name       String
+  artist     String // comma-joined artist names
+  image      String? // album cover URL
+  createdAt  DateTime @default(now())
+
+  profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+
+  @@unique([profile_id])
+  @@map("profile_tracks")
+}
+
+// Stores a Spotify album the user has pinned to their profile
+model ProfileAlbum {
+  id         String   @id @default(cuid())
+  profile_id String
+  name       String
+  image      String?
+  createdAt  DateTime @default(now())
+
+  profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+
+  @@unique([profile_id])
+  @@map("profile_albums")
+}
+
+// Stores a Spotify artist the user has pinned to their profile
+model ProfileArtist {
+  id         String   @id @default(cuid())
+  profile_id String
+  name       String
+  image      String?
+  createdAt  DateTime @default(now())
+
+  profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+
+  @@unique([profile_id])
+  @@map("profile_artists")
 }
 
 model Follow {

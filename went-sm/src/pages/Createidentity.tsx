@@ -12,10 +12,29 @@ import {
 } from "@/components/ui/popover";
 
 import Zodiac from "@/components/Zodiac";
+import searchEngineHobbie from "@/components/Hobbies";
+
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxValue,
+  useComboboxAnchor,
+  ComboboxInput,
+} from "@/components/ui/combobox";
+
+import axios from "axios";
+import { useUser } from "@clerk/clerk-react";
 
 const CLIENT_ID = "ec687a946e3543f0bee1f3f184f3cea6";
 const CLIENT_SECRET = "14f8c78ddabc4363b41793b61bf81f35";
 const OMDB_API_KEY = "d635244f";
+axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 
@@ -137,6 +156,26 @@ function MovieCard({ movie, onClick }: { movie: Movie; onClick: () => void }) {
 export default function Createidentity() {
   const { musicSearchInput, openSearch, setOpenSearch } = useSearch();
 
+  // ── Bio state ──
+  const [bio, setBio] = useState<string>("");
+
+  // ── Hobbies state ──
+  const [selectCategory, setSelectCategory] = useState<
+    | "general"
+    | "sports_and_outdoors"
+    | "education"
+    | "collection"
+    | "competition"
+    | "observation"
+  >("general");
+  const anchor = useComboboxAnchor();
+  const [query, setQuery] = useState("");
+  const [selectedHobbies, setSelectedHobbies] = useState<string[]>([]);
+
+  // ── pronounce state ──
+  const [gender, setGender] = useState<"male" | "female" | "">("");
+
+  // ── Bday state ──
   const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(undefined);
   const zodiac = date ? Zodiac(date) : "";
@@ -165,6 +204,25 @@ export default function Createidentity() {
   const [selectAlbum, setSelectAlbum] = useState<SelectedAlbum | null>(null);
   const [selectTrack, setSelectTrack] = useState<SelectedTrack | null>(null);
   const [selectMovie, setSelectMovie] = useState<SelectedMovie | null>(null);
+
+  // ── Submit into database ─────────────────────────────────────────────────────
+  const { user } = useUser();
+
+  const createIdentityArtist = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const userId = user?.id;
+    if (!userId) throw new Error("the user isn't authenticated");
+  };
+
+  // ── Hobbies ──────────────────────────────────────
+  const category = [
+    "general",
+    "sports_and_outdoors",
+    "education",
+    "collection",
+    "competition",
+    "observation",
+  ];
 
   // ── Spotify token fetch (once on mount) ──────────────────────────────────────
   useEffect(() => {
@@ -601,6 +659,86 @@ export default function Createidentity() {
           <p className="font-medium">Zodiac: {zodiac}</p>
         </div>
       )}
+
+      <textarea
+        onChange={(e) => setBio(e.target.value)}
+        className="bg-taupe-500"
+      ></textarea>
+
+      <select
+        value={gender}
+        onChange={(e) => setGender(e.target.value as "female" | "male" | "")}
+      >
+        <option value="female">female</option>
+        <option value="male">male</option>
+      </select>
+
+      <div className="flex flex-col gap-4">
+        {/* CATEGORY SELECT */}
+        <Combobox
+          items={category}
+          onValueChange={(value) =>
+            setSelectCategory(
+              value as
+                | "general"
+                | "sports_and_outdoors"
+                | "education"
+                | "collection"
+                | "competition"
+                | "observation",
+            )
+          }
+        >
+          <ComboboxInput placeholder="Select category" />
+          <ComboboxContent>
+            <ComboboxEmpty>No items found.</ComboboxEmpty>
+            <ComboboxList>
+              {(item) => (
+                <ComboboxItem key={item} value={item}>
+                  {item}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+        {/* HOBBIES SEARCH */}
+        <Combobox
+          multiple
+          autoHighlight
+          items={searchEngineHobbie(selectCategory, query)}
+          defaultValue={[]}
+          value={selectedHobbies}
+          onValueChange={setSelectedHobbies}
+        >
+          <ComboboxChips ref={anchor} className="w-full max-w-xs">
+            <ComboboxValue>
+              {(values) => (
+                <>
+                  {values.map((value: string) => (
+                    <ComboboxChip key={value}>{value}</ComboboxChip>
+                  ))}
+                  <ComboboxChipsInput
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Search hobbies..."
+                  />
+                </>
+              )}
+            </ComboboxValue>
+          </ComboboxChips>
+
+          <ComboboxContent anchor={anchor}>
+            <ComboboxEmpty>No items found.</ComboboxEmpty>
+            <ComboboxList>
+              {(item, i) => (
+                <ComboboxItem key={i} value={item}>
+                  {item}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+      </div>
     </div>
   );
 }

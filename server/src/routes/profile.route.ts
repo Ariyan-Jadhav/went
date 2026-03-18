@@ -3,15 +3,26 @@ import { requireAuth } from "@clerk/express";
 import {
   createProfile,
   getProfile,
-  getProfilebyusername,
+  getProfileByUsername,
   updateProfile,
+  pinMovie,
+  pinTrack,
+  pinAlbum,
+  pinArtist,
 } from "../controllers/profile.controller.js";
 
 const router = express.Router();
 
-router.post("/createprofile", createProfile);
+// ─── PROFILE CRUD ─────────────────────────────────────────────────────────────
+router.post("/", requireAuth(), createProfile);
 router.get("/me", requireAuth(), getProfile);
-router.get("/:username", getProfilebyusername);
-router.put("/me/updateprofile", updateProfile);
+router.put("/me", requireAuth(), updateProfile);
+router.get("/:username", requireAuth(), getProfileByUsername);
+
+// ─── PINNED MEDIA (Spotify + OMDB) ───────────────────────────────────────────
+router.put("/me/movie", requireAuth(), pinMovie);
+router.put("/me/track", requireAuth(), pinTrack);
+router.put("/me/album", requireAuth(), pinAlbum);
+router.put("/me/artist", requireAuth(), pinArtist);
 
 export default router;

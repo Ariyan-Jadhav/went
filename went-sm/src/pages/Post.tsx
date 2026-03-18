@@ -9,6 +9,8 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 
+import { useUser } from "@clerk/clerk-react";
+
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 function Post() {
@@ -52,10 +54,14 @@ function Post() {
     setThinkImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const { user } = useUser();
   const createThink = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess(false);
+
+    const userId = user?.id;
+    if (!userId) throw new Error("Login first");
 
     if (!content.trim()) {
       setError("Content cannot be empty. Say something! Anything!");
