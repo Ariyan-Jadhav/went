@@ -1,10 +1,21 @@
 import { useEffect, useState } from "react";
 import { useSearch } from "../components/di_global_context/SearchContextMusic";
 
-// ✅ Move these to your .env file
-const CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
-const CLIENT_SECRET = import.meta.env.VITE_SPOTIFY_CLIENT_SECRET;
-const OMDB_API_KEY = "d635244f"; // ✅ move "d635244f" here too!
+import * as React from "react";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Field, FieldLabel } from "@/components/ui/field";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import Zodiac from "@/components/Zodiac";
+
+const CLIENT_ID = "ec687a946e3543f0bee1f3f184f3cea6";
+const CLIENT_SECRET = "14f8c78ddabc4363b41793b61bf81f35";
+const OMDB_API_KEY = "d635244f";
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
 
@@ -28,11 +39,8 @@ interface Album {
 interface Track {
   id: string;
   name: string;
-  duration_ms: number;
-  preview_url: string | null;
   artists: { name: string }[];
   album: {
-    name: string;
     images: SpotifyImage[];
   };
 }
@@ -42,7 +50,7 @@ interface Movie {
   Title: string;
   Year: string;
   Type: string;
-  Poster: string; // can be "N/A" if no poster exists
+  Poster: string;
 }
 
 interface SelectedArtist {
@@ -59,10 +67,7 @@ interface SelectedAlbum {
 interface SelectedTrack {
   name: string;
   artist: string;
-  albumName: string;
   image: string;
-  duration: string;
-  preview_url: string | null;
 }
 
 interface SelectedMovie {
@@ -75,13 +80,6 @@ interface SelectedMovie {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-// Converts ms to m:ss — because nobody wants to read "214000"
-function formatDuration(ms: number): string {
-  const minutes = Math.floor(ms / 60000);
-  const seconds = Math.floor((ms % 60000) / 1000);
-  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-}
-
 // Capitalize first letter of type (movie → Movie)
 function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -89,8 +87,59 @@ function capitalize(str: string): string {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+// ── MovieCard — handles broken image URLs with onError fallback ───────────────
+function MovieCard({ movie, onClick }: { movie: Movie; onClick: () => void }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const hasposter = movie.Poster !== "N/A" && !imgFailed;
+
+  return (
+    <div
+      onClick={onClick}
+      className="flex flex-col items-center gap-1 cursor-pointer w-28 group"
+    >
+      {hasposter ? (
+        <img
+          src={movie.Poster}
+          alt={movie.Title}
+          onError={() => setImgFailed(true)}
+          className="w-28 h-40 object-cover rounded-lg group-hover:ring-2 group-hover:ring-amber-400 transition"
+        />
+      ) : (
+        <div className="w-28 h-40 bg-white/10 rounded-lg group-hover:ring-2 group-hover:ring-amber-400 transition flex flex-col items-center justify-center gap-2 px-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-8 h-8 text-gray-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75.125v-1.875M6 18.375V6.75M6 6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75M6 6.75h12M18 6.75v11.625M18 18.375c0 .621.504 1.125 1.125 1.125h1.5m0-13.5v13.5M4.5 7.5h1.5m-1.5 3h1.5m-1.5 3h1.5m13.5-6h-1.5m1.5 3h-1.5m1.5 3h-1.5"
+            />
+          </svg>
+          <p className="text-gray-400 text-xs text-center line-clamp-3 leading-tight">
+            {movie.Title}
+          </p>
+        </div>
+      )}
+      <p className="text-white text-xs text-center truncate w-full">
+        {movie.Title}
+      </p>
+      <p className="text-gray-400 text-xs">{movie.Year}</p>
+      <p className="text-amber-400 text-xs">{capitalize(movie.Type)}</p>
+    </div>
+  );
+}
+
 export default function Createidentity() {
   const { musicSearchInput, openSearch, setOpenSearch } = useSearch();
+
+  const [open, setOpen] = React.useState(false);
+  const [date, setDate] = React.useState<Date | undefined>(undefined);
+  const zodiac = date ? Zodiac(date) : "";
 
   // ── Spotify state ──
   const [accessToken, setAccessToken] = useState("");
@@ -100,9 +149,6 @@ export default function Createidentity() {
 
   // ── Movie state ──
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [moviePage, setMoviePage] = useState(1); // current page (1-based — OMDB uses 1-based pages)
-  const [totalMovies, setTotalMovies] = useState(0); // total results from OMDB
-  const MOVIES_PER_PAGE = 10; // OMDB always returns 10 per page — fixed by their API
 
   // ── Panel visibility ──
   const [selectArtistPanel, setSelectArtistPanel] = useState(false);
@@ -213,8 +259,7 @@ export default function Createidentity() {
     findTrack();
   }, [musicSearchInput, accessToken, selectTrackPanel]);
 
-  // ── Movie search (with pagination) ───────────────────────────────────────────
-  // Re-runs when: search input changes OR page number changes
+  // ── Movie search ─────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!selectMoviePanel || !musicSearchInput) return;
 
@@ -223,19 +268,15 @@ export default function Createidentity() {
       setError(null);
       try {
         const res = await fetch(
-          // OMDB pagination: &page= is 1-based, returns exactly 10 results per page
-          `https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(musicSearchInput)}&page=${moviePage}`,
+          `https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(musicSearchInput)}`,
         );
         const data = await res.json();
 
         if (data.Response === "False") {
-          // OMDB returns { Response: "False", Error: "..." } when nothing is found
           setMovies([]);
-          setTotalMovies(0);
           setError(data.Error ?? "No movies found.");
         } else {
           setMovies(data.Search ?? []);
-          setTotalMovies(parseInt(data.totalResults ?? "0", 10));
         }
       } catch {
         setError("Failed to fetch movies.");
@@ -245,12 +286,7 @@ export default function Createidentity() {
     }
 
     findMovie();
-  }, [musicSearchInput, selectMoviePanel, moviePage]); // ✅ moviePage in deps — page change triggers new fetch
-
-  // Reset to page 1 whenever search input changes (don't stay on page 5 of old results 👻)
-  useEffect(() => {
-    setMoviePage(1);
-  }, [musicSearchInput]);
+  }, [musicSearchInput, selectMoviePanel]);
 
   // ── Panel helpers ─────────────────────────────────────────────────────────────
   function closeAllPanels() {
@@ -269,8 +305,6 @@ export default function Createidentity() {
     setSelectTrackPanel(panel === "track");
     setSelectMoviePanel(panel === "movie");
   }
-
-  const totalMoviePages = Math.ceil(totalMovies / MOVIES_PER_PAGE);
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
@@ -393,7 +427,7 @@ export default function Createidentity() {
           onClick={closeAllPanels}
         >
           <div
-            className="mt-40 flex flex-col gap-3 w-[600px] max-h-[60vh] overflow-y-auto px-4"
+            className="mt-40 flex flex-col gap-3 w-150 max-h-[60vh] overflow-y-auto px-4"
             onClick={(e) => e.stopPropagation()}
           >
             {isLoading && <p className="text-white">Loading...</p>}
@@ -406,10 +440,7 @@ export default function Createidentity() {
                     setSelectTrack({
                       name: track.name,
                       artist: track.artists.map((a) => a.name).join(", "),
-                      albumName: track.album.name,
                       image: track.album.images?.[0]?.url,
-                      duration: formatDuration(track.duration_ms),
-                      preview_url: track.preview_url,
                     })
                   }
                   className="flex items-center gap-4 bg-white/10 hover:bg-white/20 transition rounded-xl px-4 py-3 cursor-pointer"
@@ -426,13 +457,7 @@ export default function Createidentity() {
                     <p className="text-gray-300 text-sm truncate">
                       {track.artists.map((a) => a.name).join(", ")}
                     </p>
-                    <p className="text-gray-400 text-xs truncate">
-                      {track.album.name}
-                    </p>
                   </div>
-                  <p className="text-gray-400 text-sm shrink-0">
-                    {formatDuration(track.duration_ms)}
-                  </p>
                 </div>
               ))}
           </div>
@@ -454,15 +479,6 @@ export default function Createidentity() {
           />
           <p className="font-semibold">{selectTrack.name}</p>
           <p className="text-sm text-gray-500">{selectTrack.artist}</p>
-          <p className="text-xs text-gray-400">{selectTrack.albumName}</p>
-          <p className="text-xs text-gray-400">{selectTrack.duration}</p>
-          {selectTrack.preview_url && (
-            <audio
-              controls
-              src={selectTrack.preview_url}
-              className="mt-2 w-60"
-            />
-          )}
         </div>
       )}
 
@@ -473,7 +489,7 @@ export default function Createidentity() {
           onClick={closeAllPanels}
         >
           <div
-            className="mt-24 flex flex-col gap-4 w-[680px] max-h-[70vh]"
+            className="mt-24 flex flex-col gap-4 w-170 max-h-[70vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {isLoading && <p className="text-white text-center">Loading...</p>}
@@ -483,8 +499,9 @@ export default function Createidentity() {
             {!isLoading && (
               <div className="flex gap-4 flex-wrap justify-center overflow-y-auto px-2">
                 {movies.map((movie) => (
-                  <div
+                  <MovieCard
                     key={movie.imdbID}
+                    movie={movie}
                     onClick={() =>
                       setSelectMovie({
                         title: movie.Title,
@@ -494,101 +511,9 @@ export default function Createidentity() {
                         imdbID: movie.imdbID,
                       })
                     }
-                    className="flex flex-col items-center gap-1 cursor-pointer w-28 group"
-                  >
-                    {movie.Poster !== "N/A" ? (
-                      <img
-                        src={movie.Poster}
-                        alt={movie.Title}
-                        className="w-28 h-40 object-cover rounded-lg group-hover:ring-2 group-hover:ring-amber-400 transition"
-                      />
-                    ) : (
-                      // Fallback when OMDB has no poster — happens more than you'd hope 🙃
-                      <div className="w-28 h-40 bg-white/10 rounded-lg flex items-center justify-center text-gray-400 text-xs text-center px-2">
-                        No Poster
-                      </div>
-                    )}
-                    <p className="text-white text-xs text-center truncate w-full">
-                      {movie.Title}
-                    </p>
-                    <p className="text-gray-400 text-xs">{movie.Year}</p>
-                    <p className="text-amber-400 text-xs">
-                      {capitalize(movie.Type)}
-                    </p>
-                  </div>
+                  />
                 ))}
               </div>
-            )}
-
-            {/* ── Pagination controls ── */}
-            {!isLoading && totalMoviePages > 1 && (
-              <div className="flex items-center justify-center gap-3 mt-2 flex-wrap">
-                {/* Prev button */}
-                <button
-                  onClick={() => setMoviePage((p) => Math.max(1, p - 1))}
-                  disabled={moviePage === 1}
-                  className="px-3 py-1 rounded-lg bg-white/10 text-white text-sm disabled:opacity-30 hover:bg-white/20 transition"
-                >
-                  ← Prev
-                </button>
-
-                {/* Page number pills — shows a sliding window of pages around current */}
-                {Array.from({ length: totalMoviePages }, (_, i) => i + 1)
-                  .filter(
-                    (p) =>
-                      p === 1 ||
-                      p === totalMoviePages ||
-                      Math.abs(p - moviePage) <= 2,
-                  )
-                  .reduce<(number | "...")[]>((acc, p, idx, arr) => {
-                    // Insert "..." gap when pages are non-consecutive
-                    if (idx > 0 && p - (arr[idx - 1] as number) > 1)
-                      acc.push("...");
-                    acc.push(p);
-                    return acc;
-                  }, [])
-                  .map((item, i) =>
-                    item === "..." ? (
-                      <span
-                        key={`ellipsis-${i}`}
-                        className="text-gray-400 text-sm"
-                      >
-                        …
-                      </span>
-                    ) : (
-                      <button
-                        key={item}
-                        onClick={() => setMoviePage(item as number)}
-                        className={`w-8 h-8 rounded-full text-sm transition ${
-                          moviePage === item
-                            ? "bg-amber-400 text-black font-bold"
-                            : "bg-white/10 text-white hover:bg-white/20"
-                        }`}
-                      >
-                        {item}
-                      </button>
-                    ),
-                  )}
-
-                {/* Next button */}
-                <button
-                  onClick={() =>
-                    setMoviePage((p) => Math.min(totalMoviePages, p + 1))
-                  }
-                  disabled={moviePage === totalMoviePages}
-                  className="px-3 py-1 rounded-lg bg-white/10 text-white text-sm disabled:opacity-30 hover:bg-white/20 transition"
-                >
-                  Next →
-                </button>
-              </div>
-            )}
-
-            {/* Result count footer */}
-            {!isLoading && totalMovies > 0 && (
-              <p className="text-gray-400 text-xs text-center">
-                Page {moviePage} of {totalMoviePages} — {totalMovies} total
-                results
-              </p>
             )}
           </div>
         </div>
@@ -609,8 +534,24 @@ export default function Createidentity() {
               className="w-32 h-48 object-cover rounded-lg"
             />
           ) : (
-            <div className="w-32 h-48 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400 text-sm">
-              No Poster
+            <div className="w-32 h-48 bg-gray-200 rounded-lg flex flex-col items-center justify-center gap-2 px-3">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-10 h-10 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75.125v-1.875M6 18.375V6.75M6 6.75A2.25 2.25 0 018.25 4.5h7.5A2.25 2.25 0 0118 6.75M6 6.75h12M18 6.75v11.625M18 18.375c0 .621.504 1.125 1.125 1.125h1.5m0-13.5v13.5M4.5 7.5h1.5m-1.5 3h1.5m-1.5 3h1.5m13.5-6h-1.5m1.5 3h-1.5m1.5 3h-1.5"
+                />
+              </svg>
+              <p className="text-gray-500 text-xs text-center line-clamp-3 leading-tight">
+                {selectMovie.title}
+              </p>
             </div>
           )}
           <p className="font-semibold">{selectMovie.title}</p>
@@ -626,6 +567,38 @@ export default function Createidentity() {
           >
             View on IMDb
           </a>
+        </div>
+      )}
+      <Field className="mx-auto w-44 mt-100">
+        <FieldLabel htmlFor="date">Date of birth</FieldLabel>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              id="date"
+              className="justify-start font-normal"
+            >
+              {date ? date.toLocaleDateString() : "Select date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={date}
+              defaultMonth={date}
+              captionLayout="dropdown"
+              onSelect={(date) => {
+                setDate(date);
+                setOpen(false);
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+      </Field>
+      {date && (
+        <div className="mt-3 text-sm">
+          <p>Selected: {date.toLocaleDateString()}</p>
+          <p className="font-medium">Zodiac: {zodiac}</p>
         </div>
       )}
     </div>

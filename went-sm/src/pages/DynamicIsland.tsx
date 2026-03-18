@@ -14,7 +14,7 @@ import SearchMusic from "@/components/di_animations/SearchMusic";
 
 export default function DynamicIsland() {
   const islandRef = useRef<HTMLDivElement>(null);
-  const { openSearch, setOpenSearch } = useSearch();
+  const { openSearch } = useSearch();
 
   useEffect(() => {
     gsap.fromTo(
