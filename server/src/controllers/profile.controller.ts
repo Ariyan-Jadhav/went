@@ -52,7 +52,6 @@ export const createProfile = catchAsync(async (req: Request, res: Response) => {
   res.status(201).json(profile);
 });
 
-// ─── GET MY PROFILE ───────────────────────────────────────────────────────────
 export const getProfile = catchAsync(async (req: Request, res: Response) => {
   const { userId, isAuthenticated } = getAuth(req);
 
@@ -75,7 +74,6 @@ export const getProfile = catchAsync(async (req: Request, res: Response) => {
   res.json(profile);
 });
 
-// ─── GET PROFILE BY USERNAME ───────────────────────────────────────────────────
 export const getProfileByUsername = catchAsync(
   async (req: Request, res: Response) => {
     const { username } = req.params;
@@ -105,7 +103,6 @@ export const getProfileByUsername = catchAsync(
   },
 );
 
-// ─── UPDATE PROFILE ───────────────────────────────────────────────────────────
 export const updateProfile = catchAsync(async (req: Request, res: Response) => {
   const { bio, gender, profession, location, hobby, birthday } = req.body;
 
@@ -131,7 +128,7 @@ export const updateProfile = catchAsync(async (req: Request, res: Response) => {
       gender: gender ?? "not specified",
       profession: profession ?? "Berozgar",
       location: location ?? null,
-      hobby: hobby ?? null,
+      ...(hobby ? { hobby: Array.isArray(hobby) ? hobby : [hobby] } : {}),
       birthday: birthday ? new Date(birthday) : null,
     },
     include: {
@@ -146,8 +143,6 @@ export const updateProfile = catchAsync(async (req: Request, res: Response) => {
   res.json(profile);
 });
 
-// ─── PIN MOVIE (OMDB) ─────────────────────────────────────────────────────────
-// One movie per profile. Upserts so the user can swap their pinned movie anytime.
 export const pinMovie = catchAsync(async (req: Request, res: Response) => {
   const { title, year, type, poster } = req.body;
 
@@ -178,7 +173,6 @@ export const pinMovie = catchAsync(async (req: Request, res: Response) => {
   res.json(movie);
 });
 
-// ─── PIN TRACK (SPOTIFY) ──────────────────────────────────────────────────────
 export const pinTrack = catchAsync(async (req: Request, res: Response) => {
   const { name, artist, image } = req.body;
 
@@ -202,7 +196,6 @@ export const pinTrack = catchAsync(async (req: Request, res: Response) => {
   res.json(track);
 });
 
-// ─── PIN ALBUM (SPOTIFY) ──────────────────────────────────────────────────────
 export const pinAlbum = catchAsync(async (req: Request, res: Response) => {
   const { name, image } = req.body;
 
@@ -226,7 +219,6 @@ export const pinAlbum = catchAsync(async (req: Request, res: Response) => {
   res.json(album);
 });
 
-// ─── PIN ARTIST (SPOTIFY) ─────────────────────────────────────────────────────
 export const pinArtist = catchAsync(async (req: Request, res: Response) => {
   const { name, image } = req.body;
 

@@ -13,6 +13,8 @@ import {
 
 import Zodiac from "@/components/Zodiac";
 import searchEngineHobbie from "@/components/Hobbies";
+import { professions } from "@/components/Profession";
+import { states } from "@/components/Location";
 
 import {
   Combobox,
@@ -29,7 +31,7 @@ import {
 } from "@/components/ui/combobox";
 
 import axios from "axios";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useAuth } from "@clerk/clerk-react";
 
 const CLIENT_ID = "ec687a946e3543f0bee1f3f184f3cea6";
 const CLIENT_SECRET = "14f8c78ddabc4363b41793b61bf81f35";
@@ -172,6 +174,13 @@ export default function Createidentity() {
   const [query, setQuery] = useState("");
   const [selectedHobbies, setSelectedHobbies] = useState<string[]>([]);
 
+  // ── Profession state ──
+  const [selectedProfession, setSelectedProfession] =
+    useState<string>("Berozgar");
+
+  // ── location state ──
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
+
   // ── pronounce state ──
   const [gender, setGender] = useState<"male" | "female" | "">("");
 
@@ -197,7 +206,9 @@ export default function Createidentity() {
 
   // ── Shared loading/error ──
   const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   // ── Selected items ──
   const [selectArtist, setSelectArtist] = useState<SelectedArtist | null>(null);
@@ -207,11 +218,168 @@ export default function Createidentity() {
 
   // ── Submit into database ─────────────────────────────────────────────────────
   const { user } = useUser();
+  const { getToken } = useAuth();
 
   const createIdentityArtist = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    setSuccess(false);
+
     const userId = user?.id;
     if (!userId) throw new Error("the user isn't authenticated");
+
+    try {
+      setLoading(true);
+      const response = await axios.put(
+        "profile/me/artist",
+        {
+          name: selectArtist?.name,
+          image: selectArtist?.image,
+        },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+      if (!response.data.success) {
+        console.error("No data returned from server");
+        setError("Something went wrong. Try again.");
+        return;
+      }
+      setSuccess(true);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to post.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const createIdentityAlbum = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess(false);
+
+    const userId = user?.id;
+    if (!userId) throw new Error("the user isn't authenticated");
+
+    try {
+      setLoading(true);
+      const response = await axios.put(
+        "profile/me/album",
+        {
+          name: selectAlbum?.name,
+          image: selectAlbum?.image,
+        },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+      if (!response.data.success) {
+        console.error("No data returned from server");
+        setError("Something went wrong. Try again.");
+        return;
+      }
+      setSuccess(true);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to post.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const createIdentityTrack = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess(false);
+
+    const userId = user?.id;
+    if (!userId) throw new Error("the user isn't authenticated");
+
+    try {
+      setLoading(true);
+      const response = await axios.put(
+        "profile/me/track",
+        {
+          name: selectTrack?.name,
+          image: selectTrack?.image,
+          artist: selectTrack?.artist,
+        },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+      if (!response.data.success) {
+        console.error("No data returned from server");
+        setError("Something went wrong. Try again.");
+        return;
+      }
+      setSuccess(true);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to post.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const createIdentityMovie = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess(false);
+
+    const userId = user?.id;
+    if (!userId) throw new Error("the user isn't authenticated");
+
+    try {
+      setLoading(true);
+      const response = await axios.put(
+        "profile/me/movie",
+        {
+          title: selectMovie?.title,
+          year: selectMovie?.year,
+          poster: selectMovie?.poster,
+          type: selectMovie?.type,
+        },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+      if (!response.data.success) {
+        console.error("No data returned from server");
+        setError("Something went wrong. Try again.");
+        return;
+      }
+      setSuccess(true);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to post.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const createIdentity = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess(false);
+
+    const userId = user?.id;
+    if (!userId) throw new Error("the user isn't authenticated");
+
+    try {
+      const response = await axios.put(
+        "profile/me",
+        {
+          bio,
+          gender,
+          hobby: selectedHobbies,
+          birthday: date,
+          profession: selectedProfession,
+          location: selectedLocation,
+        },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+      if (!response.data.success) {
+        console.error("No data returned from server");
+        setError("Something went wrong. Try again.");
+        return;
+      }
+      setSuccess(true);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to post.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ── Hobbies ──────────────────────────────────────
@@ -738,6 +906,52 @@ export default function Createidentity() {
             </ComboboxList>
           </ComboboxContent>
         </Combobox>
+      </div>
+
+      <div>
+        <Combobox
+          items={professions}
+          onValueChange={(value) => setSelectedProfession(value as string)}
+          defaultValue={"Berozgar"}
+        >
+          <ComboboxInput placeholder="Select category" />
+          <ComboboxContent>
+            <ComboboxEmpty>No items found.</ComboboxEmpty>
+            <ComboboxList>
+              {(item, i) => (
+                <ComboboxItem key={i} value={item}>
+                  {item}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+      </div>
+
+      <div>
+        <Combobox
+          items={states}
+          onValueChange={(value) => setSelectedLocation(value as string)}
+        >
+          <ComboboxInput placeholder="Select Location" />
+          <ComboboxContent>
+            <ComboboxEmpty>No items found.</ComboboxEmpty>
+            <ComboboxList>
+              {(item, i) => (
+                <ComboboxItem key={i} value={item}>
+                  {item}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+      </div>
+      <div>
+        <button onClick={createIdentity}>createIdentity</button>
+        <button onClick={createIdentityAlbum}>createIdentityAlbum</button>
+        <button onClick={createIdentityArtist}>createIdentityArtist</button>
+        <button onClick={createIdentityMovie}>createIdentityMovie</button>
+        <button onClick={createIdentityTrack}>createIdentityTrack</button>
       </div>
     </div>
   );

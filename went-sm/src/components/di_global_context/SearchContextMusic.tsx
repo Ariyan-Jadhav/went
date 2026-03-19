@@ -1,31 +1,15 @@
-import { createContext, useContext, useState } from "react";
+import { create } from "zustand";
 
-const SearchContext = createContext<any>(null);
-
-export function SearchProvider({ children }: any) {
-  const [musicSearchInput, setMusicSearchInput] = useState("");
-  const [openSearch, setOpenSearch] = useState(false);
-
-  return (
-    <SearchContext.Provider
-      value={{
-        musicSearchInput,
-        setMusicSearchInput,
-        openSearch,
-        setOpenSearch,
-      }}
-    >
-      {children}
-    </SearchContext.Provider>
-  );
-}
-
-export const useSearch = () => {
-  const context = useContext(SearchContext);
-
-  if (!context) {
-    throw new Error("useSearch must be used inside SearchProvider");
-  }
-
-  return context;
+type SearchState = {
+  musicSearchInput: string;
+  openSearch: boolean;
+  setMusicSearchInput: (val: string) => void;
+  setOpenSearch: (val: boolean) => void;
 };
+
+export const useSearch = create<SearchState>((set) => ({
+  musicSearchInput: "",
+  openSearch: false,
+  setMusicSearchInput: (val) => set({ musicSearchInput: val }),
+  setOpenSearch: (val) => set({ openSearch: val }),
+}));

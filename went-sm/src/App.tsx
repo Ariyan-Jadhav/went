@@ -9,24 +9,20 @@ import Post from "./pages/Post";
 import Profile from "./pages/Profile";
 import Createidentity from "./pages/Createidentity";
 
-import { SearchProvider } from "./components/di_global_context/SearchContextMusic";
-
 function App() {
   return (
-    <SearchProvider>
-      <Routes>
-        <Route path="/" element={<DynamicIsland />}>
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/feed" element={<Feed />} />
-          <Route path="/createidentity" element={<Createidentity />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/justuploaditbrah" element={<Post />} />
-          <Route path="/noti" element={<Noti />} />
-          <Route path="/home" element={<Home />} />
-        </Route>
-      </Routes>
-    </SearchProvider>
+    <Routes>
+      <Route path="/" element={<DynamicIsland />}>
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/feed" element={<Feed />} />
+        <Route path="/createidentity" element={<Createidentity />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/justuploaditbrah" element={<Post />} />
+        <Route path="/noti" element={<Noti />} />
+        <Route path="/home" element={<Home />} />
+      </Route>
+    </Routes>
   );
 }
 

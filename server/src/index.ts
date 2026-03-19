@@ -102,7 +102,7 @@ import thinkRouter from "./routes/think.route.js";
 import notificationRouter from "./routes/notification.routes.js";
 import followRouter from "./routes/follow.route.js";
 
-app.use("/api/user", userRouter);
+app.use("/api/", userRouter);
 app.use("/profile", profileRouter);
 app.use("/post", postRouter);
 app.use("/comment", commentRouter);
