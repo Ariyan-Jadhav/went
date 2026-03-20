@@ -44,3 +44,6 @@ sketch
 
 coverage/
 node_modules
+
+breathingBots.json
+prompt.txt
