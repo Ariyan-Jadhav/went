@@ -41,7 +41,7 @@ export const togglePostLike = catchAsync(
         {
           $inc: { likesCount: 1 },
         },
-        { new: true }
+        { new: true },
       );
 
       return res.status(200).json(` ${userId} Liked the post at ${Date.now()}`);
@@ -58,14 +58,14 @@ export const togglePostLike = catchAsync(
       await Post.findByIdAndUpdate(
         post_id,
         { $inc: { likesCount: -1 } },
-        { new: true }
+        { new: true },
       );
 
       return res
         .status(200)
         .json(` ${userId} Disliked the post at ${Date.now()}`);
     }
-  }
+  },
 );
 
 export const toggleThinkLike = catchAsync(
@@ -102,7 +102,7 @@ export const toggleThinkLike = catchAsync(
         {
           $inc: { likesCount: 1 },
         },
-        { new: true }
+        { new: true },
       );
 
       return res
@@ -121,14 +121,14 @@ export const toggleThinkLike = catchAsync(
       await Think.findByIdAndUpdate(
         think_id,
         { $inc: { likesCount: -1 } },
-        { new: true }
+        { new: true },
       );
 
       return res
         .status(200)
         .json(` ${userId} Disliked the think at ${Date.now()}`);
     }
-  }
+  },
 );
 
 export const toggleCommentLike = catchAsync(
@@ -165,7 +165,7 @@ export const toggleCommentLike = catchAsync(
         {
           $inc: { likesCount: 1 },
         },
-        { new: true }
+        { new: true },
       );
 
       return res
@@ -184,12 +184,12 @@ export const toggleCommentLike = catchAsync(
       await Comment.findByIdAndUpdate(
         comment_id,
         { $inc: { likesCount: -1 } },
-        { new: true }
+        { new: true },
       );
 
       return res
         .status(200)
         .json(` ${userId} Disliked the comment at ${Date.now()}`);
     }
-  }
+  },
 );

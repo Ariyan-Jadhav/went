@@ -33,9 +33,10 @@ import {
 import axios from "axios";
 import { useUser, useAuth } from "@clerk/clerk-react";
 
-const CLIENT_ID = "ec687a946e3543f0bee1f3f184f3cea6";
-const CLIENT_SECRET = "14f8c78ddabc4363b41793b61bf81f35";
-const OMDB_API_KEY = "d635244f";
+const CLIENT_ID = import.meta.env.VITE_MUSIC_CLIENT_ID;
+const CLIENT_SECRET = import.meta.env.VITE_MUSIC_CLIENT_SECRET;
+const OMDB_API_KEY = import.meta.env.VITE_MOVIE_API_KEY;
+
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 // ── Interfaces ────────────────────────────────────────────────────────────────
