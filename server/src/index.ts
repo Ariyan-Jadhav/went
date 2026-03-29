@@ -15,6 +15,8 @@ import { createServer } from "http";
 dotenv.config({ override: true });
 await connectDB();
 
+import { reloadBots } from "./breathing_bots/schedule.js";
+await reloadBots();
 // ─── 2. APP & HTTP SERVER (needed for Socket.IO) ────────────────────────────
 const app = express();
 const httpServer = createServer(app);
@@ -153,3 +155,6 @@ httpServer.listen(PORT, () => {
   console.log(`🔌 Socket.IO is ready for connections`);
   console.log(`🌐 Accepting requests from http://localhost:5173`);
 });
+
+// ─── 14. START SERVER ────────────────────────────────────────────────────────
+import "./breathing_bots/schedule.js";
