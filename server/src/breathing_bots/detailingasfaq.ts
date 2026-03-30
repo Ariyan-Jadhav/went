@@ -1,61 +1,61 @@
+import { Groq } from "groq-sdk";
 import { BreathingBots } from "../models/bots.model.js";
 import { Think } from "../models/think.model.js";
 import { Comment } from "../models/comment.model.js";
-import { Groq } from "groq-sdk";
 
-const THOUSAND_YEARS = process.env.THOUSAND_YEARS!;
+const HUNDRED_YEARS = process.env.HUNDRED_YEARS!;
 
 async function generateComment(
   data: InstanceType<typeof BreathingBots>,
   postContent: string,
 ): Promise<string> {
-  console.log("generate comment just started");
-  console.log(data);
-  console.log(postContent);
+  const groq = new Groq({ apiKey: HUNDRED_YEARS });
 
-  const groq = new Groq({ apiKey: THOUSAND_YEARS });
-
-  const chatCompletion = await groq.chat.completions.create({
+  const completion = await groq.chat.completions.create({
     messages: [
       {
         role: "system",
         content:
-          "You are a real human. Write casually, imperfectly, never like AI.",
+          "You are a real human on social media. Write only the comment, nothing else. No explanation, no quotes, no preamble.",
       },
       {
         role: "user",
-        content: `You are a real person on social media.
-Identity:
-- Username: ${data.username}
-- Archetype: ${data.archetype}
-- Bio: ${data.bio}
-- Location: ${data.location}
+        content: `You are ${data.username} commenting on an Instagram post.
 
-Current State:
-- Mood: ${data.mood_state.current}
-- Emotional volatility: ${data.mood_state.volatility}
+Your vibe: ${data.archetype}
+Mood: ${data.mood_state.current}
+Traits: ${data.personality.traits.join(", ")}
+Tone: ${data.voice.tone}
+Quirks: ${data.voice.quirks.join(", ")}
 
-Personality Core:
-- Traits: ${data.personality.traits.join(", ")}
-- Interests: ${data.personality.interests.join(", ")}
+Avoid these words: ${data.voice.forbidden_words.join(", ")}
 
-Voice & Style:
-- Tone: ${data.voice.tone}
-- Quirks: ${data.voice.quirks.join(", ")}
-- Emoji behavior: ${data.voice.emoji_usage.frequency}, most emojis used: (${data.voice.emoji_usage.emojis.join(" ")})
-- Avoid these words: ${data.voice.forbidden_words.join(", ")}
-
-Post you are commenting on:
+Post you're reacting to:
 "${postContent}"
 
-Task:
-Write a single short comment (1 sentence max) reacting to the post above.
-Stay in character. Be casual, human, imperfect. No explanations.`,
+Rules (follow exactly):
+- feel like a real Instagram comment (quick, punchy, informal)
+- react directly to the post
+- tone can be:
+  - casual / funny
+  - slightly negative / sarcastic
+  - occasionally dark (subtle, not try-hard)
+- no Hindi
+- can use emojis naturally (0–2 max)
+- lowercase is fine
+- slight imperfection is good
+
+Strictly avoid:
+- too long sentences
+- generic replies like "nice", "wow", "so true"
+- formal or structured tone
+
+Output only the comment. No explanation.`,
       },
     ],
     model: "openai/gpt-oss-120b",
     temperature: 0.9,
-    max_completion_tokens: 100,
+    max_completion_tokens: 500,
     top_p: 0.95,
     stream: true,
     reasoning_effort: "medium",
@@ -63,11 +63,32 @@ Stay in character. Be casual, human, imperfect. No explanations.`,
   });
 
   let output = "";
-  for await (const chunk of chatCompletion) {
-    output += chunk.choices[0]?.delta?.content || "";
+  for await (const chunk of completion) {
+    const delta = chunk.choices[0]?.delta as any;
+    output += delta?.content || delta?.reasoning_content || "";
   }
 
   return output.trim();
+}
+
+async function generateCommentWithRetry(
+  data: InstanceType<typeof BreathingBots>,
+  postContent: string,
+  retries = 3,
+): Promise<string> {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const result = await generateComment(data, postContent);
+      if (result) return result;
+      console.log(
+        `attempt ${attempt} returned empty for ${data.id}, retrying...`,
+      );
+    } catch (err) {
+      console.log(`attempt ${attempt} failed for ${data.id}:`, err);
+    }
+    if (attempt < retries) await new Promise((res) => setTimeout(res, 5000));
+  }
+  return "";
 }
 
 export async function engagePost(
@@ -75,8 +96,6 @@ export async function engagePost(
   postContent: string,
   excludeUserId: string,
 ) {
-  console.log(excludeUserId);
-
   const allBots = await BreathingBots.find(
     { id: { $ne: excludeUserId } },
     { id: 1 },
@@ -90,9 +109,12 @@ export async function engagePost(
   }
 
   const selected = allIds.slice(0, 60);
+  console.log(
+    `engagePost started — ${selected.length} bots selected for post ${postId}`,
+  );
 
   for (let i = 0; i < selected.length; i++) {
-    await new Promise((res) => setTimeout(res, 30 * 1000));
+    if (i > 0) await new Promise((res) => setTimeout(res, 30 * 1000));
 
     const userId = selected[i]!;
     console.log(`Processing bot ${i + 1}/60:`, userId);
@@ -103,7 +125,7 @@ export async function engagePost(
       continue;
     }
 
-    const content = await generateComment(botData, postContent);
+    const content = await generateCommentWithRetry(botData, postContent);
     console.log(`generated comment for ${userId}:`, content);
     if (!content) {
       console.log(`empty content for ${userId}, skipping`);

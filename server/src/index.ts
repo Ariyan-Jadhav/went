@@ -98,7 +98,6 @@ app.use("/api", limiter);
 
 // ─── 10. ROUTES ──────────────────────────────────────────────────────────────
 import profileRouter from "./routes/profile.route.js";
-import postRouter from "./routes/post.route.js";
 import commentRouter from "./routes/comment.route.js";
 import thinkRouter from "./routes/think.route.js";
 import notificationRouter from "./routes/notification.routes.js";
@@ -106,7 +105,6 @@ import followRouter from "./routes/follow.route.js";
 
 app.use("/api/", userRouter);
 app.use("/profile", profileRouter);
-app.use("/post", postRouter);
 app.use("/comment", commentRouter);
 app.use("/think", thinkRouter);
 app.use("/notification", notificationRouter);
