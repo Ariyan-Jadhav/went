@@ -3,7 +3,6 @@ import mongoose, { Schema, Document } from "mongoose";
 export interface IComment extends Document {
   user_id: string;
   interaction_id: string;
-  type: "post" | "think";
   content: string;
   likesCount: number;
   createdAt: Date;
@@ -15,10 +14,6 @@ const commentSchema = new Schema<IComment>(
       type: String,
       index: true,
       required: [true, "user_id is required"],
-    },
-    type: {
-      type: String,
-      required: [true, "type is required"],
     },
     interaction_id: {
       type: String,
@@ -39,10 +34,10 @@ const commentSchema = new Schema<IComment>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-commentSchema.index({ interaction_id: 1, createdAt: -1 });
+commentSchema.index({ createdAt: -1 });
 commentSchema.index({ user_id: 1, createdAt: -1 });
 commentSchema.index({ user_id: 1, likesCount: -1 });
 

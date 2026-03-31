@@ -15,8 +15,8 @@ import { createServer } from "http";
 dotenv.config({ override: true });
 await connectDB();
 
-import { reloadBots } from "./breathing_bots/schedule.js";
-await reloadBots();
+// import { reloadBots } from "./breathing_bots/schedule.js";
+// await reloadBots();
 // ─── 2. APP & HTTP SERVER (needed for Socket.IO) ────────────────────────────
 const app = express();
 const httpServer = createServer(app);
@@ -102,8 +102,10 @@ import commentRouter from "./routes/comment.route.js";
 import thinkRouter from "./routes/think.route.js";
 import notificationRouter from "./routes/notification.routes.js";
 import followRouter from "./routes/follow.route.js";
+import exploreRoute from "./routes/feed.route.js";
 
-app.use("/api/", userRouter);
+app.use("/api", userRouter);
+app.use("/feed", exploreRoute);
 app.use("/profile", profileRouter);
 app.use("/comment", commentRouter);
 app.use("/think", thinkRouter);
@@ -155,4 +157,4 @@ httpServer.listen(PORT, () => {
 });
 
 // ─── 14. START SERVER ────────────────────────────────────────────────────────
-import "./breathing_bots/schedule.js";
+// import "./breathing_bots/schedule.js";

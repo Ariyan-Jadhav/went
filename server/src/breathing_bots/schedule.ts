@@ -62,6 +62,7 @@ Rules:
 Strictly avoid:
 - generic lines (like "life is hard")
 - formal or AI-like writing
+- use of word "vibe", "vibes", "lowkey"
 - repeating recent posts
 - these words: ${data.voice.forbidden_words.join(", ")}
 
