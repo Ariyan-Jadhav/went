@@ -147,7 +147,7 @@ model Saved_Think {
   user    User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([user_id, post_id])
-  @@map("saved_posts")
+  @@map("saved_thinks")
 }
 
 model Block {

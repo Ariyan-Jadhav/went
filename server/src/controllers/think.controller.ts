@@ -141,3 +141,97 @@ export const deleteThink = catchAsync(async (req: Request, res: Response) => {
     }
   }
 });
+
+export const reThink = catchAsync(async (req: Request, res: Response) => {
+  const { isAuthenticated, userId } = getAuth(req);
+
+  if (!isAuthenticated) throw new AppError("User not authenticated", 401);
+  if (!userId) throw new AppError("User not found", 401);
+
+  const { think_id } = req.body;
+
+  if (!think_id) {
+    throw new AppError("think_id is required", 400);
+  }
+
+  const existing = await prisma.saved_Think.findUnique({
+    where: {
+      user_id_post_id: {
+        user_id: userId,
+        post_id: think_id,
+      },
+    },
+  });
+
+  if (existing) {
+    await prisma.saved_Think.delete({
+      where: {
+        user_id_post_id: {
+          user_id: userId,
+          post_id: think_id,
+        },
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "unsaved successfully",
+      saved: false,
+    });
+  }
+
+  await prisma.saved_Think.create({
+    data: {
+      user_id: userId,
+      post_id: think_id,
+    },
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: "saved successfully",
+    saved: true,
+  });
+});
+
+export const toggleThinkLike = catchAsync(
+  async (req: Request, res: Response) => {
+    const { think_id, user_id } = req.body;
+
+    const { isAuthenticated, userId } = getAuth(req);
+    if (!isAuthenticated) throw new AppError("User not authenticated", 401);
+    if (!userId) throw new AppError("User not found", 401);
+
+    const existingRethink = await prisma.saved_Think.findUnique({
+      where: {
+        user_id_post_id: { user_id: user_id, post_id: think_id },
+      },
+    });
+
+    if (!existingRethink) {
+      await prisma.saved_Think.create({
+        data: {
+          post_id: think_id as string,
+          user_id: user_id,
+        },
+      });
+
+      return res
+        .status(200)
+        .json(` ${userId} Liked the think at ${Date.now()}`);
+    } else {
+      await prisma.saved_Think.delete({
+        where: {
+          user_id_post_id: {
+            user_id: user_id,
+            post_id: think_id,
+          },
+        },
+      });
+
+      return res
+        .status(200)
+        .json(` ${userId} Disliked the think at ${Date.now()}`);
+    }
+  },
+);

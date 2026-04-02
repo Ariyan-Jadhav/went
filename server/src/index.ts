@@ -103,6 +103,7 @@ import thinkRouter from "./routes/think.route.js";
 import notificationRouter from "./routes/notification.routes.js";
 import followRouter from "./routes/follow.route.js";
 import exploreRoute from "./routes/feed.route.js";
+import likeRouter from "./routes/like.route.js";
 
 app.use("/api", userRouter);
 app.use("/feed", exploreRoute);
@@ -111,6 +112,7 @@ app.use("/comment", commentRouter);
 app.use("/think", thinkRouter);
 app.use("/notification", notificationRouter);
 app.use("/follow", followRouter);
+app.use("/like", likeRouter);
 
 app.get("/health", (req, res) => {
   res.status(200).json({

@@ -40,19 +40,24 @@ function Feed() {
     setUpload,
   } = useDefaultOptions();
 
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [showSkeletons, setShowSkeletons] = useState(false); // separate skeleton visibility
   const skeletonTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ---------------- STATE ----------------
   const [thinks, setThinks] = useState<Think[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [comments_count, setComments_count] = useState<number>(0);
   const [caughtUp, setCaughtUp] = useState(false);
   const [selectedThink, setSelectedThink] = useState<Think | null>(null);
+  const [liked, setLiked] = useState<Record<string, boolean>>({});
+  const [rethink, setRethink] = useState<Record<string, boolean>>({});
   const [newComment, setNewComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
   const [skip, setSkip] = useState<number>(() => {
     return Number(localStorage.getItem("skip") || 0);
   });
@@ -144,11 +149,6 @@ function Feed() {
     setShowSkeletons(true);
   };
 
-  /**
-   * Hide skeletons smoothly: wait at least `minMs` from `startTime`,
-   * then fade out by keeping showSkeletons true a tiny extra bit
-   * so the CSS opacity transition has time to play.
-   */
   const stopLoading = (startTime: number, minMs = 800) => {
     const elapsed = Date.now() - startTime;
     const wait = Math.max(0, minMs - elapsed);
@@ -157,7 +157,6 @@ function Feed() {
 
     skeletonTimerRef.current = setTimeout(() => {
       setLoading(false);
-      // Small extra delay so the fade-out CSS transition isn't clipped
       setTimeout(() => setShowSkeletons(false), 300);
     }, wait);
   };
@@ -244,22 +243,6 @@ function Feed() {
     }
   };
 
-  const postComment = async () => {
-    if (!newComment.trim() || !selectedThink) return;
-
-    try {
-      await axios.post(
-        "/feed/comment/create",
-        { think_id: selectedThink._id, content: newComment },
-        { headers: { Authorization: `Bearer ${await getToken()}` } },
-      );
-      setNewComment("");
-      await openComment(selectedThink);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   const handelInfiniteScroll = () => {
     if (
       window.innerHeight + document.documentElement.scrollTop + 1 >=
@@ -269,7 +252,86 @@ function Feed() {
     }
   };
 
+  const toggleLike = async (think: Think) => {
+    setLiked((prev) => ({
+      ...prev,
+      [think._id]: !prev[think._id],
+    }));
+    try {
+      const res = await axios.post(
+        "like/think",
+        { think_id: think._id },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+      console.log(res);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const postComment = async () => {
+    if (!newComment.trim() || !selectedThink) return;
+    try {
+      await axios.post(
+        "/comment/create",
+        { interaction_id: selectedThink._id, content: newComment },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+      setNewComment("");
+      await openComment(selectedThink);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const editComment = async (comment_id: string) => {
+    if (!editContent.trim()) return;
+    try {
+      await axios.post(
+        "comment/update",
+        { comment_id, content: editContent },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+      setEditingCommentId(null);
+      setEditContent("");
+      if (selectedThink) await openComment(selectedThink);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const deleteComment = async (comment_id: string) => {
+    try {
+      await axios.post(
+        "comment/delete",
+        { comment_id },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+      if (selectedThink) await openComment(selectedThink);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleRethink = async (think: Think) => {
+    setRethink((prev) => ({
+      ...prev,
+      [think._id]: !prev[think._id],
+    }));
+    try {
+      const res = await axios.post(
+        "think/rethink",
+        { think_id: think._id },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+      console.log(res);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   // ---------------- UI ----------------
+
   const isInitialLoad = showSkeletons && thinks.length === 0;
   const isLoadingMore = showSkeletons && thinks.length > 0;
 
@@ -312,19 +374,38 @@ function Feed() {
               <div className="flex gap-8 mt-4 pl-10">
                 <button
                   onClick={() => openComment(think)}
-                  className="flex items-center gap-1 text-gray-500 hover:text-blue-400 text-sm transition-colors"
+                  className="flex items-center cursor-pointer gap-1 text-gray-500 hover:text-blue-400 text-sm transition-colors"
                 >
                   <MessageCircle size={16} />
                   <span>{think.commentsCount}</span>
                 </button>
 
-                <button className="flex items-center gap-1 text-gray-500 hover:text-green-400 text-sm transition-colors">
+                <button
+                  onClick={() => toggleRethink(think)}
+                  className={`flex cursor-pointer items-center gap-1 text-sm transition-colors
+                    ${
+                      rethink[think._id]
+                        ? "text-green-400"
+                        : "text-gray-500 hover:text-green-400 "
+                    }
+                    `}
+                >
                   <Repeat2 size={16} />
                   <span>Rethink</span>
                 </button>
 
-                <button className="flex items-center gap-1 text-gray-500 hover:text-pink-500 text-sm transition-colors">
-                  <Heart size={16} />
+                <button
+                  onClick={() => toggleLike(think)}
+                  className={`flex cursor-pointer items-center gap-1 text-sm transition-colors ${
+                    liked[think._id]
+                      ? "text-pink-500"
+                      : "text-gray-500 hover:text-pink-500"
+                  }`}
+                >
+                  <Heart
+                    size={16}
+                    className={liked[think._id] ? "fill-pink-500" : ""}
+                  />
                   <span>Like</span>
                 </button>
               </div>
@@ -375,19 +456,80 @@ function Feed() {
                   ))}
                 </div>
               ) : (
-                comments.map((comment, i) => (
-                  <div key={i} className="flex gap-2 mb-3">
-                    <div className="w-7 h-7 bg-blue-800 rounded-full flex items-center justify-center text-xs font-bold">
-                      {comment.username?.[0]?.toUpperCase()}
+                comments.map((comment, i) => {
+                  const isOwner = comment.user_id === userId; // from useAuth()
+                  const isEditing = editingCommentId === comment._id;
+
+                  return (
+                    <div key={i} className="flex gap-2 mb-4">
+                      <div className="w-7 h-7 bg-blue-800 rounded-full flex items-center justify-center text-xs font-bold shrink-0">
+                        {comment.username?.[0]?.toUpperCase()}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-semibold">
+                            {comment.username}
+                            {isOwner && (
+                              <span className="ml-2 text-xs text-blue-400">
+                                you
+                              </span>
+                            )}
+                          </p>
+
+                          {/* Edit/Delete — only visible to owner */}
+                          {isOwner && !isEditing && (
+                            <div className="flex gap-2 text-xs text-gray-500">
+                              <button
+                                onClick={() => {
+                                  setEditingCommentId(comment._id);
+                                  setEditContent(comment.content);
+                                }}
+                                className="hover:text-blue-400 transition-colors"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => deleteComment(comment._id)}
+                                className="hover:text-red-400 transition-colors"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        {isEditing ? (
+                          <div className="flex gap-2 mt-1">
+                            <input
+                              value={editContent}
+                              onChange={(e) => setEditContent(e.target.value)}
+                              onKeyDown={(e) =>
+                                e.key === "Enter" && editComment(comment._id)
+                              }
+                              className="flex-1 bg-gray-900 text-white text-sm rounded-full px-3 py-1 outline-none border border-gray-700 focus:border-gray-500 transition-colors"
+                            />
+                            <button
+                              onClick={() => editComment(comment._id)}
+                              className="text-xs text-blue-400 hover:text-blue-300"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setEditingCommentId(null)}
+                              className="text-xs text-gray-500 hover:text-gray-300"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="text-gray-300 text-sm">
+                            {comment.content}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold">
-                        {comment.username}
-                      </p>
-                      <p className="text-gray-300 text-sm">{comment.content}</p>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 
