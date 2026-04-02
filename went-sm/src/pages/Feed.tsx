@@ -1,13 +1,12 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
-import { Heart, MessageCircle, Repeat2, X } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { Heart, MessageCircle, Repeat2 } from "lucide-react";
 import { useAuth } from "@clerk/clerk-react";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 import { useDefaultOptions } from "@/components/di_global_context/default";
 
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
-// interface //
 interface Think {
   _id: string;
   content: string;
@@ -28,11 +27,10 @@ interface Comment {
   interaction_id: string;
 }
 
-// main-function //
 function Feed() {
-  // ----------------------------------------------- use-states ----------------------------------------------- //
+  const { setOpenFeedOptions, setGototop, setScrollToTop, chooseFeedOptions } =
+    useFeedOptions();
 
-  const { setOpenFeedOptions, setGototop } = useFeedOptions();
   const {
     setFeed,
     setMessage,
@@ -42,7 +40,12 @@ function Feed() {
     setUpload,
   } = useDefaultOptions();
 
+  const { getToken } = useAuth();
+
   const [loading, setLoading] = useState(false);
+  const [showSkeletons, setShowSkeletons] = useState(false); // separate skeleton visibility
+  const skeletonTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [thinks, setThinks] = useState<Think[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [comments_count, setComments_count] = useState<number>(0);
@@ -50,84 +53,59 @@ function Feed() {
   const [selectedThink, setSelectedThink] = useState<Think | null>(null);
   const [newComment, setNewComment] = useState("");
   const [commentLoading, setCommentLoading] = useState(false);
-  const [showBackToTop, setShowBackToTop] = useState(false);
   const [skip, setSkip] = useState<number>(() => {
     return Number(localStorage.getItem("skip") || 0);
   });
 
-  // ----------------------------------------------- use-effects ----------------------------------------------- //
+  // ---------------- SKELETON ----------------
+  const SkeletonPost = () => (
+    <div className="border-y border-gray-800 px-6 py-4 animate-pulse">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-8 h-8 rounded-full bg-gray-700" />
+        <div className="h-3 w-24 bg-gray-700 rounded" />
+        <div className="h-3 w-12 bg-gray-800 rounded" />
+      </div>
+      <div className="pl-10 space-y-2">
+        <div className="h-3 bg-gray-700 rounded w-3/4" />
+        <div className="h-3 bg-gray-700 rounded w-1/2" />
+      </div>
+      <div className="flex gap-8 mt-4 pl-10">
+        <div className="h-3 w-10 bg-gray-700 rounded" />
+        <div className="h-3 w-10 bg-gray-700 rounded" />
+        <div className="h-3 w-10 bg-gray-700 rounded" />
+      </div>
+    </div>
+  );
 
-  // handelInfiniteScroll //
+  // ---------------- EFFECTS ----------------
   useEffect(() => {
     window.addEventListener("scroll", handelInfiniteScroll);
     return () => window.removeEventListener("scroll", handelInfiniteScroll);
   }, [loading, caughtUp]);
 
-  // infinite scroll //
   useEffect(() => {
     getThinkData();
-  }, [skip]);
+  }, [skip, chooseFeedOptions]);
 
-  // toggle OpenFeedOptions //
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-
-    const handleScroll = () => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        if (window.scrollY > 30) {
-          setOpenFeedOptions(false);
-          setShowBackToTop(true);
-        } else {
-          setOpenFeedOptions(true);
-          setShowBackToTop(false);
-        }
-      }, 300); // adjust delay
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      clearTimeout(timer); // cleanup the ghost timer on unmount
-    };
-  }, []);
-
-  // starting OpenFeedOptions open //
-  useEffect(() => {
-    setOpenFeedOptions(true);
-  }, []);
-
-  // save skip in real time //
   useEffect(() => {
     localStorage.setItem("skip", String(skip));
   }, [skip]);
 
-  //go-to-top //
+  useEffect(() => {
+    setOpenFeedOptions(true);
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
         setOpenFeedOptions(false);
-        setShowBackToTop(true);
       } else {
         setOpenFeedOptions(true);
-        setShowBackToTop(false);
       }
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  const { getToken } = useAuth();
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return "";
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  // set gototop
 
   useEffect(() => {
     setGototop(true);
@@ -139,58 +117,117 @@ function Feed() {
     setUpload(false);
   }, []);
 
+  useEffect(() => {
+    const handler = () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+    setScrollToTop(handler);
+  }, []);
+
+  useEffect(() => {
+    setThinks([]);
+    setCaughtUp(false);
+    setSkip(0);
+    localStorage.setItem("skip", "0");
+  }, [chooseFeedOptions]);
+
+  // Cleanup skeleton timer on unmount
+  useEffect(() => {
+    return () => {
+      if (skeletonTimerRef.current) clearTimeout(skeletonTimerRef.current);
+    };
+  }, []);
+
+  // ---------------- HELPERS ----------------
+  const startLoading = () => {
+    setLoading(true);
+    setShowSkeletons(true);
+  };
+
+  /**
+   * Hide skeletons smoothly: wait at least `minMs` from `startTime`,
+   * then fade out by keeping showSkeletons true a tiny extra bit
+   * so the CSS opacity transition has time to play.
+   */
+  const stopLoading = (startTime: number, minMs = 800) => {
+    const elapsed = Date.now() - startTime;
+    const wait = Math.max(0, minMs - elapsed);
+
+    if (skeletonTimerRef.current) clearTimeout(skeletonTimerRef.current);
+
+    skeletonTimerRef.current = setTimeout(() => {
+      setLoading(false);
+      // Small extra delay so the fade-out CSS transition isn't clipped
+      setTimeout(() => setShowSkeletons(false), 300);
+    }, wait);
+  };
+
+  // ---------------- FUNCTIONS ----------------
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "";
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  };
+
   const getThinkData = async () => {
     try {
-      setLoading(true);
+      startLoading();
+      const startTime = Date.now();
 
       const storedIds: string[] = JSON.parse(
         localStorage.getItem("seenIds") || "[]",
       );
       const storedIdsSet = new Set(storedIds);
 
+      const endpoint =
+        chooseFeedOptions === "following" ? "/feed/following" : "/feed/explore";
+
       const res = await axios.post(
-        "/feed/explore",
+        endpoint,
         { skip },
         { headers: { Authorization: `Bearer ${await getToken()}` } },
       );
 
       const newThinks: Think[] = res.data.personalizedThinks;
+      const isEnd = res.data.isEnd;
+
+      if (isEnd) {
+        setCaughtUp(true);
+        stopLoading(startTime);
+        return;
+      }
+
       const filtered = newThinks.filter((t) => !storedIdsSet.has(t._id));
 
       if (filtered.length === 0) {
+        stopLoading(startTime);
         setSkip((prev) => prev + 5);
         return;
       }
 
       const updatedIds = [...storedIds, ...filtered.map((e) => e._id)];
-      try {
-        localStorage.setItem(
-          "seenIds",
-          JSON.stringify(updatedIds.slice(-6000)),
-        );
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "QuotaExceededError")
-          localStorage.setItem(
-            "seenIds",
-            JSON.stringify(updatedIds.slice(-2500)),
-          );
-      }
+      localStorage.setItem("seenIds", JSON.stringify(updatedIds.slice(-6000)));
 
       setThinks((prev) => (skip === 0 ? filtered : [...prev, ...filtered]));
+
+      stopLoading(startTime);
     } catch (err: any) {
       if (err.response?.status === 500) {
         setCaughtUp(true);
-        return;
+      } else {
+        console.error(err);
       }
-      console.error(err);
-    } finally {
       setLoading(false);
+      setShowSkeletons(false);
     }
   };
 
   const openComment = async (think: Think) => {
     setSelectedThink(think);
     setComments([]);
+
     try {
       setCommentLoading(true);
       const res = await axios.post(
@@ -209,6 +246,7 @@ function Feed() {
 
   const postComment = async () => {
     if (!newComment.trim() || !selectedThink) return;
+
     try {
       await axios.post(
         "/feed/comment/create",
@@ -216,7 +254,6 @@ function Feed() {
         { headers: { Authorization: `Bearer ${await getToken()}` } },
       );
       setNewComment("");
-      // refetch comments
       await openComment(selectedThink);
     } catch (err) {
       console.error(err);
@@ -232,47 +269,36 @@ function Feed() {
     }
   };
 
+  // ---------------- UI ----------------
+  const isInitialLoad = showSkeletons && thinks.length === 0;
+  const isLoadingMore = showSkeletons && thinks.length > 0;
+
   return (
-    <div className="min-h-screen bg-[rgb(0,0,0)] grid grid-cols-[1.5fr_1.9fr_1.5fr]">
-      {/* Left sidebar */}
-      <div className="bg-gray-900">
-        <div>
-          <button onClick={() => setOpenFeedOptions(true)}>helulu</button>
-        </div>
-        {showBackToTop && (
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="fixed bg-white h-10 text-black p-3 rounded-full shadow-lg hover:bg-gray-200 transition z-50"
-          >
-            HELLLOO
-          </button>
-        )}
-      </div>
+    <div className="min-h-screen bg-black grid grid-cols-[1.5fr_1.9fr_1.5fr]">
+      <div className="bg-gray-900" />
 
-      {/* Main feed */}
       <div className="border-x border-gray-800 mt-22">
-        {loading && thinks.length === 0 && (
-          <p className="text-white text-center mt-6">Loading...</p>
-        )}
+        {/* Initial full-page skeleton — fades out smoothly */}
+        <div
+          className="transition-opacity duration-300"
+          style={{ opacity: isInitialLoad ? 1 : 0, pointerEvents: "none" }}
+        >
+          {isInitialLoad &&
+            [...Array(5)].map((_, i) => <SkeletonPost key={i} />)}
+        </div>
 
-        {!loading && thinks.length === 0 && !caughtUp && (
-          <p className="text-white text-center p-4 mt-20">
-            No thinks yet. Start thinking!
-          </p>
-        )}
-
-        {/* Posts */}
-        <div>
+        {/* Posts — fade in once loaded */}
+        <div
+          className="transition-opacity duration-300"
+          style={{ opacity: isInitialLoad ? 0 : 1 }}
+        >
           {thinks.map((think, i) => (
             <div
               key={i}
-              className={`border-y border-gray-800 px-6 py-4 text-white hover:bg-gray-900 transition cursor-pointer ${
-                selectedThink?._id === think._id ? "bg-gray-900" : ""
-              }`}
+              className="border-y border-gray-800 px-6 py-4 text-white hover:bg-gray-900 transition"
             >
-              {/* Header */}
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-8 h-8 rounded-full bg-linear-to-br from-teal-400 to-cyan-600 flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-xs font-bold text-white">
                   {think.username?.[0]?.toUpperCase()}
                 </div>
                 <h1 className="font-bold">{think.username}</h1>
@@ -281,133 +307,107 @@ function Feed() {
                 </span>
               </div>
 
-              {/* Content */}
               <p className="mt-1 text-gray-300 pl-10">{think.content}</p>
 
-              {/* Actions */}
               <div className="flex gap-8 mt-4 pl-10">
                 <button
                   onClick={() => openComment(think)}
-                  className="flex items-center gap-1.5 text-gray-500 hover:text-blue-400 transition text-sm"
+                  className="flex items-center gap-1 text-gray-500 hover:text-blue-400 text-sm transition-colors"
                 >
                   <MessageCircle size={16} />
                   <span>{think.commentsCount}</span>
                 </button>
 
-                <button className="flex items-center gap-1.5 text-gray-500 hover:text-green-400 transition text-sm">
+                <button className="flex items-center gap-1 text-gray-500 hover:text-green-400 text-sm transition-colors">
                   <Repeat2 size={16} />
-                  <span>{think.rethinkcount}</span>
+                  <span>Rethink</span>
                 </button>
 
-                <button className="flex items-center gap-1.5 text-gray-500 hover:text-pink-500 transition text-sm">
+                <button className="flex items-center gap-1 text-gray-500 hover:text-pink-500 text-sm transition-colors">
                   <Heart size={16} />
-                  <span>0</span>
+                  <span>Like</span>
                 </button>
               </div>
             </div>
           ))}
         </div>
 
-        {caughtUp && (
-          <p className="text-gray-500 text-center py-8 text-sm">
-            You've caught up for today! Touch grass. 🌿
-          </p>
-        )}
+        {/* Load-more skeleton at bottom — smooth fade */}
+        <div
+          className="transition-opacity duration-300"
+          style={{ opacity: isLoadingMore ? 1 : 0, pointerEvents: "none" }}
+        >
+          {isLoadingMore &&
+            [...Array(2)].map((_, i) => <SkeletonPost key={i} />)}
+        </div>
 
-        {loading && thinks.length > 0 && (
-          <p className="text-gray-500 text-center py-4 text-sm">
-            Loading more...
+        {caughtUp && (
+          <p className="text-center text-gray-600 text-sm py-8">
+            You're all caught up 🎉
           </p>
         )}
       </div>
 
-      {/* Comments sidebar */}
-      <div className="border-l border-gray-800 text-white flex flex-col sticky top-0 h-screen">
+      {/* Comments Panel */}
+      <div className="border-l border-gray-800 text-white flex flex-col h-screen sticky top-0">
         {!selectedThink ? (
-          <div className="flex items-center justify-center h-full text-gray-600 text-sm px-4 text-center">
-            Click the comment icon on any think to view comments
+          <div className="flex items-center justify-center h-full text-gray-600 text-sm">
+            Click a post to view comments
           </div>
         ) : (
           <>
-            {/* Sidebar header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800 shrink-0">
-              <div>
-                <p className="font-bold text-sm">{selectedThink.username}</p>
-                <p className="text-gray-500 text-xs">
-                  {comments_count} comments
-                </p>
-              </div>
-              <button
-                onClick={() => {
-                  setSelectedThink(null);
-                  setComments([]);
-                }}
-                className="text-gray-500 hover:text-white transition"
-              >
-                <X size={16} />
-              </button>
+            <div className="px-4 py-3 border-b border-gray-800">
+              <p className="font-bold">{selectedThink.username}</p>
+              <p className="text-gray-500 text-xs">{comments_count} comments</p>
             </div>
 
-            {/* Comments list */}
-            <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-4">
-              {commentLoading && (
-                <p className="text-gray-500 text-sm text-center mt-4">
-                  Loading comments...
-                </p>
-              )}
-
-              {!commentLoading && comments.length === 0 && (
-                <p className="text-gray-600 text-sm text-center mt-4">
-                  No comments yet. Be the first!
-                </p>
-              )}
-
-              {comments.map((comment, i) => (
-                <div key={i} className="flex gap-2">
-                  <div className="w-7 h-7 rounded-full bg-linear-to-br from-purple-400 to-pink-500 flex items-center justify-center font-bold text-xs shrink-0">
-                    {comment.username?.[0]?.toUpperCase()}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm">
-                        {comment.username}
-                      </span>
-                      <span className="text-gray-600 text-xs">
-                        {formatDate(comment.createdAt)}
-                      </span>
+            <div className="flex-1 overflow-y-auto px-4 py-3">
+              {commentLoading ? (
+                <div className="space-y-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex gap-2 animate-pulse">
+                      <div className="w-7 h-7 bg-gray-700 rounded-full" />
+                      <div className="flex-1 space-y-2">
+                        <div className="h-3 bg-gray-700 w-24 rounded" />
+                        <div className="h-3 bg-gray-800 w-3/4 rounded" />
+                      </div>
                     </div>
-                    <p className="text-gray-300 text-sm mt-0.5">
-                      {comment.content}
-                    </p>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                comments.map((comment, i) => (
+                  <div key={i} className="flex gap-2 mb-3">
+                    <div className="w-7 h-7 bg-blue-800 rounded-full flex items-center justify-center text-xs font-bold">
+                      {comment.username?.[0]?.toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">
+                        {comment.username}
+                      </p>
+                      <p className="text-gray-300 text-sm">{comment.content}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
 
-            {/* Comment input */}
-            <div className="border-t border-gray-800 px-4 py-3 shrink-0">
-              <div className="flex gap-2 items-end">
-                <textarea
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      postComment();
-                    }
-                  }}
-                  placeholder="Write a comment..."
-                  rows={2}
-                  className="flex-1 bg-gray-800 text-white text-sm rounded-xl px-3 py-2 resize-none outline-none placeholder-gray-600 border border-gray-700 focus:border-gray-500 transition"
-                />
-                <button
-                  onClick={postComment}
-                  disabled={!newComment.trim()}
-                  className="bg-white text-black text-sm font-semibold px-4 py-2 rounded-xl hover:bg-gray-200 transition disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
-                >
-                  Post
-                </button>
-              </div>
+            {/* Comment Input */}
+            <div className="px-4 py-3 border-t border-gray-800 flex gap-2">
+              <input
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && postComment()}
+                placeholder="Add a comment..."
+                className="flex-1 bg-gray-900 text-white text-sm rounded-full px-4 py-2 outline-none border border-gray-700 focus:border-gray-500 transition-colors"
+              />
+              <button
+                onClick={postComment}
+                disabled={!newComment.trim()}
+                className="text-sm text-blue-400 hover:text-blue-300 disabled:opacity-30 transition-colors"
+              >
+                Post
+              </button>
             </div>
           </>
         )}

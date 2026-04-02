@@ -21,7 +21,7 @@ export default function DynamicIsland() {
   const contentRef = useRef<HTMLDivElement>(null);
 
   const { openSearch } = useSearch();
-  const { openFeedOptions, gototop } = useFeedOptions();
+  const { openFeedOptions, gototop, scrollToTop } = useFeedOptions();
   const { feed, message, notification, profile, upload, search } =
     useDefaultOptions();
 
@@ -115,6 +115,7 @@ export default function DynamicIsland() {
                   )}
                   {gototop && (
                     <button
+                      onClick={scrollToTop}
                       className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${
                         feed ? glowClass : ""
                       }`}

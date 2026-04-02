@@ -7,6 +7,8 @@ type FeedState = {
   setChooseFeedOptions: (val: "explore" | "following") => void;
   gototop: boolean;
   setGototop: (val: boolean) => void;
+  scrollToTop: () => void;
+  setScrollToTop: (fn: () => void) => void;
 };
 
 export const useFeedOptions = create<FeedState>((set) => ({
@@ -16,4 +18,6 @@ export const useFeedOptions = create<FeedState>((set) => ({
   setOpenFeedOptions: (val) => set({ openFeedOptions: val }),
   gototop: false,
   setGototop: (val) => set({ gototop: val }),
+  scrollToTop: () => {},
+  setScrollToTop: (fn) => set({ scrollToTop: fn }),
 }));
