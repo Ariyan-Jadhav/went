@@ -4,6 +4,7 @@ import { Heart, MessageCircle, Repeat2 } from "lucide-react";
 import { useAuth } from "@clerk/clerk-react";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 import { useDefaultOptions } from "@/components/di_global_context/default";
+import { useTwemoji } from "@/hooks/useTwemoji";
 
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
@@ -41,6 +42,7 @@ function Feed() {
   } = useDefaultOptions();
 
   const { getToken, userId } = useAuth();
+  const twemojiRef = useTwemoji();
 
   const [loading, setLoading] = useState(false);
   const [showSkeletons, setShowSkeletons] = useState(false); // separate skeleton visibility
@@ -336,7 +338,10 @@ function Feed() {
   const isLoadingMore = showSkeletons && thinks.length > 0;
 
   return (
-    <div className="min-h-screen bg-black grid grid-cols-[1.5fr_1.9fr_1.5fr]">
+    <div
+      ref={twemojiRef}
+      className="min-h-screen bg-black grid grid-cols-[1.5fr_1.9fr_1.5fr]"
+    >
       <div className="bg-gray-900" />
 
       <div className="border-x border-gray-800 mt-22">
