@@ -3,6 +3,7 @@ import { catchAsync } from "../middleware/error.middleware.js";
 import { Response, Request } from "express";
 import { getAuth } from "@clerk/express";
 import { Comment } from "../models/comment.model.js";
+import { BreathingBots } from "../models/bots.model.js";
 import { Think } from "../models/think.model.js";
 
 export const createComment = catchAsync(async (req: Request, res: Response) => {
@@ -85,8 +86,20 @@ export const getComments = catchAsync(async (req: Request, res: Response) => {
 
   const { think_id } = req.body;
 
-  let data = await Comment.find({ interaction_id: think_id });
-  if (!data) data = [];
+  const data = await Comment.find({ interaction_id: think_id }).lean();
 
-  res.status(201).json({ data, count: data.length });
+  const fetchuserId = data.map((e) => e.user_id);
+
+  const dataset = await BreathingBots.find({
+    id: { $in: fetchuserId },
+  }).lean();
+
+  const usernamesMap = new Map(dataset.map((u) => [u.id, u.username]));
+
+  const personalizedComments = data.map((e) => ({
+    ...e,
+    username: usernamesMap.get(e.user_id) || "Unknown",
+  }));
+
+  res.status(200).json({ personalizedComments, count: data.length });
 });

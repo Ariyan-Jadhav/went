@@ -8,13 +8,22 @@ import {
   FiMessageCircle,
   FiSearch,
   FiUpload,
+  FiArrowUp,
 } from "react-icons/fi";
 import { useSearch } from "../components/di_global_context/SearchContextMusic";
+import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
+import { useDefaultOptions } from "@/components/di_global_context/default";
 import SearchMusic from "@/components/di_animations/SearchMusic";
+import FeedOptions from "@/components/di_animations/FeedOptions";
 
 export default function DynamicIsland() {
   const islandRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
   const { openSearch } = useSearch();
+  const { openFeedOptions, gototop } = useFeedOptions();
+  const { feed, message, notification, profile, upload, search } =
+    useDefaultOptions();
 
   useEffect(() => {
     gsap.fromTo(
@@ -27,7 +36,42 @@ export default function DynamicIsland() {
   useEffect(() => {
     if (!islandRef.current) return;
 
-    if (openSearch) {
+    // Handle feed options expansion
+    if (openFeedOptions) {
+      gsap.fromTo(
+        islandRef.current,
+        {
+          width: 100,
+          duration: 0.4,
+          ease: "power3.out",
+        },
+        {
+          width: 380,
+          height: 56,
+          borderRadius: 24,
+          duration: 0.4,
+          ease: "power3.out",
+        },
+      );
+    } else if (!openFeedOptions) {
+      gsap.fromTo(
+        islandRef.current,
+        {
+          width: 100,
+          duration: 0.4,
+          ease: "power3.out",
+        },
+        {
+          width: 380,
+          height: 56,
+          borderRadius: 24,
+          duration: 0.4,
+          ease: "power3.out",
+        },
+      );
+    }
+    // Handle search expansion
+    else if (openSearch) {
       gsap.to(islandRef.current, {
         width: 420,
         height: 120,
@@ -35,15 +79,19 @@ export default function DynamicIsland() {
         duration: 0.4,
         ease: "power3.out",
       });
-    } else {
+    }
+    // Collapsed state
+    else {
       gsap.to(islandRef.current, {
         width: 380,
         height: 56,
-        borderRadius: 999,
+        borderRadius: 24,
         duration: 0.4,
       });
     }
-  }, [openSearch]);
+  }, [openSearch, openFeedOptions]);
+
+  const glowClass = "bg-white text-black hover:bg-[rgb(255,255,255,0.7)]";
 
   return (
     <div>
@@ -51,20 +99,75 @@ export default function DynamicIsland() {
         <div className="fixed z-50 mt-6 flex flex-col items-center">
           <div
             ref={islandRef}
-            className="flex flex-col justify-center bg-black text-white shadow-xl px-6 w-95 h-14 rounded-full"
+            className="flex flex-col justify-center bg-[rgb(0,0,0,0.9)] border-2 border-gray-500 text-white shadow-xl rounded-full overflow-hidden"
           >
-            {!openSearch && (
-              <div className="flex items-center justify-around w-full">
-                <FiBell className="cursor-pointer hover:scale-125 transition" />
-                <FiHome className="cursor-pointer hover:scale-125 transition" />
-                <FiMessageCircle className="cursor-pointer hover:scale-125 transition" />
-                <FiUser className="cursor-pointer hover:scale-125 transition" />
-                <FiUpload className="cursor-pointer hover:scale-125 transition" />
-                <FiSearch className="cursor-pointer hover:scale-125 transition" />
-              </div>
-            )}
+            <div ref={contentRef}>
+              {!openSearch && !openFeedOptions && (
+                <div className="flex items-center justify-center w-full ">
+                  {!gototop && (
+                    <button
+                      className={`h-full py-5 px-5.5 hover:bg-[rgb(255,255,255,0.1)] ${
+                        feed ? glowClass : ""
+                      }`}
+                    >
+                      <FiHome className="transition" />
+                    </button>
+                  )}
+                  {gototop && (
+                    <button
+                      className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${
+                        feed ? glowClass : ""
+                      }`}
+                    >
+                      <FiArrowUp className="transition " />
+                    </button>
+                  )}
 
-            {openSearch && <SearchMusic />}
+                  <button
+                    className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${
+                      notification ? glowClass : ""
+                    }`}
+                  >
+                    <FiBell className="transition" />
+                  </button>
+
+                  <button
+                    className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${
+                      message ? glowClass : ""
+                    }`}
+                  >
+                    <FiMessageCircle className="transition" />
+                  </button>
+
+                  <button
+                    className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${
+                      profile ? glowClass : ""
+                    }`}
+                  >
+                    <FiUser className="transition" />
+                  </button>
+
+                  <button
+                    className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${
+                      upload ? glowClass : ""
+                    }`}
+                  >
+                    <FiUpload className="transition" />
+                  </button>
+
+                  <button
+                    className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${
+                      search ? glowClass : ""
+                    }`}
+                  >
+                    <FiSearch className="transition" />
+                  </button>
+                </div>
+              )}
+
+              {openSearch && <SearchMusic />}
+              {openFeedOptions && <FeedOptions />}
+            </div>
           </div>
         </div>
       </div>

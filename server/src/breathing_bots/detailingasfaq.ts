@@ -135,7 +135,6 @@ export async function engagePost(
     await Comment.create({
       user_id: userId,
       interaction_id: postId,
-      type: "think",
       content,
       likesCount: 0,
     });
