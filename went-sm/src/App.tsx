@@ -17,7 +17,7 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/feed" element={<Feed />} />
         <Route path="/createidentity" element={<Createidentity />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/:username" element={<Profile />} />
         <Route path="/justuploaditbrah" element={<Post />} />
         <Route path="/noti" element={<Noti />} />
         <Route path="/home" element={<Home />} />

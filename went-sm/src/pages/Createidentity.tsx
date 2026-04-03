@@ -11,7 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import Zodiac from "@/components/Zodiac";
+import { Zodiac } from "@/components/Zodiac";
 import searchEngineHobbie from "@/components/Hobbies";
 import { professions } from "@/components/Profession";
 import { states } from "@/components/Location";

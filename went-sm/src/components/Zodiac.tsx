@@ -1,4 +1,4 @@
-export default function Zodiac(date: Date) {
+export function Zodiac(date: Date) {
   const day = date.getDate();
   const month = date.getMonth() + 1;
   if ((month === 1 && day <= 19) || (month === 12 && day >= 22))
