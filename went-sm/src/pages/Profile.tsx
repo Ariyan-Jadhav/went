@@ -5,14 +5,16 @@ import { useEffect, useState } from "react";
 import { Zodiac } from "@/components/Zodiac";
 import { useTwemoji } from "@/hooks/useTwemoji";
 import Aurora from "@/components/Aurora";
-import { Pin } from "lucide-react";
-
+import { Pin, Mountain } from "lucide-react";
+import Magnet from "@/components/Magnet";
+import VariableProximity from "@/components/VariableProximity";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import TiltedCard from "@/components/TiltedCard";
+import { useRef } from "react";
 
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
@@ -26,6 +28,22 @@ interface WentProfile {
   isBot: boolean;
   createdAt: string;
   updatedAt: string;
+
+  followersCount: number;
+  followingCount: number;
+
+  followers: {
+    id: string;
+    username: string;
+    profilePicUrl: string | null;
+  }[];
+
+  following: {
+    id: string;
+    username: string;
+    profilePicUrl: string | null;
+  }[];
+
   Profile: {
     id: string;
     user_id: string;
@@ -37,6 +55,7 @@ interface WentProfile {
     birthday: string | null;
     createdAt: string;
     updatedAt: string;
+
     movies: {
       id: string;
       title: string;
@@ -44,12 +63,29 @@ interface WentProfile {
       type: string;
       poster?: string;
     }[];
-    tracks: { id: string; name: string; artist: string; image?: string }[];
-    albums: { id: string; name: string; image?: string }[];
-    artists: { id: string; name: string; image?: string }[];
+
+    tracks: {
+      id: string;
+      name: string;
+      artist: string;
+      image?: string;
+    }[];
+
+    albums: {
+      id: string;
+      name: string;
+      image?: string;
+    }[];
+
+    artists: {
+      id: string;
+      name: string;
+      image?: string;
+    }[];
   } | null;
 }
 export default function Profile() {
+  const containerRef = useRef(null);
   const { getToken } = useAuth();
   const twemojiRef = useTwemoji();
 
@@ -67,6 +103,8 @@ export default function Profile() {
       const res = await axios.get(`/profile/${username}`, {
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
+      console.log(res);
+
       setProfile(res.data);
     } catch (err) {
       console.error(err);
@@ -112,7 +150,17 @@ export default function Profile() {
                   )}
                   <div className=" ml-2">
                     <div className="flex items-baseline-last">
-                      <h1 className="text-lg uppercase">Lavanya Moore</h1>
+                      <div ref={containerRef} style={{ position: "relative" }}>
+                        <VariableProximity
+                          label={"Rahul Satpute"}
+                          className={"variable-proximity-demo"}
+                          fromFontVariationSettings="'wght' 400, 'opsz' 9"
+                          toFontVariationSettings="'wght' 1000, 'opsz' 40"
+                          containerRef={containerRef}
+                          radius={100}
+                          falloff="linear"
+                        />
+                      </div>
                       <h2 className=" text-sm ml-1 font-light text-amber-50">
                         {profile.Profile?.gender === "male" ? (
                           <p>he/him</p>
@@ -124,12 +172,22 @@ export default function Profile() {
                     <h1 className="font-bold">@{profile.username}</h1>
                   </div>
                 </div>
+                <div className="flex gap-2">
+                  <div className="flex items-baseline-last gap-0.5">
+                    <p>{profile.followersCount}</p>{" "}
+                    <p className="text-sm text-mist-400">Followers</p>
+                  </div>
+                  <div className="flex items-baseline-last gap-0.5">
+                    <p>{profile.followingCount}</p>{" "}
+                    <p className="text-sm text-mist-400">Following</p>
+                  </div>
+                </div>
               </div>
             )}
           </div>
           {/* SHOWOFF */}
           {profile && (
-            <div className="mt-1 cursor-default">
+            <div className="mt-1 cursor-default relative z-30">
               <div className="flex gap-1">
                 <p className="text-blue-800 font-extrabold">|</p>{" "}
                 {profile?.Profile?.bio}
@@ -166,27 +224,26 @@ export default function Profile() {
                   </li>
                 </ul>
               </div>
-              <div>{profile.Profile?.hobby.map((hobby) => `${hobby} `)}</div>
             </div>
           )}
         </div>
         {/* MEDIA */}
-        <div className=" ml-5 mt-5 z-10 relative border-mist-700 flex flex-col w-[75%]">
-          <div className="ml-2 flex items-center">
+        <div className=" ml-5 mt-5 z-10 relative border-mist-700 flex flex-col w-[65%]">
+          <div className="ml-2 flex items-center mb-1">
             <Pin className="h-5" />
             <h1>Pins</h1>
           </div>
-          <div className="rounded-sm border flex bg-[rgb(255,255,255,0.2)] justify-around py-5 overflow-hidden">
+          <div className="rounded-sm border flex bg-[rgb(255,255,255,0.2)] justify-center-safe gap-7 py-5 overflow-hidden">
             <div className="flex flex-col items-center gap-1">
               <TiltedCard
                 imageSrc={profile?.Profile?.movies[0]?.poster}
                 altText={profile?.Profile?.movies[0].title}
                 captionText={profile?.Profile?.movies[0].title}
-                containerHeight="200px"
-                containerWidth="150px"
-                imageHeight="200px"
-                imageWidth="150px"
-                rotateAmplitude={12}
+                containerHeight="180px"
+                containerWidth="120px"
+                imageHeight="180px"
+                imageWidth="120px"
+                rotateAmplitude={25}
                 scaleOnHover={1.05}
                 showMobileWarning={false}
                 showTooltip
@@ -199,11 +256,11 @@ export default function Profile() {
                 imageSrc={profile?.Profile?.artists[0].image}
                 altText={profile?.Profile?.artists[0].name}
                 captionText={profile?.Profile?.artists[0].name}
-                containerHeight="200px"
-                containerWidth="150px"
-                imageHeight="200px"
-                imageWidth="150px"
-                rotateAmplitude={12}
+                containerHeight="180px"
+                containerWidth="120px"
+                imageHeight="180px"
+                imageWidth="120px"
+                rotateAmplitude={25}
                 scaleOnHover={1.05}
                 showMobileWarning={false}
                 showTooltip
@@ -216,11 +273,11 @@ export default function Profile() {
                 imageSrc={profile?.Profile?.tracks[0].image}
                 altText={profile?.Profile?.tracks[0].name}
                 captionText={profile?.Profile?.tracks[0].name}
-                containerHeight="200px"
-                containerWidth="150px"
-                imageHeight="200px"
-                imageWidth="150px"
-                rotateAmplitude={12}
+                containerHeight="180px"
+                containerWidth="120px"
+                imageHeight="180px"
+                imageWidth="120px"
+                rotateAmplitude={25}
                 scaleOnHover={1.05}
                 showMobileWarning={false}
                 showTooltip
@@ -233,11 +290,11 @@ export default function Profile() {
                 imageSrc={profile?.Profile?.albums[0].image}
                 altText={profile?.Profile?.albums[0].name}
                 captionText={profile?.Profile?.albums[0].name}
-                containerHeight="200px"
-                containerWidth="150px"
-                imageHeight="200px"
-                imageWidth="150px"
-                rotateAmplitude={12}
+                containerHeight="180px"
+                containerWidth="120px"
+                imageHeight="180px"
+                imageWidth="120px"
+                rotateAmplitude={25}
                 scaleOnHover={1.05}
                 showMobileWarning={false}
                 showTooltip
@@ -247,9 +304,27 @@ export default function Profile() {
             </div>
           </div>
         </div>
+        <div className=" ml-5 mt-5 z-10 relative border-mist-700 flex flex-col w-[65%]">
+          <div className="ml-2 flex mb-1">
+            {" "}
+            <Mountain className="h-5" />
+            <h1>Hobbies</h1>
+          </div>
+          <div className="rounded-sm border flex bg-[rgb(255,255,255,0.2)] justify-start py-5 overflow-hidden">
+            {profile && (
+              <div className="flex flex-wrap gap-2 text-sm mx-2">
+                {profile.Profile?.hobby.map((hobby) => (
+                  <Magnet padding={100} disabled={false} magnetStrength={100}>
+                    <p className="border p-1 rounded-sm">{hobby}</p>
+                  </Magnet>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
       {/* THINK */}
-      <div className="bg-indigo-700">Thinks</div>
+      <div className="bg-black text-white">Thinks</div>
     </div>
   );
 }

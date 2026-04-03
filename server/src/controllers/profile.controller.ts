@@ -86,6 +86,40 @@ export const getProfileByUsername = catchAsync(
     const user = await prisma.user.findUnique({
       where: { username },
       include: {
+        // 👇 followers list (who follows this user)
+        followers: {
+          include: {
+            follower: {
+              select: {
+                id: true,
+                username: true,
+                profilePicUrl: true,
+              },
+            },
+          },
+        },
+
+        // 👇 following list (who this user follows)
+        following: {
+          include: {
+            following: {
+              select: {
+                id: true,
+                username: true,
+                profilePicUrl: true,
+              },
+            },
+          },
+        },
+
+        // 👇 counts
+        _count: {
+          select: {
+            followers: true,
+            following: true,
+          },
+        },
+
         Profile: {
           include: {
             movies: true,
@@ -99,7 +133,18 @@ export const getProfileByUsername = catchAsync(
 
     if (!user) throw new AppError("User not found", 404);
 
-    res.json(user);
+    // 🔥 optional: clean response (much better)
+    const formatted = {
+      ...user,
+
+      followersCount: user._count.followers,
+      followingCount: user._count.following,
+
+      followers: user.followers.map((f) => f.follower),
+      following: user.following.map((f) => f.following),
+    };
+
+    res.json(formatted);
   },
 );
 
