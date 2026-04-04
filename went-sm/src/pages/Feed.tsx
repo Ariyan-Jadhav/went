@@ -36,7 +36,7 @@ function Feed() {
     setFeed,
     setMessage,
     setNotification,
-    setProfile,
+    setProfile1,
     setSearch,
     setUpload,
   } = useDefaultOptions();
@@ -119,7 +119,7 @@ function Feed() {
     setFeed(true);
     setMessage(false);
     setNotification(false);
-    setProfile(false);
+    setProfile1(false);
     setSearch(false);
     setUpload(false);
   }, []);

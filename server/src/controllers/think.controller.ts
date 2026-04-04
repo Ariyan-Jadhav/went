@@ -235,3 +235,73 @@ export const toggleThinkLike = catchAsync(
     }
   },
 );
+
+export const getThinksByUser = catchAsync(
+  async (req: Request, res: Response) => {
+    const { isAuthenticated, userId } = getAuth(req);
+    if (!isAuthenticated) throw new AppError("User not authenticated", 401);
+    if (!userId) throw new AppError("User not found", 401);
+
+    const { username } = req.body;
+
+    if (!username) throw new AppError("Username not found", 401);
+
+    const user = await prisma.user.findUnique({
+      where: { username },
+    });
+
+    if (!user) throw new AppError("User not found", 404);
+
+    const thinks = await Think.find({
+      user_id: user.id,
+    }).sort({ createdAt: -1 });
+
+    res.status(200).json({ thinks });
+  },
+);
+
+export const getUserRepostThink = catchAsync(
+  async (req: Request, res: Response) => {
+    const { isAuthenticated, userId } = getAuth(req);
+    if (!isAuthenticated) throw new AppError("User not authenticated", 401);
+    if (!userId) throw new AppError("User not found", 401);
+
+    const { username } = req.body;
+
+    if (!username) throw new AppError("Username not found", 401);
+
+    const user = await prisma.user.findUnique({
+      where: { username },
+    });
+
+    if (!user) throw new AppError("User not found", 404);
+
+    const savedThinks = await prisma.saved_Think.findMany({
+      where: { user_id: user.id },
+      select: {
+        post_id: true,
+      },
+    });
+
+    const filter = savedThinks.map((f) => f.post_id);
+
+    const thinks = await Think.find({ _id: { $in: filter } })
+      .lean()
+      .sort({ _id: -1 });
+
+    const fetchuserId = thinks.map((e) => e.user_id);
+
+    const dataset = await prisma.user.findMany({
+      where: {
+        id: { in: fetchuserId },
+      },
+    });
+    const usernamesMap = new Map(dataset.map((u) => [u.id, u.username]));
+    const personalizedThinks = thinks.map((e) => ({
+      ...e,
+      username: usernamesMap.get(e.user_id),
+    }));
+
+    res.status(200).json({ personalizedThinks });
+  },
+);

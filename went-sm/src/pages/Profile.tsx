@@ -8,6 +8,8 @@ import Aurora from "@/components/Aurora";
 import { Pin, Mountain } from "lucide-react";
 import Magnet from "@/components/Magnet";
 import VariableProximity from "@/components/VariableProximity";
+import { Heart, Repeat2 } from "lucide-react";
+
 import {
   HoverCard,
   HoverCardContent,
@@ -15,7 +17,8 @@ import {
 } from "@/components/ui/hover-card";
 import TiltedCard from "@/components/TiltedCard";
 import { useRef } from "react";
-
+import { useDefaultOptions } from "@/components/di_global_context/default";
+import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 interface WentProfile {
@@ -28,6 +31,20 @@ interface WentProfile {
   isBot: boolean;
   createdAt: string;
   updatedAt: string;
+
+  likes: {
+    id: string;
+    user_id: string;
+    interaction_id: string;
+  }[];
+
+  // Saved thinks
+  saved_post: {
+    id: string;
+    user_id: string;
+    post_id: string;
+    savedAt: string;
+  }[];
 
   followersCount: number;
   followingCount: number;
@@ -84,17 +101,70 @@ interface WentProfile {
     }[];
   } | null;
 }
+
+interface Think {
+  _id: string;
+  user_id: string;
+  content: string;
+
+  imageUrl: {
+    url: string;
+    publicId: string;
+  }[];
+
+  hashtags: string[];
+
+  likesCount: number;
+  commentsCount: number;
+  rethinkCount: number;
+
+  createdAt: string;
+  updatedAt: string;
+
+  username?: string;
+}
+
 export default function Profile() {
   const containerRef = useRef(null);
   const { getToken } = useAuth();
   const twemojiRef = useTwemoji();
+  const {
+    setFeed,
+    setMessage,
+    setNotification,
+    setProfile1,
+    setSearch,
+    setUpload,
+  } = useDefaultOptions();
+
+  const { setOpenProfileOptions, chooseProfileOptions } = useProfileOptions();
 
   // ---------------- STATE ----------------
   const [profile, setProfile] = useState<WentProfile | null>(null);
+  const [think, setThink] = useState<Think[]>([]);
   const [loading, setLoading] = useState(false);
+  const [thinkLoading, setThinkLoading] = useState(false);
+  const [liked, setLiked] = useState<Record<string, boolean>>({});
+  const [rethink, setRethink] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     getProfile();
+
+    getThinks();
+  }, []);
+
+  useEffect(() => {
+    getThinks();
+  }, [chooseProfileOptions]);
+
+  useEffect(() => {
+    setOpenProfileOptions(true);
+    setFeed(false);
+    setMessage(false);
+    setNotification(false);
+    setProfile1(true);
+    setSearch(false);
+    setUpload(false);
   }, []);
 
   const getProfile = async () => {
@@ -103,8 +173,6 @@ export default function Profile() {
       const res = await axios.get(`/profile/${username}`, {
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
-      console.log(res);
-
       setProfile(res.data);
     } catch (err) {
       console.error(err);
@@ -113,15 +181,144 @@ export default function Profile() {
     }
   };
 
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "";
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const getThinks = async () => {
+    try {
+      setThinkLoading(true);
+
+      const endpoint =
+        chooseProfileOptions === "posted"
+          ? "/think/userthink"
+          : "/think/profilerepost";
+
+      const thinks = await axios.post(
+        endpoint,
+        { username },
+        {
+          headers: { Authorization: `Bearer ${await getToken()}` },
+        },
+      );
+
+      setThink(
+        chooseProfileOptions === "posted"
+          ? thinks.data.thinks
+          : thinks.data.personalizedThinks,
+      );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setThinkLoading(false);
+    }
+  };
+
+  const toggleLike = async (think: Think) => {
+    const newState = toggleLikeToLocalStorage(think._id);
+
+    setLiked((prev) => ({ ...prev, [think._id]: newState }));
+
+    try {
+      await axios.post(
+        "like/think",
+        { think_id: think._id },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+    } catch (err) {
+      // Revert both state and localStorage if API fails
+      toggleLikeToLocalStorage(think._id);
+      setLiked((prev) => ({ ...prev, [think._id]: !newState }));
+      console.error(err);
+    }
+  };
+
+  const toggleRethink = async (think: Think) => {
+    const newState = toggleRethinkToLocalStorage(think._id);
+
+    setRethink((prev) => ({ ...prev, [think._id]: newState }));
+
+    try {
+      await axios.post(
+        "think/rethink",
+        { think_id: think._id },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+    } catch (err) {
+      toggleRethinkToLocalStorage(think._id);
+      setRethink((prev) => ({ ...prev, [think._id]: !newState }));
+      console.error(err);
+    }
+  };
+
+  const toggleRethinkToLocalStorage = (thinkId: string) => {
+    const stored: string[] = JSON.parse(
+      localStorage.getItem("rethinkThinks") || "[]",
+    );
+
+    const isRethinked = stored.includes(thinkId);
+
+    const updated = isRethinked
+      ? stored.filter((id) => id !== thinkId)
+      : [...stored, thinkId];
+
+    localStorage.setItem("rethinkThinks", JSON.stringify(updated));
+
+    return !isRethinked;
+  };
+
+  const toggleLikeToLocalStorage = (thinkId: string) => {
+    const stored: string[] = JSON.parse(
+      localStorage.getItem("likedThinks") || "[]",
+    );
+
+    const isLiked = stored.includes(thinkId);
+
+    const updated = isLiked
+      ? stored.filter((id) => id !== thinkId) // unlike — remove it
+      : [...stored, thinkId]; // like — add it
+
+    localStorage.setItem("likedThinks", JSON.stringify(updated));
+
+    return !isLiked; // returns the new liked state
+  };
+
+  useEffect(() => {
+    const stored: string[] = JSON.parse(
+      localStorage.getItem("likedThinks") || "[]",
+    );
+    const likedMap = stored.reduce((acc, id) => ({ ...acc, [id]: true }), {});
+    setLiked(likedMap);
+  }, []);
+
+  useEffect(() => {
+    const likedStored: string[] = JSON.parse(
+      localStorage.getItem("likedThinks") || "[]",
+    );
+    const rethinkStored: string[] = JSON.parse(
+      localStorage.getItem("rethinkThinks") || "[]",
+    );
+
+    setLiked(likedStored.reduce((acc, id) => ({ ...acc, [id]: true }), {}));
+    setRethink(rethinkStored.reduce((acc, id) => ({ ...acc, [id]: true }), {}));
+  }, []);
+
   const { username } = useParams<{ username: string }>();
   return (
-    <div ref={twemojiRef} className="grid min-h-screen grid-cols-[2fr_1fr]">
+    <div
+      ref={twemojiRef}
+      className="grid h-screen grid-cols-[3fr_2.3fr_1.5fr] overflow-hidden"
+    >
       {/* PROFILE */}
 
-      <div className="bg-black text-white z-20 relative overflow-hidden">
+      <div className="bg-black text-white z-20 relative">
         <div className="absolute inset-0 z-0">
           <Aurora
-            colorStops={["#7cff67", "#B19EEF", "#5227FF"]}
+            colorStops={["#579BB1", "#ffffff", "#D0A2F7"]}
             blend={99}
             amplitude={1.0}
             speed={1}
@@ -228,7 +425,7 @@ export default function Profile() {
           )}
         </div>
         {/* MEDIA */}
-        <div className=" ml-5 mt-5 z-10 relative border-mist-700 flex flex-col w-[65%]">
+        <div className=" ml-5 mt-5 z-10 relative border-mist-700 flex flex-col w-[90%]">
           <div className="ml-2 flex items-center mb-1">
             <Pin className="h-5" />
             <h1>Pins</h1>
@@ -237,8 +434,8 @@ export default function Profile() {
             <div className="flex flex-col items-center gap-1">
               <TiltedCard
                 imageSrc={profile?.Profile?.movies[0]?.poster}
-                altText={profile?.Profile?.movies[0].title}
-                captionText={profile?.Profile?.movies[0].title}
+                altText={profile?.Profile?.movies[0]?.title}
+                captionText={profile?.Profile?.movies[0]?.title}
                 containerHeight="180px"
                 containerWidth="120px"
                 imageHeight="180px"
@@ -253,9 +450,9 @@ export default function Profile() {
             </div>
             <div className="flex flex-col items-center gap-1">
               <TiltedCard
-                imageSrc={profile?.Profile?.artists[0].image}
-                altText={profile?.Profile?.artists[0].name}
-                captionText={profile?.Profile?.artists[0].name}
+                imageSrc={profile?.Profile?.artists[0]?.image}
+                altText={profile?.Profile?.artists[0]?.name}
+                captionText={profile?.Profile?.artists[0]?.name}
                 containerHeight="180px"
                 containerWidth="120px"
                 imageHeight="180px"
@@ -270,9 +467,9 @@ export default function Profile() {
             </div>
             <div className="flex flex-col items-center gap-1">
               <TiltedCard
-                imageSrc={profile?.Profile?.tracks[0].image}
-                altText={profile?.Profile?.tracks[0].name}
-                captionText={profile?.Profile?.tracks[0].name}
+                imageSrc={profile?.Profile?.tracks[0]?.image}
+                altText={profile?.Profile?.tracks[0]?.name}
+                captionText={profile?.Profile?.tracks[0]?.name}
                 containerHeight="180px"
                 containerWidth="120px"
                 imageHeight="180px"
@@ -287,9 +484,9 @@ export default function Profile() {
             </div>
             <div className="flex flex-col items-center gap-1">
               <TiltedCard
-                imageSrc={profile?.Profile?.albums[0].image}
-                altText={profile?.Profile?.albums[0].name}
-                captionText={profile?.Profile?.albums[0].name}
+                imageSrc={profile?.Profile?.albums[0]?.image}
+                altText={profile?.Profile?.albums[0]?.name}
+                captionText={profile?.Profile?.albums[0]?.name}
                 containerHeight="180px"
                 containerWidth="120px"
                 imageHeight="180px"
@@ -304,9 +501,8 @@ export default function Profile() {
             </div>
           </div>
         </div>
-        <div className=" ml-5 mt-5 z-10 relative border-mist-700 flex flex-col w-[65%]">
+        <div className=" ml-5 mt-5 z-10 relative border-mist-700 flex flex-col w-[90%]">
           <div className="ml-2 flex mb-1">
-            {" "}
             <Mountain className="h-5" />
             <h1>Hobbies</h1>
           </div>
@@ -314,7 +510,12 @@ export default function Profile() {
             {profile && (
               <div className="flex flex-wrap gap-2 text-sm mx-2">
                 {profile.Profile?.hobby.map((hobby) => (
-                  <Magnet padding={100} disabled={false} magnetStrength={100}>
+                  <Magnet
+                    key={hobby}
+                    padding={100}
+                    disabled={false}
+                    magnetStrength={100}
+                  >
                     <p className="border p-1 rounded-sm">{hobby}</p>
                   </Magnet>
                 ))}
@@ -324,7 +525,63 @@ export default function Profile() {
         </div>
       </div>
       {/* THINK */}
-      <div className="bg-black text-white">Thinks</div>
+      <div className="bg-black border-x-2 border border-gray-800 text-white h-screen overflow-y-auto thinks-scroll">
+        <div className="mt-25">
+          {think &&
+            think.map((think, i) => (
+              <div
+                key={i}
+                className="border-y border-gray-800 px-6 py-4 text-white hover:bg-gray-900 transition"
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-xs font-bold text-white">
+                    {username?.[0]?.toUpperCase()}
+                  </div>
+                  <h1 className="font-bold">
+                    {chooseProfileOptions === "posted"
+                      ? username
+                      : think.username}
+                  </h1>
+                  <span className="text-gray-500 text-sm">
+                    {formatDate(think.createdAt)}
+                  </span>
+                </div>
+                <p className="mt-1 text-gray-300 pl-10">{think.content}</p>
+                <div className="flex gap-8 mt-4 pl-10">
+                  <button
+                    onClick={() => toggleRethink(think)}
+                    className={`flex cursor-pointer items-center gap-1 text-sm transition-colors
+                    ${
+                      rethink[think._id]
+                        ? "text-green-400"
+                        : "text-gray-500 hover:text-green-400 "
+                    }
+                    `}
+                  >
+                    <Repeat2 size={16} />
+                    <span>Rethink</span>
+                  </button>
+
+                  <button
+                    onClick={() => toggleLike(think)}
+                    className={`flex cursor-pointer items-center gap-1 text-sm transition-colors ${
+                      liked[think._id]
+                        ? "text-pink-500"
+                        : "text-gray-500 hover:text-pink-500"
+                    }`}
+                  >
+                    <Heart
+                      size={16}
+                      className={liked[think._id] ? "fill-pink-500" : ""}
+                    />
+                    <span>Like</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+        </div>
+      </div>
+      <div className="bg-mist-900"></div>
     </div>
   );
 }

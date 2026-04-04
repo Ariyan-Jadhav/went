@@ -3,7 +3,7 @@ import { getAuth } from "@clerk/express";
 import { AppError, catchAsync } from "../middleware/error.middleware.js";
 import { Think } from "../models/think.model.js";
 import { Comment } from "../models/comment.model.js";
-import { BreathingBots } from "../models/bots.model.js";
+
 import prisma from "../../lib/prisma.js";
 
 export const explore = catchAsync(async (req: Request, res: Response) => {
@@ -30,10 +30,11 @@ export const explore = catchAsync(async (req: Request, res: Response) => {
 
   const fetchuserId = thinks.map((e) => e.user_id);
 
-  const dataset = await BreathingBots.find({
-    id: { $in: fetchuserId },
-  }).lean();
-
+  const dataset = await prisma.user.findMany({
+    where: {
+      id: { in: fetchuserId },
+    },
+  });
   const usernamesMap = new Map(dataset.map((u) => [u.id, u.username]));
 
   const personalizedThinks = thinks.map((e) => ({
@@ -88,9 +89,11 @@ export const following = catchAsync(async (req: Request, res: Response) => {
   // Step 2: attach usernames
   const fetchUserIds = thinks.map((e) => e.user_id);
 
-  const dataset = await BreathingBots.find({
-    id: { $in: fetchUserIds },
-  }).lean();
+  const dataset = await prisma.user.findMany({
+    where: {
+      id: { in: fetchUserIds },
+    },
+  });
 
   const usernamesMap = new Map(dataset.map((u) => [u.id, u.username]));
 

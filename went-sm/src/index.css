@@ -163,3 +163,20 @@ img.twemoji {
     @apply font-sans;
   }
 }
+
+.thinks-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.thinks-scroll::-webkit-scrollbar-track {
+  background: black;
+}
+
+.thinks-scroll::-webkit-scrollbar-thumb {
+  background: #1f2937; /* gray-800 — subtle, not invisible */
+  border-radius: 999px;
+}
+
+.thinks-scroll::-webkit-scrollbar-thumb:hover {
+  background: #374151; /* gray-700 on hover */
+}

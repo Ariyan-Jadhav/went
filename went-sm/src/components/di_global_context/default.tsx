@@ -10,8 +10,8 @@ type DefaultDI = {
   notification: boolean;
   setNotification: (val: boolean) => void;
 
-  profile: boolean;
-  setProfile: (val: boolean) => void;
+  profile1: boolean;
+  setProfile1: (val: boolean) => void;
 
   upload: boolean;
   setUpload: (val: boolean) => void;
@@ -30,8 +30,8 @@ export const useDefaultOptions = create<DefaultDI>((set) => ({
   notification: false,
   setNotification: (val) => set({ notification: val }),
 
-  profile: false,
-  setProfile: (val) => set({ profile: val }),
+  profile1: false,
+  setProfile1: (val) => set({ profile1: val }),
 
   upload: false,
   setUpload: (val) => set({ upload: val }),

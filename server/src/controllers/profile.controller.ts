@@ -52,6 +52,47 @@ export const createProfile = catchAsync(async (req: Request, res: Response) => {
   res.status(201).json(profile);
 });
 
+export const getRandomUsers = catchAsync(
+  async (req: Request, res: Response) => {
+    const { userId, isAuthenticated } = getAuth(req);
+
+    if (!isAuthenticated) throw new AppError("User not authenticated", 401);
+    if (!userId) throw new AppError("User not found", 401);
+
+    const users = await prisma.$queryRaw<
+      {
+        id: string;
+        username: string;
+        firstName: string;
+        lastName: string;
+        profilePicUrl: string | null;
+      }[]
+    >`
+    SELECT id, username, "firstName", "lastName", "profilePicUrl"
+    FROM users
+    WHERE id != ${userId}
+    ORDER BY RANDOM()
+    LIMIT 4
+  `;
+
+    const userIds = users.map((u) => u.id);
+
+    const profiles = await prisma.profile.findMany({
+      where: { user_id: { in: userIds } },
+      select: { user_id: true, profession: true, bio: true },
+    });
+
+    const profileMap = new Map(profiles.map((p) => [p.user_id, p]));
+
+    const result = users.map((u) => ({
+      ...u,
+      Profile: profileMap.get(u.id) ?? null,
+    }));
+
+    res.json({ users: result });
+  },
+);
+
 export const getProfile = catchAsync(async (req: Request, res: Response) => {
   const { userId, isAuthenticated } = getAuth(req);
 
@@ -86,7 +127,8 @@ export const getProfileByUsername = catchAsync(
     const user = await prisma.user.findUnique({
       where: { username },
       include: {
-        // 👇 followers list (who follows this user)
+        likes: true,
+        saved_post: true,
         followers: {
           include: {
             follower: {
@@ -99,7 +141,6 @@ export const getProfileByUsername = catchAsync(
           },
         },
 
-        // 👇 following list (who this user follows)
         following: {
           include: {
             following: {
@@ -112,7 +153,6 @@ export const getProfileByUsername = catchAsync(
           },
         },
 
-        // 👇 counts
         _count: {
           select: {
             followers: true,

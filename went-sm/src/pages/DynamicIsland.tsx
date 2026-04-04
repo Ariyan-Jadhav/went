@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import gsap from "gsap";
+import { NavLink } from "react-router-dom";
 import {
   FiBell,
   FiUser,
@@ -13,8 +14,10 @@ import {
 import { useSearch } from "../components/di_global_context/SearchContextMusic";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 import { useDefaultOptions } from "@/components/di_global_context/default";
+import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
 import SearchMusic from "@/components/di_animations/SearchMusic";
 import FeedOptions from "@/components/di_animations/FeedOptions";
+import ProfileOptions from "@/components/di_animations/ProfileOptions";
 
 export default function DynamicIsland() {
   const islandRef = useRef<HTMLDivElement>(null);
@@ -22,7 +25,8 @@ export default function DynamicIsland() {
 
   const { openSearch } = useSearch();
   const { openFeedOptions, gototop, scrollToTop } = useFeedOptions();
-  const { feed, message, notification, profile, upload, search } =
+  const { openProfileOptions } = useProfileOptions();
+  const { feed, message, notification, profile1, upload, search } =
     useDefaultOptions();
 
   useEffect(() => {
@@ -53,7 +57,17 @@ export default function DynamicIsland() {
           ease: "power3.out",
         },
       );
-    } else if (!openFeedOptions) {
+    }
+    // Handle search expansion
+    else if (openSearch) {
+      gsap.to(islandRef.current, {
+        width: 420,
+        height: 120,
+        borderRadius: 24,
+        duration: 0.4,
+        ease: "power3.out",
+      });
+    } else if (openProfileOptions) {
       gsap.fromTo(
         islandRef.current,
         {
@@ -70,26 +84,25 @@ export default function DynamicIsland() {
         },
       );
     }
-    // Handle search expansion
-    else if (openSearch) {
-      gsap.to(islandRef.current, {
-        width: 420,
-        height: 120,
-        borderRadius: 24,
-        duration: 0.4,
-        ease: "power3.out",
-      });
-    }
     // Collapsed state
     else {
-      gsap.to(islandRef.current, {
-        width: 380,
-        height: 56,
-        borderRadius: 24,
-        duration: 0.4,
-      });
+      gsap.fromTo(
+        islandRef.current,
+        {
+          width: 100,
+          duration: 0.4,
+          ease: "power3.out",
+        },
+        {
+          width: 380,
+          height: 56,
+          borderRadius: 24,
+          duration: 0.4,
+          ease: "power3.out",
+        },
+      );
     }
-  }, [openSearch, openFeedOptions]);
+  }, [openSearch, openFeedOptions, openProfileOptions]);
 
   const glowClass = "bg-white text-black hover:bg-[rgb(255,255,255,0.7)]";
 
@@ -99,10 +112,10 @@ export default function DynamicIsland() {
         <div className="fixed z-50 mt-6 flex flex-col items-center">
           <div
             ref={islandRef}
-            className="flex flex-col justify-center bg-[rgb(0,0,0,0.9)] border-2 border-gray-500 text-white shadow-xl rounded-full overflow-hidden"
+            className="flex flex-col justify-center bg-[rgb(0,0,0,0.4)] border-2 border-gray-500 text-white shadow-xl rounded-full overflow-hidden"
           >
             <div ref={contentRef}>
-              {!openSearch && !openFeedOptions && (
+              {!openSearch && !openFeedOptions && !openProfileOptions && (
                 <div className="flex items-center justify-center w-full ">
                   {!gototop && (
                     <button
@@ -142,7 +155,7 @@ export default function DynamicIsland() {
 
                   <button
                     className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${
-                      profile ? glowClass : ""
+                      profile1 ? glowClass : ""
                     }`}
                   >
                     <FiUser className="transition" />
@@ -168,6 +181,7 @@ export default function DynamicIsland() {
 
               {openSearch && <SearchMusic />}
               {openFeedOptions && <FeedOptions />}
+              {openProfileOptions && <ProfileOptions />}
             </div>
           </div>
         </div>
