@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Zodiac } from "@/components/Zodiac";
 import { useTwemoji } from "@/hooks/useTwemoji";
 import Aurora from "@/components/Aurora";
-import { Mountain } from "lucide-react";
+import { SpinnerCustom } from "@/components/ui/spinner";
 import Magnet from "@/components/Magnet";
 import VariableProximity from "@/components/VariableProximity";
 import { Heart, Repeat2 } from "lucide-react";
@@ -138,7 +138,7 @@ interface RandomUser {
 
 export default function Profile() {
   const containerRef = useRef(null);
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
   const twemojiRef = useTwemoji();
   const {
     setFeed,
@@ -161,6 +161,8 @@ export default function Profile() {
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [suggestions, setSuggestions] = useState<RandomUser[]>([]);
   const [rethink, setRethink] = useState<Record<string, boolean>>({});
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   useEffect(() => {
     getProfile();
@@ -169,6 +171,25 @@ export default function Profile() {
     setShiftDI(true);
   }, []);
 
+  useEffect(() => {
+    if (!profile || !userId) return;
+
+    const stored: string[] = JSON.parse(
+      localStorage.getItem("followingUsers") || "[]",
+    );
+
+    // localStorage takes priority (reflects latest action), fall back to server data
+    if (stored.includes(profile.id)) {
+      setIsFollowing(true);
+    } else if (stored.length > 0) {
+      // User has interacted before — trust localStorage
+      setIsFollowing(false);
+    } else {
+      // First visit, no localStorage — use server data
+      const alreadyFollowing = profile.followers.some((f) => f.id === userId);
+      setIsFollowing(alreadyFollowing);
+    }
+  }, [profile, userId]);
   useEffect(() => {
     getThinks();
   }, [chooseProfileOptions]);
@@ -196,6 +217,7 @@ export default function Profile() {
       setLoading(false);
     }
   };
+
   function capitalize(str: string): string {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
@@ -279,6 +301,46 @@ export default function Profile() {
     });
   };
 
+  const toggleFollow = async () => {
+    const newState = !isFollowing;
+    setIsFollowing(newState);
+
+    // Optimistically persist
+    if (profile) {
+      const stored: string[] = JSON.parse(
+        localStorage.getItem("followingUsers") || "[]",
+      );
+      const updated = newState
+        ? [...stored, profile.id]
+        : stored.filter((id) => id !== profile.id);
+      localStorage.setItem("followingUsers", JSON.stringify(updated));
+    }
+
+    try {
+      setFollowLoading(true);
+      await axios.post(
+        "/follow",
+        { personality_id: profile?.id },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+    } catch (err) {
+      // Revert both state and localStorage
+      setIsFollowing((prev) => !prev);
+      if (profile) {
+        const stored: string[] = JSON.parse(
+          localStorage.getItem("followingUsers") || "[]",
+        );
+        const reverted = !newState
+          ? [...stored, profile.id]
+          : stored.filter((id) => id !== profile.id);
+        localStorage.setItem("followingUsers", JSON.stringify(reverted));
+      }
+      console.error(err);
+    } finally {
+      setFollowLoading(false);
+    }
+  };
+
   const getThinks = async () => {
     try {
       setThinkLoading(true);
@@ -314,7 +376,6 @@ export default function Profile() {
       const res = await axios.get("/profile/random", {
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
-      console.log(res.data.users);
       setSuggestions(res.data.users);
     } catch (err) {
       console.error(err);
@@ -416,274 +477,325 @@ export default function Profile() {
   return (
     <div
       ref={twemojiRef}
-      className="grid h-screen grid-cols-[1.5fr_2.5fr_1.8fr] overflow-hidden"
+      className="grid h-screen grid-cols-[1fr_2fr_1.5fr] overflow-hidden"
     >
+      {/* SUGGETIONS */}
       <div className="bg-mist-900 border-r-2 border border-gray-800">
-        <div className="bg-black text-white p-4 h-screen sticky top-0">
-          <h2 className="text-sm font-semibold text-gray-400 mb-4">
-            Who to follow
-          </h2>
-
-          <div className="flex flex-col gap-3">
-            {suggestions.map((user) => (
-              <div
-                key={user.id}
-                className="flex items-center justify-between gap-2"
-              >
-                {/* Avatar + Info */}
-                <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-full bg-blue-800 flex items-center justify-center font-bold shrink-0">
-                    {user.username?.[0]?.toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="font-semibold leading-tight">
-                      {user.firstName} {user.lastName}
-                    </p>
-                    <p className="text-sm text-gray-500">@{user.username}</p>
-                    {user.Profile?.profession && (
-                      <p className="text-xs text-gray-600 capitalize">
-                        {user.Profile.profession}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Follow Button */}
-                <button className="text-sm border border-gray-600 px-3 py-1 rounded-full hover:bg-white hover:text-black transition-colors shrink-0">
-                  Follow
-                </button>
-              </div>
-            ))}
+        {loading && (
+          <div className="h-screen text-white flex justify-center items-center">
+            <SpinnerCustom />
           </div>
-        </div>
-      </div>
-      {/* PROFILE */}
+        )}
+        {!loading && (
+          <div className="bg-black text-white p-4 h-screen sticky top-0">
+            <h2 className="text-sm font-semibold text-gray-400 mb-4">
+              Who to follow
+            </h2>
 
-      <div className="bg-black text-white z-20 relative">
+            <div className="flex flex-col gap-3">
+              {suggestions.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between gap-2"
+                >
+                  {/* Avatar + Info */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-9 h-9 rounded-full bg-blue-800 flex items-center justify-center font-bold shrink-0">
+                      {user.username?.[0]?.toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-semibold leading-tight">
+                        {user.firstName} {user.lastName}
+                      </p>
+                      <p className="text-sm text-gray-500">@{user.username}</p>
+                      {user.Profile?.profession && (
+                        <p className="text-xs text-gray-600 capitalize">
+                          {user.Profile.profession}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Follow Button */}
+                  <button className="text-sm border border-gray-600 px-3 py-1 rounded-full hover:bg-white hover:text-black transition-colors shrink-0">
+                    Follow
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* PROFILE */}
+      {/* PROFILE */}
+      <div ref={containerRef} className="bg-black text-white z-20 relative">
+        {loading && (
+          <div className="h-screen z-50 relative flex justify-center items-center">
+            <SpinnerCustom />
+          </div>
+        )}
         <div className="absolute inset-0 z-0">
           <Aurora
-            colorStops={["#579BB1", "#ffffff", "#D0A2F7"]}
-            blend={99}
-            amplitude={1.0}
+            colorStops={["#579BB1", "#FAF3F0", "#0F2C59"]}
+            blend={999}
+            amplitude={3}
             speed={1}
           />
         </div>
         {/* LOADING */}
-        <div>{loading && <p>Loading</p>}</div>
+
         {/* MAIN */}
-        <div className="mt-20 relative z-10">
-          {/* BASIC INFO */}
-          <div className="">
-            {profile && (
-              <div className="flex items-center gap-10">
-                <div className="flex items-center ml-5">
-                  {profile.profilePicUrl ? (
-                    <img className="h-25" src={profile.profilePicUrl} />
-                  ) : (
-                    <img
-                      className="h-25"
-                      src={
-                        profile.Profile?.gender === "male"
-                          ? "/profile-pic/male.png"
-                          : "/profile-pic/female.png"
-                      }
-                    />
-                  )}
-                  <div className="ml-2">
-                    <div className="flex items-baseline-last">
-                      <div ref={containerRef} style={{ position: "relative" }}>
-                        <VariableProximity
-                          label={"Rahul Satpute"}
-                          className={"variable-proximity-demo"}
-                          fromFontVariationSettings="'wght' 400, 'opsz' 9"
-                          toFontVariationSettings="'wght' 1000, 'opsz' 40"
-                          containerRef={containerRef}
-                          radius={100}
-                          falloff="linear"
-                        />
+        {!loading && (
+          <div className="mt-20 relative z-10">
+            {/* BASIC INFO */}
+            <div className="">
+              {profile && (
+                <div className="flex items-center gap-10">
+                  <div className="flex items-center ml-5">
+                    {profile.profilePicUrl ? (
+                      <img
+                        className="h-25 rounded-full"
+                        src={profile.profilePicUrl}
+                      />
+                    ) : (
+                      <img
+                        className="h-25"
+                        src={
+                          profile.Profile?.gender === "male"
+                            ? "/profile-pic/male.png"
+                            : "/profile-pic/female.png"
+                        }
+                      />
+                    )}
+                    <div className="ml-2">
+                      <div
+                        className={`flex items-baseline-last ${profile.isBot ? "text-amber-400" : ""}`}
+                      >
+                        <p className="font-semibold text-lg">
+                          {profile.isBot
+                            ? "Breathing Bot"
+                            : `${profile.firstName} ${profile.lastName}`}
+                        </p>
+                        <h2 className=" text-sm ml-1 font-light text-amber-50">
+                          {profile.Profile?.gender === "male" ? (
+                            <p>he/him</p>
+                          ) : (
+                            <p>she/her</p>
+                          )}
+                        </h2>
                       </div>
-                      <h2 className=" text-sm ml-1 font-light text-amber-50">
-                        {profile.Profile?.gender === "male" ? (
-                          <p>he/him</p>
-                        ) : (
-                          <p>she/her</p>
-                        )}
-                      </h2>
+                      <h1 className="font-bold">@{profile.username}</h1>
                     </div>
-                    <h1 className="font-bold">@{profile.username}</h1>
+                  </div>
+                  <div className="flex flex-col ml-5 mt-1">
+                    <div className="flex gap-2 border-b">
+                      <div className="flex items-baseline-last gap-1 ">
+                        <p className="font-bold text-[17px]">
+                          {profile.followingCount}
+                        </p>
+                        <p className="text-xs text-mist-300">FOLLOWERS</p>
+                      </div>
+                      <div className="flex items-baseline-last gap-1">
+                        <p className="font-bold text-[17px]">
+                          {profile.followersCount}
+                        </p>
+                        <p className="text-xs text-mist-300">FOLLOWING</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-center">
+                      {userId !== profile.id && (
+                        <button
+                          onClick={toggleFollow}
+                          disabled={followLoading}
+                          className={`mt-2 w-full px-4 py-1 rounded text-sm font-medium border transition-colors disabled:opacity-50 ${
+                            isFollowing
+                              ? "bg-transparent border-gray-500 text-white hover:border-red-500 hover:text-red-400"
+                              : "bg-white text-black border-white hover:bg-gray-200"
+                          }`}
+                        >
+                          {isFollowing ? "Following" : "Follow"}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="flex gap-2 mt-2 mb-2 ml-5">
-                  <div className="flex items-baseline-last gap-1">
-                    <p>{profile.followersCount}</p>{" "}
-                    <p className="text-xs text-mist-400">FOLLOWERS</p>
-                  </div>
-                  <div className="flex items-baseline-last gap-1">
-                    <p>{profile.followingCount}</p>{" "}
-                    <p className="text-xs text-mist-400">FOLLOWING</p>
-                  </div>
+              )}
+            </div>
+            {/* SHOWOFF */}
+            {profile && (
+              <div className="mt-1 cursor-default relative z-30 ml-5">
+                <div className="flex gap-1">
+                  <p className="text-blue-800 font-extrabold">|</p>
+                  <VariableProximity
+                    label={profile.Profile?.bio as string}
+                    className={"variable-proximity-demo"}
+                    fromFontVariationSettings="'wght' 400, 'opsz' 9"
+                    toFontVariationSettings="'wght' 1000, 'opsz' 40"
+                    containerRef={containerRef}
+                    radius={100}
+                    falloff="linear"
+                  />
                 </div>
-              </div>
-            )}
-          </div>
-          {/* SHOWOFF */}
-          {profile && (
-            <div className="mt-1 cursor-default relative z-30 ml-5">
-              <div className="flex gap-1">
-                <p className="text-blue-800 font-extrabold">|</p>{" "}
-                {profile?.Profile?.bio}
-              </div>
-              <div className="mt-2">
-                <ul className="flex text-sm gap-2 text-mist-300">
-                  <HoverCard openDelay={0} closeDelay={100}>
-                    <HoverCardTrigger>
-                      {" "}
-                      <li className="outline py-1 px-2 rounded-full">
+                <div className="mt-2">
+                  <ul className="flex text-sm gap-2 text-mist-300">
+                    <HoverCard openDelay={0} closeDelay={100}>
+                      <HoverCardTrigger>
+                        {" "}
+                        <li className="outline py-1 px-2 rounded-full">
+                          {profile?.Profile?.birthday
+                            ? Zodiac(new Date(profile.Profile.birthday))
+                            : "—"}{" "}
+                        </li>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-30 text-xs py-1 px-1 text-center rounded-xs bg-black text-white font-semibold">
                         {profile?.Profile?.birthday
-                          ? Zodiac(new Date(profile.Profile.birthday))
-                          : "—"}{" "}
-                      </li>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="w-30 text-xs py-1 px-1 text-center rounded-xs bg-black text-white font-semibold">
-                      {profile?.Profile?.birthday
-                        ? new Date(profile.Profile.birthday).toLocaleDateString(
-                            "en-US",
-                            {
+                          ? new Date(
+                              profile.Profile.birthday,
+                            ).toLocaleDateString("en-US", {
                               month: "long",
                               day: "numeric",
                               year: "numeric",
-                            },
-                          )
-                        : "—"}
-                    </HoverCardContent>
-                  </HoverCard>
-                  <li className="outline py-1 px-2 rounded-full capitalize">
-                    {profile?.Profile?.profession}
-                  </li>
-                  <li className="outline py-1 px-2 rounded-full capitalize">
-                    {profile?.Profile?.location}
-                  </li>
-                </ul>
+                            })
+                          : "—"}
+                      </HoverCardContent>
+                    </HoverCard>
+                    <li className="outline py-1 px-2 rounded-full capitalize">
+                      {profile?.Profile?.profession}
+                    </li>
+                    <li className="outline py-1 px-2 rounded-full capitalize">
+                      {profile?.Profile?.location}
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-        <div className="h-px border border-gray-800 my-2 mt-4" />
+            )}
+          </div>
+        )}
+        {!loading && <div className="h-px border border-gray-800 my-2 mt-4" />}
 
         {/* Selected media display */}
-        <div className="mt-5 ml-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-mist-700 border bg-[rgb(255,255,255,0.2)]  p-4 w-[95%] rounded-sm">
-            {profile?.Profile && (
-              <SelectedMediaCard
-                image={profile?.Profile?.artists[0]?.image}
-                title={profile?.Profile?.artists[0]?.name}
-                badge="Artist"
-              />
-            )}
-            {profile?.Profile && (
-              <SelectedMediaCard
-                image={profile?.Profile?.albums[0]?.image}
-                title={profile?.Profile?.albums[0]?.name}
-                badge="Album"
-              />
-            )}
-            {profile?.Profile && (
-              <SelectedMediaCard
-                image={profile?.Profile?.tracks[0]?.image}
-                title={profile?.Profile?.tracks[0]?.name}
-                subtitle={profile?.Profile?.tracks[0]?.artist}
-                badge="Track"
-              />
-            )}
-            {profile?.Profile && (
-              <SelectedMediaCard
-                image={profile?.Profile?.movies[0]?.poster}
-                title={profile?.Profile?.movies[0]?.title}
-                subtitle={profile?.Profile?.movies[0]?.year}
-                badge={capitalize(profile?.Profile?.movies[0]?.type)}
-              />
-            )}
+        {!loading && (
+          <div className="mt-5 flex justify-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-mist-700 border bg-[rgb(255,255,255,0.2)]  p-4 w-[95%] rounded-sm">
+              {profile?.Profile && (
+                <SelectedMediaCard
+                  image={profile?.Profile?.artists[0]?.image}
+                  title={profile?.Profile?.artists[0]?.name}
+                  badge="Artist"
+                />
+              )}
+              {profile?.Profile && (
+                <SelectedMediaCard
+                  image={profile?.Profile?.albums[0]?.image}
+                  title={profile?.Profile?.albums[0]?.name}
+                  badge="Album"
+                />
+              )}
+              {profile?.Profile && (
+                <SelectedMediaCard
+                  image={profile?.Profile?.tracks[0]?.image}
+                  title={profile?.Profile?.tracks[0]?.name}
+                  subtitle={profile?.Profile?.tracks[0]?.artist}
+                  badge="Track"
+                />
+              )}
+              {profile?.Profile && (
+                <SelectedMediaCard
+                  image={profile?.Profile?.movies[0]?.poster}
+                  title={profile?.Profile?.movies[0]?.title}
+                  subtitle={profile?.Profile?.movies[0]?.year}
+                  badge={capitalize(profile?.Profile?.movies[0]?.type)}
+                />
+              )}
+            </div>
           </div>
-        </div>
-        <div className=" ml-5 mt-5 z-10 relative border-mist-700 flex flex-col w-[90%]">
-          <div className="ml-2 flex mb-1">
-            <Mountain className="h-5" />
-            <h1>Hobbies</h1>
+        )}
+        {!loading && (
+          <div className="mt-5 z-10 relative border-mist-700 w-[95%] mx-auto">
+            <div className="w-full rounded-sm flex border-mist-800 border bg-[rgb(255,255,255,0.1)] justify-start py-5 overflow-hidden">
+              {profile && (
+                <div className="flex flex-wrap gap-2 text-sm mx-2">
+                  {profile.Profile?.hobby.map((hobby) => (
+                    <Magnet
+                      key={hobby}
+                      padding={100}
+                      disabled={false}
+                      magnetStrength={100}
+                    >
+                      <p className="border px-1.5 py-1 rounded-sm">{hobby}</p>
+                    </Magnet>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="rounded-sm border flex bg-[rgb(255,255,255,0.2)] justify-start py-5 overflow-hidden">
-            {profile && (
-              <div className="flex flex-wrap gap-2 text-sm mx-2">
-                {profile.Profile?.hobby.map((hobby) => (
-                  <Magnet
-                    key={hobby}
-                    padding={100}
-                    disabled={false}
-                    magnetStrength={100}
-                  >
-                    <p className="border p-1 rounded-sm">{hobby}</p>
-                  </Magnet>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        )}
       </div>
+
       {/* THINK */}
       <div className="bg-black border-x-2 border border-gray-800 text-white h-screen overflow-y-auto thinks-scroll">
-        <div>
-          {think &&
-            think.map((think, i) => (
-              <div
-                key={i}
-                className="border-y border-gray-800 px-4 py-4 text-white hover:bg-gray-900 transition"
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-xs font-bold text-white">
-                    {username?.[0]?.toUpperCase()}
+        {loading && (
+          <div className="h-screen flex justify-center items-center">
+            <SpinnerCustom />
+          </div>
+        )}
+        {!loading && (
+          <div>
+            {think &&
+              think.map((think, i) => (
+                <div
+                  key={i}
+                  className="border-y border-gray-800 px-4 py-4 text-white hover:bg-gray-900 transition"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-xs font-bold text-white">
+                      {username?.[0]?.toUpperCase()}
+                    </div>
+                    <h1 className="font-bold">
+                      {chooseProfileOptions === "posted"
+                        ? username
+                        : think.username}
+                    </h1>
+                    <span className="text-gray-500 text-sm">
+                      {formatDate(think.createdAt)}
+                    </span>
                   </div>
-                  <h1 className="font-bold">
-                    {chooseProfileOptions === "posted"
-                      ? username
-                      : think.username}
-                  </h1>
-                  <span className="text-gray-500 text-sm">
-                    {formatDate(think.createdAt)}
-                  </span>
-                </div>
-                <p className="mt-1 text-gray-300 pl-10">{think.content}</p>
-                <div className="flex gap-8 mt-4 pl-10">
-                  <button
-                    onClick={() => toggleRethink(think)}
-                    className={`flex cursor-pointer items-center gap-1 text-sm transition-colors
+                  <p className="mt-1 text-gray-300 pl-10">{think.content}</p>
+                  <div className="flex gap-8 mt-4 pl-10">
+                    <button
+                      onClick={() => toggleRethink(think)}
+                      className={`flex cursor-pointer items-center gap-1 text-sm transition-colors
                     ${
                       rethink[think._id]
                         ? "text-green-400"
                         : "text-gray-500 hover:text-green-400 "
                     }
                     `}
-                  >
-                    <Repeat2 size={16} />
-                    <span>Rethink</span>
-                  </button>
+                    >
+                      <Repeat2 size={16} />
+                      <span>Rethink</span>
+                    </button>
 
-                  <button
-                    onClick={() => toggleLike(think)}
-                    className={`flex cursor-pointer items-center gap-1 text-sm transition-colors ${
-                      liked[think._id]
-                        ? "text-pink-500"
-                        : "text-gray-500 hover:text-pink-500"
-                    }`}
-                  >
-                    <Heart
-                      size={16}
-                      className={liked[think._id] ? "fill-pink-500" : ""}
-                    />
-                    <span>Like</span>
-                  </button>
+                    <button
+                      onClick={() => toggleLike(think)}
+                      className={`flex cursor-pointer items-center gap-1 text-sm transition-colors ${
+                        liked[think._id]
+                          ? "text-pink-500"
+                          : "text-gray-500 hover:text-pink-500"
+                      }`}
+                    >
+                      <Heart
+                        size={16}
+                        className={liked[think._id] ? "fill-pink-500" : ""}
+                      />
+                      <span>Like</span>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-        </div>
+              ))}
+          </div>
+        )}
       </div>
     </div>
   );

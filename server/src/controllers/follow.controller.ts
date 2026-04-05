@@ -15,6 +15,15 @@ export const toggleFollow = catchAsync(async (req: Request, res: Response) => {
   if (!isAuthenticated) throw new AppError("User not authenticated", 401);
   if (!userId) throw new AppError("User not found", 401);
 
+  // const user = await prisma.user.findUnique({
+  //   where: {
+  //     username: personality_id,
+  //   },
+  // });
+
+  // if (!user?.id)
+  //   throw new AppError("could not find the user u wanna follow", 401);
+
   const existingFollow = await prisma.follow.findUnique({
     where: {
       follower_id_following_id: {
@@ -54,7 +63,7 @@ export const toggleFollow = catchAsync(async (req: Request, res: Response) => {
       console.log(`Notification sent to user ${personality_id}`);
     } else {
       console.log(
-        `User ${personality_id} is offline, notification saved to database`
+        `User ${personality_id} is offline, notification saved to database`,
       );
     }
 

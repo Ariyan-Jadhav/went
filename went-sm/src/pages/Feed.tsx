@@ -15,8 +15,11 @@ interface Think {
   user_id: string;
   commentsCount: number;
   rethinkcount: number;
-  imageUrl?: string;
   username: string;
+  imageUrl?: Array<{
+    url: string;
+    publicId: string;
+  }>;
 }
 
 interface Comment {
@@ -60,6 +63,10 @@ function Feed() {
   const [commentLoading, setCommentLoading] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
+  const [lightbox, setLightbox] = useState<{
+    urls: string[];
+    index: number;
+  } | null>(null);
   const [skip, setSkip] = useState<number>(() => {
     return Number(localStorage.getItem("skip") || 0);
   });
@@ -164,6 +171,63 @@ function Feed() {
   };
 
   // ---------------- FUNCTIONS ----------------
+
+  const ThinkImageGrid = ({
+    urls,
+    onImageClick,
+  }: {
+    urls: string[];
+    onImageClick: (index: number) => void;
+  }) => {
+    if (!urls.length) return null;
+
+    const count = Math.min(urls.length, 4);
+    const clipped = urls.slice(0, count);
+
+    const gridClass = {
+      1: "grid-cols-1",
+      2: "grid-cols-2",
+      3: "grid-cols-2",
+      4: "grid-cols-2",
+    }[count];
+
+    return (
+      <div
+        className={`grid ${gridClass} gap-0.5 rounded-2xl overflow-hidden mt-3`}
+      >
+        {clipped.map((url, i) => {
+          const isLeftTall = count === 3 && i === 0;
+          return (
+            <div
+              key={i}
+              className={`overflow-hidden bg-gray-800 cursor-pointer ${isLeftTall ? "row-span-2" : ""}`}
+              onClick={() => onImageClick(i)}
+            >
+              <img
+                src={url}
+                alt={`image ${i + 1}`}
+                className={`w-full max-h-50 object-cover ${count === 1 ? "max-h-80 aspect-video" : "aspect-square"}`}
+                loading="lazy"
+              />
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderContent = (content: string) => {
+    return content.split(/(\s+)/).map((word, i) =>
+      word.startsWith("#") ? (
+        <span key={i} className="text-blue-400">
+          {word}
+        </span>
+      ) : (
+        <span key={i}>{word}</span>
+      ),
+    );
+  };
+
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "";
     return new Date(dateStr).toLocaleDateString("en-US", {
@@ -201,6 +265,7 @@ function Feed() {
       }
 
       const filtered = newThinks.filter((t) => !storedIdsSet.has(t._id));
+      console.log(filtered);
 
       if (filtered.length === 0) {
         stopLoading(startTime);
@@ -374,7 +439,22 @@ function Feed() {
                 </span>
               </div>
 
-              <p className="mt-1 text-gray-300 pl-10">{think.content}</p>
+              <p className="mt-1 text-gray-300 pl-10">
+                {renderContent(think.content)}
+              </p>
+              {think.imageUrl && think.imageUrl.length > 0 && (
+                <div className="pl-10 mt-2">
+                  <ThinkImageGrid
+                    urls={think.imageUrl.map((img) => img.url)}
+                    onImageClick={(index) =>
+                      setLightbox({
+                        urls: think.imageUrl!.map((img) => img.url),
+                        index,
+                      })
+                    }
+                  />
+                </div>
+              )}
 
               <div className="flex gap-8 mt-4 pl-10">
                 <button
@@ -559,6 +639,74 @@ function Feed() {
           </>
         )}
       </div>
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          onClick={() => setLightbox(null)}
+        >
+          {/* Prev button */}
+          {lightbox.urls.length > 1 && (
+            <button
+              className="absolute left-4 text-white text-3xl px-3 py-1 hover:text-gray-300 z-10"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightbox((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        index:
+                          (prev.index - 1 + prev.urls.length) %
+                          prev.urls.length,
+                      }
+                    : null,
+                );
+              }}
+            >
+              ‹
+            </button>
+          )}
+
+          {/* Image */}
+          <img
+            src={lightbox.urls[lightbox.index]}
+            alt="Full view"
+            className="max-h-[90vh] max-w-[90vw] object-contain rounded-xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          {/* Next button */}
+          {lightbox.urls.length > 1 && (
+            <button
+              className="absolute right-4 text-white text-3xl px-3 py-1 hover:text-gray-300 z-10"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightbox((prev) =>
+                  prev
+                    ? { ...prev, index: (prev.index + 1) % prev.urls.length }
+                    : null,
+                );
+              }}
+            >
+              ›
+            </button>
+          )}
+
+          {/* Counter */}
+          {lightbox.urls.length > 1 && (
+            <p className="absolute bottom-4 text-gray-400 text-sm">
+              {lightbox.index + 1} / {lightbox.urls.length}
+            </p>
+          )}
+
+          {/* Close button */}
+          <button
+            className="absolute top-4 right-4 text-white text-xl hover:text-gray-300"
+            onClick={() => setLightbox(null)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }
