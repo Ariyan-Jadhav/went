@@ -35,11 +35,15 @@ export const explore = catchAsync(async (req: Request, res: Response) => {
       id: { in: fetchuserId },
     },
   });
+
+  const imageMap = new Map(dataset.map((u) => [u.id, u.profilePicUrl]));
+
   const usernamesMap = new Map(dataset.map((u) => [u.id, u.username]));
 
   const personalizedThinks = thinks.map((e) => ({
     ...e,
     username: usernamesMap.get(e.user_id),
+    userImageUrl: imageMap.get(e.user_id),
   }));
 
   res.status(200).json({

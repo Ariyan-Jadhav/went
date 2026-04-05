@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import {
   Carousel,
@@ -8,6 +8,9 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { useDefaultOptions } from "@/components/di_global_context/default";
+import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
+import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
 
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
@@ -42,6 +45,44 @@ function SectionHeader({
 // ── Main Component ────────────────────────────────────────────────────────────
 
 function Post() {
+  const {
+    setFeed,
+    setMessage,
+    setNotification,
+    setProfile1,
+    setSearch,
+    setUpload,
+    setOpenTextBox,
+    setTextBox,
+  } = useDefaultOptions();
+
+  const { setOpenProfileOptions } = useProfileOptions();
+  const { setOpenFeedOptions, setGototop } = useFeedOptions();
+
+  useEffect(() => {
+    setFeed(false);
+    setMessage(false);
+    setNotification(false);
+    setProfile1(false);
+    setSearch(false);
+    setUpload(true);
+    setOpenTextBox(false);
+    setTextBox("THINK");
+    setOpenFeedOptions(false);
+    setGototop(false);
+    setOpenProfileOptions(false);
+  }, []);
+
+  useEffect(() => {
+    setOpenTextBox(true);
+
+    const timer = setTimeout(() => {
+      setOpenTextBox(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   const [content, setContent] = useState("");
   const [hashtag, setHashtag] = useState<string>("");
   const [hashtags, setHashtags] = useState<string[]>([]);

@@ -34,6 +34,13 @@ export const createComment = catchAsync(async (req: Request, res: Response) => {
     likesCount: 0,
   });
 
+  await Think.updateOne(
+    {
+      _id: interaction_id,
+    },
+    { $inc: { commentsCount: 1 } },
+  );
+
   if (comment)
     res.status(200).json({ message: "comment added successfully", username });
 });
@@ -73,9 +80,10 @@ export const deleteComment = catchAsync(async (req: Request, res: Response) => {
   if (!isAuthenticated) throw new AppError("User not authenticated", 401);
   if (!userId) throw new AppError("User not found", 401);
 
-  const { comment_id } = req.body;
+  const { comment_id, interaction_id } = req.body;
 
   if (!comment_id) throw new AppError("comment_id is required", 400);
+  if (!interaction_id) throw new AppError("interaction_id is required", 400);
 
   // Convert to string just in case it comes in as an object
   const commentForDelete = await Comment.findById(comment_id.toString());
@@ -86,6 +94,13 @@ export const deleteComment = catchAsync(async (req: Request, res: Response) => {
   }
 
   await Comment.findByIdAndDelete(comment_id.toString());
+
+  await Think.updateOne(
+    {
+      _id: interaction_id,
+    },
+    { $inc: { commentsCount: -1 } },
+  );
 
   res.status(200).json({ message: "comment deleted successfully" });
 });
@@ -105,17 +120,15 @@ export const getComments = catchAsync(async (req: Request, res: Response) => {
     where: {
       id: { in: fetchUserIds },
     },
-    select: {
-      id: true,
-      username: true,
-    },
   });
 
   const usernamesMap = new Map(users.map((u) => [u.id, u.username]));
+  const imageMap = new Map(users.map((u) => [u.id, u.profilePicUrl]));
 
   const personalizedComments = data.map((e) => ({
     ...e,
     username: usernamesMap.get(e.user_id) || "Unknown",
+    userProfileImage: imageMap.get(e.user_id),
   }));
 
   const sorted = personalizedComments.sort((a, b) => {

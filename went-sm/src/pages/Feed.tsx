@@ -3,8 +3,10 @@ import { useEffect, useState, useRef } from "react";
 import { Heart, MessageCircle, Repeat2 } from "lucide-react";
 import { useAuth } from "@clerk/clerk-react";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
+import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
 import { useDefaultOptions } from "@/components/di_global_context/default";
 import { useTwemoji } from "@/hooks/useTwemoji";
+import { NavLink } from "react-router-dom";
 
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
@@ -20,6 +22,7 @@ interface Think {
     url: string;
     publicId: string;
   }>;
+  userImageUrl: string;
 }
 
 interface Comment {
@@ -29,11 +32,13 @@ interface Comment {
   username: string;
   createdAt?: string;
   interaction_id: string;
+  userProfileImage: string;
 }
 
 function Feed() {
   const { setOpenFeedOptions, setGototop, setScrollToTop, chooseFeedOptions } =
     useFeedOptions();
+  const { setOpenProfileOptions } = useProfileOptions();
 
   const {
     setFeed,
@@ -42,6 +47,7 @@ function Feed() {
     setProfile1,
     setSearch,
     setUpload,
+    setOpenTextBox,
   } = useDefaultOptions();
 
   const { getToken, userId } = useAuth();
@@ -106,10 +112,6 @@ function Feed() {
   }, [skip]);
 
   useEffect(() => {
-    setOpenFeedOptions(true);
-  }, []);
-
-  useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
         setOpenFeedOptions(false);
@@ -129,6 +131,9 @@ function Feed() {
     setProfile1(false);
     setSearch(false);
     setUpload(false);
+    setOpenFeedOptions(true);
+    setOpenProfileOptions(false);
+    setOpenTextBox(false);
   }, []);
 
   useEffect(() => {
@@ -367,11 +372,11 @@ function Feed() {
     }
   };
 
-  const deleteComment = async (comment_id: string) => {
+  const deleteComment = async (comment_id: string, interaction_id: string) => {
     try {
       await axios.post(
         "comment/delete",
-        { comment_id },
+        { comment_id, interaction_id },
         { headers: { Authorization: `Bearer ${await getToken()}` } },
       );
       if (selectedThink) await openComment(selectedThink);
@@ -431,9 +436,15 @@ function Feed() {
             >
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-xs font-bold text-white">
-                  {think.username?.[0]?.toUpperCase()}
+                  {think.userImageUrl ? (
+                    <img src={think.userImageUrl} className="rounded-full" />
+                  ) : (
+                    think.username?.[0]?.toUpperCase()
+                  )}
                 </div>
-                <h1 className="font-bold">{think.username}</h1>
+                <NavLink to={`/profile/${think.username}`}>
+                  <h1 className="font-bold">{think.username}</h1>
+                </NavLink>
                 <span className="text-gray-500 text-sm">
                   {formatDate(think.createdAt)}
                 </span>
@@ -547,8 +558,15 @@ function Feed() {
 
                   return (
                     <div key={i} className="flex gap-2 mb-4">
-                      <div className="w-7 h-7 bg-blue-800 rounded-full flex items-center justify-center text-xs font-bold shrink-0">
-                        {comment.username?.[0]?.toUpperCase()}
+                      <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-xs font-bold text-white">
+                        {comment.userProfileImage ? (
+                          <img
+                            src={comment.userProfileImage}
+                            className="rounded-full"
+                          />
+                        ) : (
+                          comment.username?.[0]?.toUpperCase()
+                        )}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
@@ -574,7 +592,12 @@ function Feed() {
                                 Edit
                               </button>
                               <button
-                                onClick={() => deleteComment(comment._id)}
+                                onClick={() =>
+                                  deleteComment(
+                                    comment._id,
+                                    comment.interaction_id,
+                                  )
+                                }
                                 className="hover:text-red-400 transition-colors"
                               >
                                 Delete

@@ -18,6 +18,7 @@ import {
 import { useRef } from "react";
 import { useDefaultOptions } from "@/components/di_global_context/default";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
+import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 interface WentProfile {
@@ -152,6 +153,7 @@ export default function Profile() {
   } = useDefaultOptions();
 
   const { setOpenProfileOptions, chooseProfileOptions } = useProfileOptions();
+  const { setOpenFeedOptions, setGototop } = useFeedOptions();
 
   // ---------------- STATE ----------------
   const [profile, setProfile] = useState<WentProfile | null>(null);
@@ -211,6 +213,8 @@ export default function Profile() {
     setProfile1(true);
     setSearch(false);
     setUpload(false);
+    setOpenFeedOptions(false);
+    setGototop(false);
   }, []);
 
   useEffect(() => {
@@ -558,7 +562,7 @@ export default function Profile() {
   return (
     <div
       ref={twemojiRef}
-      className="grid h-screen grid-cols-[1fr_2fr_1.5fr] overflow-hidden"
+      className="grid h-screen grid-cols-[1.2fr_2fr_1.5fr] overflow-hidden"
     >
       {/* SUGGETIONS */}
       <div className="bg-mist-900 border-r-2 border border-gray-800">
@@ -569,11 +573,14 @@ export default function Profile() {
         )}
         {!loading && !suggestLoading && (
           <div className="bg-black text-white p-4 h-screen sticky top-0">
+            <div className="w-full flex justify-center">
+              <img src="/logo/white-went.png" className="w-[40%]" />
+            </div>
             <h2 className="text-sm font-semibold text-gray-400 mb-4">
-              Who to follow
+              People you may fall in love with
             </h2>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-5">
               {suggestions.map((user) => (
                 <div
                   key={user.id}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
 import gsap from "gsap";
 import { NavLink } from "react-router-dom";
@@ -19,10 +19,17 @@ import { useProfileOptions } from "@/components/di_global_context/ProfileP-SCont
 import Shuffle from "@/components/Shuffle";
 import FeedOptions from "@/components/di_animations/FeedOptions";
 import ProfileOptions from "@/components/di_animations/ProfileOptions";
+import { useUser } from "@clerk/clerk-react";
 
 export default function DynamicIsland() {
   const islandRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const { user, isLoaded } = useUser();
+
+  if (!isLoaded) return null;
+
+  const username = user?.username;
 
   const { openSearch, musicSearchInput, setMusicSearchInput, setOpenSearch } =
     useSearch();
@@ -79,7 +86,7 @@ export default function DynamicIsland() {
         },
       );
     }
-  }, [openSearch, openFeedOptions, openProfileOptions]);
+  }, [openSearch, openFeedOptions, openProfileOptions, openTextBox]);
 
   const glowClass = "bg-white text-black hover:bg-[rgb(255,255,255,0.7)]";
 
@@ -99,44 +106,53 @@ export default function DynamicIsland() {
                 !openProfileOptions &&
                 !openTextBox && (
                   <div className="flex items-center justify-center w-full">
-                    {!gototop ? (
+                    <NavLink to="/feed">
+                      {!gototop ? (
+                        <button
+                          className={`h-full py-5 px-5.5 hover:bg-[rgb(255,255,255,0.1)] ${feed ? glowClass : ""}`}
+                        >
+                          <FiHome className="transition" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={scrollToTop}
+                          className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${feed ? glowClass : ""}`}
+                        >
+                          <FiArrowUp className="transition" />
+                        </button>
+                      )}
+                    </NavLink>
+
+                    <NavLink to="/noti">
                       <button
-                        className={`h-full py-5 px-5.5 hover:bg-[rgb(255,255,255,0.1)] ${feed ? glowClass : ""}`}
+                        className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${notification ? glowClass : ""}`}
                       >
-                        <FiHome className="transition" />
+                        <FiBell className="transition" />
                       </button>
-                    ) : (
+                    </NavLink>
+
+                    <NavLink to={`/profile/${username}`}>
                       <button
-                        onClick={scrollToTop}
-                        className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${feed ? glowClass : ""}`}
+                        className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${profile1 ? glowClass : ""}`}
                       >
-                        <FiArrowUp className="transition" />
+                        <FiUser className="transition" />
                       </button>
-                    )}
+                    </NavLink>
 
-                    <button
-                      className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${notification ? glowClass : ""}`}
-                    >
-                      <FiBell className="transition" />
-                    </button>
-
-                    <button
-                      className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${message ? glowClass : ""}`}
-                    >
-                      <FiMessageCircle className="transition" />
-                    </button>
-
-                    <button
-                      className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${profile1 ? glowClass : ""}`}
-                    >
-                      <FiUser className="transition" />
-                    </button>
-
-                    <button
-                      className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${upload ? glowClass : ""}`}
-                    >
-                      <FiUpload className="transition" />
-                    </button>
+                    <NavLink to="/justuploaditbrah">
+                      <button
+                        className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${upload ? glowClass : ""}`}
+                      >
+                        <FiUpload className="transition" />
+                      </button>
+                    </NavLink>
+                    <NavLink to="/message">
+                      <button
+                        className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${message ? glowClass : ""}`}
+                      >
+                        <FiMessageCircle className="transition" />
+                      </button>
+                    </NavLink>
 
                     <button
                       onClick={() => setOpenSearch(true)}
