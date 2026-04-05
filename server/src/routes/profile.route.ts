@@ -10,6 +10,7 @@ import {
   pinAlbum,
   pinArtist,
   getRandomUsers,
+  updateUser,
 } from "../controllers/profile.controller.js";
 
 const router = express.Router();
@@ -18,6 +19,7 @@ const router = express.Router();
 router.post("/", requireAuth(), createProfile);
 router.get("/me", requireAuth(), getProfile);
 router.put("/me", requireAuth(), updateProfile);
+router.put("/me/user", requireAuth(), updateUser);
 router.put("/me/movie", requireAuth(), pinMovie);
 router.put("/me/track", requireAuth(), pinTrack);
 router.put("/me/album", requireAuth(), pinAlbum);

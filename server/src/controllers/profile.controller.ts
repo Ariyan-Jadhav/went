@@ -326,3 +326,33 @@ export const pinArtist = catchAsync(async (req: Request, res: Response) => {
 
   res.json(artist);
 });
+export const updateUser = catchAsync(async (req: Request, res: Response) => {
+  const { firstName, lastName, username, profilePicUrl } = req.body;
+
+  const { userId, isAuthenticated } = getAuth(req);
+
+  if (!isAuthenticated) throw new AppError("User not authenticated", 401);
+  if (!userId) throw new AppError("User not found", 401);
+
+  // Build update object with only provided fields
+  const updateData: any = {};
+  if (firstName !== undefined) updateData.firstName = firstName;
+  if (lastName !== undefined) updateData.lastName = lastName;
+  if (username !== undefined) updateData.username = username;
+  if (profilePicUrl !== undefined) updateData.profilePicUrl = profilePicUrl;
+
+  // Check username uniqueness if being updated
+  if (username) {
+    const taken = await prisma.user.findFirst({
+      where: { username, NOT: { id: userId } },
+    });
+    if (taken) throw new AppError("Username is already taken.", 400);
+  }
+
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: updateData,
+  });
+
+  res.json(user);
+});

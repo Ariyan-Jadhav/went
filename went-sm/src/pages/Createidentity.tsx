@@ -1,23 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearch } from "../components/di_global_context/SearchContextMusic";
 import { MicVocal, Disc3, AudioLines, Clapperboard } from "lucide-react";
 import TrueFocus from "@/components/TrueFocus";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-// import { Field, FieldLabel } from "@/components/ui/field";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
 import { Zodiac } from "@/components/Zodiac";
 import searchEngineHobbie from "@/components/Hobbies";
 import { professions } from "@/components/Profession";
 import { states } from "@/components/Location";
 import { useDefaultOptions } from "@/components/di_global_context/default";
-
 import {
   Combobox,
   ComboboxChip,
@@ -31,7 +28,6 @@ import {
   useComboboxAnchor,
   ComboboxInput,
 } from "@/components/ui/combobox";
-
 import axios from "axios";
 import { useUser, useAuth } from "@clerk/clerk-react";
 
@@ -46,29 +42,23 @@ axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 interface SpotifyImage {
   url: string;
 }
-
 interface Artist {
   id: string;
   name: string;
   images: SpotifyImage[];
 }
-
 interface Album {
   id: string;
   name: string;
   images: SpotifyImage[];
   artists: { name: string }[];
 }
-
 interface Track {
   id: string;
   name: string;
   artists: { name: string }[];
-  album: {
-    images: SpotifyImage[];
-  };
+  album: { images: SpotifyImage[] };
 }
-
 interface Movie {
   imdbID: string;
   Title: string;
@@ -76,24 +66,20 @@ interface Movie {
   Type: string;
   Poster: string;
 }
-
 interface SelectedArtist {
   name: string;
   image: string;
 }
-
 interface SelectedAlbum {
   name: string;
   image: string;
   artist: string;
 }
-
 interface SelectedTrack {
   name: string;
   artist: string;
   image: string;
 }
-
 interface SelectedMovie {
   title: string;
   year: string;
@@ -104,14 +90,12 @@ interface SelectedMovie {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-// Capitalize first letter of type (movie → Movie)
 function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// ── Sub-components ────────────────────────────────────────────────────────────
 
-// ── MovieCard — handles broken image URLs with onError fallback ───────────────
 function MovieCard({ movie, onClick }: { movie: Movie; onClick: () => void }) {
   const [imgFailed, setImgFailed] = useState(false);
   const hasposter = movie.Poster !== "N/A" && !imgFailed;
@@ -264,15 +248,11 @@ function MediaPillButton({
     <button
       type="button"
       onClick={onClick}
-      className={`
-        group flex items-center gap-2.5 px-4 py-2.5 rounded-full border text-sm font-medium
-        transition-all duration-200 cursor-pointer
-        ${
-          active
-            ? "bg-blue-400 border-white text-black shadow-[0_0_20px_rgba(251,191,36,0.3)]"
-            : "bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-white hover:text-white"
-        }
-      `}
+      className={`group flex items-center gap-2.5 px-4 py-2.5 rounded-full border text-sm font-medium transition-all duration-200 cursor-pointer ${
+        active
+          ? "bg-blue-400 border-white text-black shadow-[0_0_20px_rgba(251,191,36,0.3)]"
+          : "bg-zinc-900 border-zinc-700 text-zinc-300 hover:border-white hover:text-white"
+      }`}
     >
       <span>{icon}</span>
       {label}
@@ -306,10 +286,37 @@ function SectionHeader({
   );
 }
 
+// ── Main Component ────────────────────────────────────────────────────────────
+
 export default function Createidentity() {
   const { musicSearchInput, openSearch, setOpenSearch } = useSearch();
-
   const { setOpenTextBox } = useDefaultOptions();
+  const { user } = useUser();
+  const { getToken } = useAuth();
+
+  // ── Clerk state ──
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [username, setUsername] = useState("");
+  const [pfpPreview, setPfpPreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  // Sync Clerk user data once loaded
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.firstName ?? "");
+      setLastName(user.lastName ?? "");
+      setUsername(user.username ?? "");
+    }
+  }, [user]);
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setPfpPreview(URL.createObjectURL(file));
+  }
 
   // ── Bio state ──
   const [bio, setBio] = useState<string>("");
@@ -327,17 +334,16 @@ export default function Createidentity() {
   const [query, setQuery] = useState("");
   const [selectedHobbies, setSelectedHobbies] = useState<string[]>([]);
 
-  // ── Profession state ──
+  // ── Profession & Location state ──
   const [selectedProfession, setSelectedProfession] =
     useState<string>("Berozgar");
-
-  // ── location state ──
   const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
-  // ── pronounce state ──
+  // ── Gender state ──
   const [gender, setGender] = useState<"male" | "female" | "">("");
 
-  // ── Bday state ──
+  // ── Birthday state ──
   const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(undefined);
   const zodiac = date ? Zodiac(date) : "";
@@ -357,13 +363,13 @@ export default function Createidentity() {
   const [selectTrackPanel, setSelectTrackPanel] = useState(false);
   const [selectMoviePanel, setSelectMoviePanel] = useState(false);
 
-  // ── Shared loading/error ──
+  // ── Loading / feedback ──
   const [isLoading, setIsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  // ── Selected items ──
+  // ── Selected media ──
   const [selectArtist, setSelectArtist] = useState<SelectedArtist | null>(null);
   const [selectAlbum, setSelectAlbum] = useState<SelectedAlbum | null>(null);
   const [selectTrack, setSelectTrack] = useState<SelectedTrack | null>(null);
@@ -372,15 +378,217 @@ export default function Createidentity() {
   const allMediaSelected =
     !!selectArtist && !!selectAlbum && !!selectTrack && !!selectMovie;
 
-  // ── Submit into database ─────────────────────────────────────────────────────
-  const { user } = useUser();
-  const { getToken } = useAuth();
+  // ── Hobbies categories ──
+  const category = [
+    "General",
+    "Sports and Outdoors",
+    "Education",
+    "Collection",
+    "Competition",
+    "Observation",
+  ];
 
+  // ── Zodiac emoji map ──
+  const zodiacEmoji: Record<string, string> = {
+    Aries: "♈",
+    Taurus: "♉",
+    Gemini: "♊",
+    Cancer: "♋",
+    Leo: "♌",
+    Virgo: "♍",
+    Libra: "♎",
+    Scorpio: "♏",
+    Sagittarius: "♐",
+    Capricorn: "♑",
+    Aquarius: "♒",
+    Pisces: "♓",
+  };
+
+  // ── Spotify token (on mount) ──────────────────────────────────────────────────
+  useEffect(() => {
+    setOpenTextBox(true);
+    fetch("https://accounts.spotify.com/api/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}`,
+    })
+      .then((res) => res.json())
+      .then((data) => setAccessToken(data.access_token))
+      .catch(() => setError("Failed to authenticate with Spotify."));
+  }, []);
+
+  // ── Load existing profile ─────────────────────────────────────────────────────
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const token = await getToken();
+        const { data } = await axios.get("profile/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (data) {
+          if (data.bio) setBio(data.bio);
+          if (data.gender) setGender(data.gender);
+          if (data.profession) setSelectedProfession(data.profession);
+          if (data.location) setSelectedLocation(data.location);
+          if (data.hobby) setSelectedHobbies(data.hobby);
+          if (data.birthday) setDate(new Date(data.birthday));
+
+          if (data.artists?.[0])
+            setSelectArtist({
+              name: data.artists[0].name,
+              image: data.artists[0].image,
+            });
+          if (data.albums?.[0])
+            setSelectAlbum({
+              name: data.albums[0].name,
+              image: data.albums[0].image,
+              artist: "",
+            });
+          if (data.tracks?.[0])
+            setSelectTrack({
+              name: data.tracks[0].name,
+              artist: data.tracks[0].artist,
+              image: data.tracks[0].image,
+            });
+          if (data.movies?.[0])
+            setSelectMovie({
+              title: data.movies[0].title,
+              year: data.movies[0].year,
+              type: data.movies[0].type,
+              poster: data.movies[0].poster,
+              imdbID: "",
+            });
+        }
+      } catch {
+        // Fresh user — no profile yet, that's fine
+      } finally {
+        setProfileLoaded(true);
+      }
+    }
+    loadProfile();
+  }, []);
+
+  // ── Spotify: Artist search ────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!selectArtistPanel || !accessToken || !musicSearchInput) return;
+    async function findArtist() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `https://api.spotify.com/v1/search?q=${musicSearchInput}&type=artist&limit=10`,
+          {
+            headers: { Authorization: "Bearer " + accessToken },
+          },
+        );
+        const data = await res.json();
+        setArtists(data.artists?.items ?? []);
+      } catch {
+        setError("Failed to fetch artists.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    findArtist();
+  }, [musicSearchInput, accessToken, selectArtistPanel]);
+
+  // ── Spotify: Album search ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!selectAlbumPanel || !accessToken || !musicSearchInput) return;
+    async function findAlbum() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `https://api.spotify.com/v1/search?q=${musicSearchInput}&type=album&limit=10`,
+          {
+            headers: { Authorization: "Bearer " + accessToken },
+          },
+        );
+        const data = await res.json();
+        setAlbums(data.albums?.items ?? []);
+      } catch {
+        setError("Failed to fetch albums.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    findAlbum();
+  }, [musicSearchInput, accessToken, selectAlbumPanel]);
+
+  // ── Spotify: Track search ─────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!selectTrackPanel || !accessToken || !musicSearchInput) return;
+    async function findTrack() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `https://api.spotify.com/v1/search?q=${musicSearchInput}&type=track&limit=10`,
+          {
+            headers: { Authorization: "Bearer " + accessToken },
+          },
+        );
+        const data = await res.json();
+        setTracks(data.tracks?.items ?? []);
+      } catch {
+        setError("Failed to fetch tracks.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    findTrack();
+  }, [musicSearchInput, accessToken, selectTrackPanel]);
+
+  // ── OMDB: Movie search ────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!selectMoviePanel || !musicSearchInput) return;
+    async function findMovie() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(musicSearchInput)}`,
+        );
+        const data = await res.json();
+        if (data.Response === "False") {
+          setMovies([]);
+          setError(data.Error ?? "No movies found.");
+        } else {
+          setMovies(data.Search ?? []);
+        }
+      } catch {
+        setError("Failed to fetch movies.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    findMovie();
+  }, [musicSearchInput, selectMoviePanel]);
+
+  // ── Panel helpers ─────────────────────────────────────────────────────────────
+  function closeAllPanels() {
+    setOpenSearch(false);
+    setSelectArtistPanel(false);
+    setSelectAlbumPanel(false);
+    setSelectTrackPanel(false);
+    setSelectMoviePanel(false);
+  }
+
+  function openPanel(panel: "artist" | "album" | "track" | "movie") {
+    setOpenSearch(true);
+    setSelectArtistPanel(panel === "artist");
+    setSelectAlbumPanel(panel === "album");
+    setSelectTrackPanel(panel === "track");
+    setSelectMoviePanel(panel === "movie");
+  }
+
+  // ── Submit ────────────────────────────────────────────────────────────────────
   const createIdentity = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError(null);
     setSuccess(false);
-
     if (!user?.id) {
       setError("You're not authenticated.");
       return;
@@ -388,10 +596,38 @@ export default function Createidentity() {
 
     try {
       setLoading(true);
+
+      // 1. Safe to update without verification
+      await user.update({ firstName, lastName });
+      if (imageFile) await user.setProfileImage({ file: imageFile });
+
+      // 2. Username — only update if it actually changed
+      if (username !== user.username) {
+        try {
+          await user.update({ username });
+        } catch (clerkErr: any) {
+          const msg = clerkErr?.errors?.[0]?.message ?? "";
+          if (msg.toLowerCase().includes("verification")) {
+            setError(
+              "Username change requires email verification. Please update it from your account settings.",
+            );
+            // Continue saving the rest anyway
+          } else {
+            throw clerkErr; // Re-throw unexpected errors
+          }
+        }
+      }
+
+      // 3. Update your DB
       const token = await getToken();
       const headers = { Authorization: `Bearer ${token}` };
 
       await Promise.all([
+        axios.put(
+          "profile/me/user",
+          { firstName, lastName, username, profilePicUrl: user?.imageUrl },
+          { headers },
+        ),
         axios.put(
           "profile/me",
           {
@@ -436,180 +672,23 @@ export default function Createidentity() {
       ]);
 
       setSuccess(true);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to save. Please try again.");
+      setImageFile(null);
+    } catch (err: any) {
+      console.error("e:", err);
+      setError(
+        err?.errors?.[0]?.message ?? "Failed to save. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
   };
-  // ── Hobbies ──────────────────────────────────────
-  const category = [
-    "General",
-    "Sports and Outdoors",
-    "Education",
-    "Collection",
-    "Competition",
-    "Observation",
-  ];
-
-  // ── zodiac Emoji ──────────────────────────────────────
-  const zodiacEmoji: Record<string, string> = {
-    Aries: "♈",
-    Taurus: "♉",
-    Gemini: "♊",
-    Cancer: "♋",
-    Leo: "♌",
-    Virgo: "♍",
-    Libra: "♎",
-    Scorpio: "♏",
-    Sagittarius: "♐",
-    Capricorn: "♑",
-    Aquarius: "♒",
-    Pisces: "♓",
-  };
-
-  // ── Spotify token fetch (once on mount) ──────────────────────────────────────
-  useEffect(() => {
-    setOpenTextBox(true);
-
-    fetch("https://accounts.spotify.com/api/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: `grant_type=client_credentials&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}`,
-    })
-      .then((res) => res.json())
-      .then((data) => setAccessToken(data.access_token))
-      .catch(() => setError("Failed to authenticate with Spotify."));
-  }, []);
-
-  // ── Artist search ─────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!selectArtistPanel || !accessToken || !musicSearchInput) return;
-
-    async function findArtist() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(
-          `https://api.spotify.com/v1/search?q=${musicSearchInput}&type=artist&limit=10`,
-          {
-            method: "GET",
-            headers: { Authorization: "Bearer " + accessToken },
-          },
-        );
-        const data = await res.json();
-        setArtists(data.artists?.items ?? []);
-      } catch {
-        setError("Failed to fetch artists.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    findArtist();
-  }, [musicSearchInput, accessToken, selectArtistPanel]);
-
-  // ── Album search ──────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!selectAlbumPanel || !accessToken || !musicSearchInput) return;
-
-    async function findAlbum() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(
-          `https://api.spotify.com/v1/search?q=${musicSearchInput}&type=album&limit=10`,
-          {
-            method: "GET",
-            headers: { Authorization: "Bearer " + accessToken },
-          },
-        );
-        const data = await res.json();
-        setAlbums(data.albums?.items ?? []);
-      } catch {
-        setError("Failed to fetch albums.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    findAlbum();
-  }, [musicSearchInput, accessToken, selectAlbumPanel]);
-
-  // ── Track search ──────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!selectTrackPanel || !accessToken || !musicSearchInput) return;
-
-    async function findTrack() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(
-          `https://api.spotify.com/v1/search?q=${musicSearchInput}&type=track&limit=10`,
-          {
-            method: "GET",
-            headers: { Authorization: "Bearer " + accessToken },
-          },
-        );
-        const data = await res.json();
-        setTracks(data.tracks?.items ?? []);
-      } catch {
-        setError("Failed to fetch tracks.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    findTrack();
-  }, [musicSearchInput, accessToken, selectTrackPanel]);
-
-  // ── Movie search ─────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!selectMoviePanel || !musicSearchInput) return;
-
-    async function findMovie() {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(
-          `https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(musicSearchInput)}`,
-        );
-        const data = await res.json();
-
-        if (data.Response === "False") {
-          setMovies([]);
-          setError(data.Error ?? "No movies found.");
-        } else {
-          setMovies(data.Search ?? []);
-        }
-      } catch {
-        setError("Failed to fetch movies.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    findMovie();
-  }, [musicSearchInput, selectMoviePanel]);
-
-  // ── Panel helpers ─────────────────────────────────────────────────────────────
-  function closeAllPanels() {
-    setOpenSearch(false);
-    setSelectArtistPanel(false);
-    setSelectAlbumPanel(false);
-    setSelectTrackPanel(false);
-    setSelectMoviePanel(false);
-  }
-
-  // Single function to open any panel — closes all others automatically
-  function openPanel(panel: "artist" | "album" | "track" | "movie") {
-    setOpenSearch(true);
-    setSelectArtistPanel(panel === "artist");
-    setSelectAlbumPanel(panel === "album");
-    setSelectTrackPanel(panel === "track");
-    setSelectMoviePanel(panel === "movie");
-  }
+  // ── Modal shared spinner ──────────────────────────────────────────────────────
+  const ModalSpinner = ({ label }: { label: string }) => (
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+      <p className="text-white/80">{label}</p>
+    </div>
+  );
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
@@ -624,20 +703,7 @@ export default function Createidentity() {
             className="mt-40 max-w-5xl w-full px-6 py-8 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl flex gap-8 justify-center flex-wrap"
             onClick={(e) => e.stopPropagation()}
           >
-            {isLoading && (
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                <p className="text-white/80">Fetching Artists...</p>
-              </div>
-            )}
-
-            {/* Error */}
-            {/* {error && (
-              <p className="text-red-400 bg-red-500/10 px-4 py-2 rounded-lg border border-red-400/20">
-                {error}
-              </p>
-            )} */}
-
+            {isLoading && <ModalSpinner label="Fetching Artists..." />}
             {!isLoading &&
               artists.map((artist) => (
                 <div
@@ -657,15 +723,11 @@ export default function Createidentity() {
                       alt={artist.name}
                       className="w-40 h-40 rounded-2xl object-cover shadow-lg transition-transform duration-300 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 rounded-2xl bg-black/20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                    <div className="absolute inset-0 rounded-2xl bg-black/20 opacity-0 group-hover:opacity-100 transition duration-300" />
                   </div>
-
-                  {/* Text */}
-                  <div className="text-center">
-                    <p className="text-white font-medium text-sm truncate w-36">
-                      {artist.name}
-                    </p>
-                  </div>
+                  <p className="text-white font-medium text-sm truncate w-36 text-center">
+                    {artist.name}
+                  </p>
                 </div>
               ))}
           </div>
@@ -682,22 +744,7 @@ export default function Createidentity() {
             className="mt-40 max-w-5xl w-full px-6 py-8 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl flex gap-8 justify-center flex-wrap"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Loading */}
-            {isLoading && (
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                <p className="text-white/80">Fetching albums...</p>
-              </div>
-            )}
-
-            {/* Error */}
-            {/* {error && (
-              <p className="text-red-400 bg-red-500/10 px-4 py-2 rounded-lg border border-red-400/20">
-                {error}
-              </p>
-            )} */}
-
-            {/* Albums */}
+            {isLoading && <ModalSpinner label="Fetching Albums..." />}
             {!isLoading &&
               albums.map((album) => (
                 <div
@@ -712,17 +759,14 @@ export default function Createidentity() {
                   }}
                   className="group flex flex-col items-center gap-3 cursor-pointer transition-all duration-300"
                 >
-                  {/* Album Image */}
                   <div className="relative">
                     <img
                       src={album.images?.[0]?.url}
                       alt={album.name}
                       className="w-40 h-40 rounded-2xl object-cover shadow-lg transition-transform duration-300 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 rounded-2xl bg-black/20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                    <div className="absolute inset-0 rounded-2xl bg-black/20 opacity-0 group-hover:opacity-100 transition duration-300" />
                   </div>
-
-                  {/* Text */}
                   <div className="text-center">
                     <p className="text-white font-medium text-sm truncate w-36">
                       {album.name}
@@ -736,6 +780,7 @@ export default function Createidentity() {
           </div>
         </div>
       )}
+
       {/* ── Track Modal ── */}
       {openSearch && selectTrackPanel && (
         <div
@@ -746,18 +791,7 @@ export default function Createidentity() {
             className="mt-40 max-w-5xl w-full px-6 py-8 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl flex gap-8 justify-center flex-wrap"
             onClick={(e) => e.stopPropagation()}
           >
-            {isLoading && (
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                <p className="text-white/80">Fetching Tracks...</p>
-              </div>
-            )}
-
-            {/* {error && (
-              <p className="text-red-400 bg-red-500/10 px-4 py-2 rounded-lg border border-red-400/20">
-                {error}
-              </p>
-            )} */}
+            {isLoading && <ModalSpinner label="Fetching Tracks..." />}
             {!isLoading &&
               tracks.map((track) => (
                 <div
@@ -778,7 +812,7 @@ export default function Createidentity() {
                       alt={track.name}
                       className="w-40 h-40 rounded-2xl object-cover shadow-lg transition-transform duration-300 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 rounded-2xl bg-black/20 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                    <div className="absolute inset-0 rounded-2xl bg-black/20 opacity-0 group-hover:opacity-100 transition duration-300" />
                   </div>
                   <div className="text-center">
                     <p className="text-white font-medium text-sm truncate w-36">
@@ -804,14 +838,7 @@ export default function Createidentity() {
             className="mt-40 max-w-5xl w-full px-6 py-8 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl flex gap-8 justify-center flex-wrap"
             onClick={(e) => e.stopPropagation()}
           >
-            {isLoading && (
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-10 h-10 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                <p className="text-white/80">Fetching Movies...</p>
-              </div>
-            )}
-
-            {/* Movie poster grid */}
+            {isLoading && <ModalSpinner label="Fetching Movies..." />}
             {!isLoading && (
               <div className="gap-9 grid-cols-5 grid px-2">
                 {movies.map((movie) => (
@@ -836,6 +863,7 @@ export default function Createidentity() {
         </div>
       )}
 
+      {/* ── Page ── */}
       <div className="min-h-screen bg-zinc-950 text-white flex">
         <div className="fixed inset-0 pointer-events-none w-[50%] opacity-[0.03]" />
 
@@ -848,7 +876,87 @@ export default function Createidentity() {
             <div className="mt-4 h-px w-16 bg-blue-400/60 rounded" />
           </div>
 
-          {/* ── Media Tastes Section ───────────────────────────────────────────── */}
+          {/* ── Section 00: Account ───────────────────────────────────────────── */}
+          <div className="mb-10">
+            <SectionHeader
+              step="00"
+              label="Your Account"
+              sublabel="The face of your profile. Make it worthy."
+            />
+
+            {/* PFP */}
+            <div className="flex items-center gap-5 mb-6">
+              <div
+                className="relative group cursor-pointer"
+                onClick={() => fileRef.current?.click()}
+              >
+                <img
+                  src={pfpPreview ?? user?.imageUrl}
+                  alt="pfp"
+                  className="w-20 h-20 rounded-full object-cover border border-zinc-700"
+                />
+                <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                  <span className="text-white text-xs font-medium">Change</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-white text-sm font-medium">Profile Photo</p>
+                <p className="text-zinc-500 text-xs mt-0.5">
+                  JPG, PNG up to 10MB
+                </p>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            {/* Name + Username */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase tracking-widest mb-2.5">
+                  First Name
+                </label>
+                <input
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-zinc-500 transition"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 uppercase tracking-widest mb-2.5">
+                  Last Name
+                </label>
+                <input
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:border-zinc-500 transition"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-xs text-zinc-500 uppercase tracking-widest mb-2.5">
+                  Username
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 text-sm">
+                    @
+                  </span>
+                  <input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full bg-zinc-900 border border-zinc-700 rounded-xl pl-8 pr-4 py-2.5 text-white text-sm outline-none focus:border-zinc-500 transition"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="h-px bg-zinc-800/80 my-10" />
+
+          {/* ── Section 01: Media Tastes ──────────────────────────────────────── */}
           <div className="mb-10">
             <SectionHeader
               step="01"
@@ -856,7 +964,6 @@ export default function Createidentity() {
               sublabel="What defines your vibe? Music, films — spill it."
             />
 
-            {/* Media type buttons */}
             <div className="flex flex-wrap gap-3 mb-6">
               <MediaPillButton
                 icon={<MicVocal className="text-white h-5" />}
@@ -884,7 +991,6 @@ export default function Createidentity() {
               />
             </div>
 
-            {/* Selected media display */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {selectArtist && (
                 <SelectedMediaCard
@@ -925,10 +1031,9 @@ export default function Createidentity() {
             </div>
           </div>
 
-          {/* Divider */}
           <div className="h-px bg-zinc-800/80 my-10" />
 
-          {/* ── Bio Section ──────────────────────────────────────────────────── */}
+          {/* ── Section 02: Bio ───────────────────────────────────────────────── */}
           <div className="mb-10">
             <SectionHeader
               step="02"
@@ -942,7 +1047,7 @@ export default function Createidentity() {
                 placeholder="I'm someone who believes the best conversations happen at 2am with the right playlist going..."
                 maxLength={300}
                 rows={4}
-                className="w-full bg-zinc-900 border border-zinc-700/80 rounded-2xl px-4 py-3.5 text-white placeholder-zinc-600 text-sm resize-none focus:outline-none focus:border-mauve-400 focus:ring-1 focus:ring-mauve-400 transition-all duration-200"
+                className="w-full bg-zinc-900 border border-zinc-700/80 rounded-2xl px-4 py-3.5 text-white placeholder-zinc-600 text-sm resize-none focus:outline-none focus:border-zinc-500 focus:ring-1 focus:ring-zinc-500 transition-all duration-200"
               />
               <span className="absolute bottom-3 right-4 text-zinc-600 text-xs">
                 {bio.length}/300
@@ -950,10 +1055,9 @@ export default function Createidentity() {
             </div>
           </div>
 
-          {/* Divider */}
           <div className="h-px bg-zinc-800/80 my-10" />
 
-          {/* ── Personal Details ──────────────────────────────────────────────── */}
+          {/* ── Section 03: Personal Details ─────────────────────────────────── */}
           <div className="mb-10">
             <SectionHeader
               step="03"
@@ -962,6 +1066,7 @@ export default function Createidentity() {
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {/* Pronouns */}
               <div>
                 <label className="block text-xs text-zinc-500 uppercase tracking-widest mb-2.5">
                   Pronouns
@@ -1005,7 +1110,7 @@ export default function Createidentity() {
                         </span>
                       )}
                       {zodiac && (
-                        <span className="" title={zodiac}>
+                        <span title={zodiac}>
                           {zodiacEmoji[zodiac] || zodiac}
                         </span>
                       )}
@@ -1035,11 +1140,12 @@ export default function Createidentity() {
                   Profession
                 </label>
                 <Combobox
+                  key={`profession-${profileLoaded}`}
                   items={professions}
+                  defaultValue={selectedProfession}
                   onValueChange={(value) =>
                     setSelectedProfession(value as string)
                   }
-                  defaultValue={"Berozgar"}
                 >
                   <ComboboxInput
                     placeholder="What do you do for a living?"
@@ -1068,7 +1174,9 @@ export default function Createidentity() {
                   Location
                 </label>
                 <Combobox
+                  key={`location-${profileLoaded}`}
                   items={states}
+                  defaultValue={selectedLocation}
                   onValueChange={(value) =>
                     setSelectedLocation(value as string)
                   }
@@ -1096,10 +1204,9 @@ export default function Createidentity() {
             </div>
           </div>
 
-          {/* Divider */}
           <div className="h-px bg-zinc-800/80 my-10" />
 
-          {/* ── Hobbies Section ───────────────────────────────────────────────── */}
+          {/* ── Section 04: Hobbies ───────────────────────────────────────────── */}
           <div className="mb-10 cursor-default">
             <SectionHeader
               step="04"
@@ -1108,14 +1215,14 @@ export default function Createidentity() {
             />
 
             <div className="flex flex-col gap-4">
-              {/* Category select */}
+              {/* Category */}
               <div>
                 <label className="block text-xs text-zinc-500 uppercase tracking-widest mb-2.5">
                   Category
                 </label>
                 <Combobox
                   items={category}
-                  defaultValue={"General"}
+                  defaultValue="General"
                   onValueChange={(value) =>
                     setSelectCategory(value as typeof selectCategory)
                   }
@@ -1208,16 +1315,22 @@ export default function Createidentity() {
           </div>
 
           {/* ── Feedback ─────────────────────────────────────────────────────── */}
+          {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+          {success && (
+            <p className="text-green-400 text-sm mb-4">
+              Identity saved successfully! 🎉
+            </p>
+          )}
 
-          {/* ── Submit Button ─────────────────────────────────────────────────── */}
+          {/* ── Submit ───────────────────────────────────────────────────────── */}
           <button
             onClick={createIdentity}
             disabled={loading || !allMediaSelected}
-            className="w-full py-4 rounded-2xl hover:bg-white hover:text-black font-semibold text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border "
+            className="w-full py-4 rounded-2xl hover:bg-white hover:text-black font-semibold text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <span className="w-4 h-4 rounded-full border-2 border-black border-t-transparent animate-spin" />
+                <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
                 Saving...
               </span>
             ) : (
@@ -1225,17 +1338,17 @@ export default function Createidentity() {
             )}
           </button>
         </div>
+
+        {/* ── Right panel ── */}
         <div className="flex-1 flex flex-col gap-20 justify-center w-[50%] items-center min-h-screen">
-          <div>
-            <TrueFocus
-              sentence="Developed By OMJ"
-              manualMode={true}
-              blurAmount={5}
-              borderColor="#5227FF"
-              animationDuration={0.5}
-              pauseBetweenAnimations={1}
-            />
-          </div>
+          <TrueFocus
+            sentence="Developed By OMJ"
+            manualMode={true}
+            blurAmount={5}
+            borderColor="#5227FF"
+            animationDuration={0.5}
+            pauseBetweenAnimations={1}
+          />
         </div>
       </div>
     </div>

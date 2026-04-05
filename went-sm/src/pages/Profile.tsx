@@ -416,7 +416,7 @@ export default function Profile() {
   return (
     <div
       ref={twemojiRef}
-      className="grid h-screen grid-cols-[1.5fr_2.5fr_1.5fr] overflow-hidden"
+      className="grid h-screen grid-cols-[1.5fr_2.5fr_1.8fr] overflow-hidden"
     >
       <div className="bg-mist-900 border-r-2 border border-gray-800">
         <div className="bg-black text-white p-4 h-screen sticky top-0">
@@ -635,7 +635,7 @@ export default function Profile() {
             think.map((think, i) => (
               <div
                 key={i}
-                className="border-y border-gray-800 px-2 py-4 text-white hover:bg-gray-900 transition"
+                className="border-y border-gray-800 px-4 py-4 text-white hover:bg-gray-900 transition"
               >
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-xs font-bold text-white">
