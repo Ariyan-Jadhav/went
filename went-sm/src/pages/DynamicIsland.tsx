@@ -61,15 +61,6 @@ export default function DynamicIsland() {
         duration: 0.4,
         ease: "power3.out",
       });
-    } else if (openFeedOptions || openProfileOptions) {
-      // Medium expansion for options menus
-      gsap.to(islandRef.current, {
-        width: 380,
-        height: 56,
-        borderRadius: 24,
-        duration: 0.4,
-        ease: "power3.out",
-      });
     } else {
       // Default collapsed pill with nav icons
       gsap.fromTo(
@@ -98,6 +89,7 @@ export default function DynamicIsland() {
         <div className="fixed z-50 mt-6 flex flex-col items-center">
           <div
             ref={islandRef}
+            style={{ opacity: 0, transform: "translateY(-80px)" }}
             className="flex flex-col justify-center bg-[rgb(0,0,0,0.4)] border-2 border-gray-500 text-white shadow-xl rounded-full overflow-hidden"
           >
             <div ref={contentRef}>
@@ -195,7 +187,7 @@ export default function DynamicIsland() {
                     triggerOnHover
                     respectReducedMotion={true}
                     loop={true}
-                    loopDelay={5}
+                    loopDelay={3}
                   />
                 </div>
               )}

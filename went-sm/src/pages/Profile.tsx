@@ -147,15 +147,16 @@ export default function Profile() {
     setProfile1,
     setSearch,
     setUpload,
+    setOpenTextBox,
+    setTextBox,
   } = useDefaultOptions();
 
-  const { setOpenProfileOptions, chooseProfileOptions, setShiftDI } =
-    useProfileOptions();
+  const { setOpenProfileOptions, chooseProfileOptions } = useProfileOptions();
 
   // ---------------- STATE ----------------
   const [profile, setProfile] = useState<WentProfile | null>(null);
   const [think, setThink] = useState<Think[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [thinkLoading, setThinkLoading] = useState(false);
   const [suggestLoading, setSuggestLoading] = useState(false);
   const [liked, setLiked] = useState<Record<string, boolean>>({});
@@ -175,7 +176,7 @@ export default function Profile() {
     getProfile();
     getRandom();
     getThinks();
-    setShiftDI(true);
+    setTextBox("WELCOME");
   }, []);
 
   useEffect(() => {
@@ -198,18 +199,30 @@ export default function Profile() {
         : profile.followers.some((f) => f.id === userId),
     }));
   }, [profile, userId]);
+
   useEffect(() => {
     getThinks();
   }, [chooseProfileOptions]);
 
   useEffect(() => {
-    setOpenProfileOptions(true);
     setFeed(false);
     setMessage(false);
     setNotification(false);
     setProfile1(true);
     setSearch(false);
     setUpload(false);
+  }, []);
+
+  useEffect(() => {
+    setOpenTextBox(true);
+    setOpenProfileOptions(false);
+
+    const timer = setTimeout(() => {
+      setOpenTextBox(false);
+      setOpenProfileOptions(true);
+    }, 5000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const getProfile = async () => {
