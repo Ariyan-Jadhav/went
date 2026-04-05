@@ -44,7 +44,7 @@ export default function DynamicIsland() {
     gsap.fromTo(
       islandRef.current,
       { y: -80, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.6 },
+      { y: 0, opacity: 1, duration: 0.6, delay: 1 },
     );
   }, []);
 

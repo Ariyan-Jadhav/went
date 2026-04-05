@@ -161,8 +161,15 @@ export default function Profile() {
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [suggestions, setSuggestions] = useState<RandomUser[]>([]);
   const [rethink, setRethink] = useState<Record<string, boolean>>({});
-  const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const [notFound, setNotFound] = useState(false);
+  const [followingUsers, setFollowingUsers] = useState<Record<string, boolean>>(
+    {},
+  );
+  const [lightbox, setLightbox] = useState<{
+    urls: string[];
+    index: number;
+  } | null>(null);
 
   useEffect(() => {
     getProfile();
@@ -172,23 +179,24 @@ export default function Profile() {
   }, []);
 
   useEffect(() => {
-    if (!profile || !userId) return;
-
     const stored: string[] = JSON.parse(
       localStorage.getItem("followingUsers") || "[]",
     );
+    const map = stored.reduce((acc, id) => ({ ...acc, [id]: true }), {});
+    setFollowingUsers(map);
+  }, []);
 
-    // localStorage takes priority (reflects latest action), fall back to server data
-    if (stored.includes(profile.id)) {
-      setIsFollowing(true);
-    } else if (stored.length > 0) {
-      // User has interacted before — trust localStorage
-      setIsFollowing(false);
-    } else {
-      // First visit, no localStorage — use server data
-      const alreadyFollowing = profile.followers.some((f) => f.id === userId);
-      setIsFollowing(alreadyFollowing);
-    }
+  useEffect(() => {
+    if (!profile || !userId) return;
+    const stored: string[] = JSON.parse(
+      localStorage.getItem("followingUsers") || "[]",
+    );
+    setFollowingUsers((prev) => ({
+      ...prev,
+      [profile.id]: stored.includes(profile.id)
+        ? true
+        : profile.followers.some((f) => f.id === userId),
+    }));
   }, [profile, userId]);
   useEffect(() => {
     getThinks();
@@ -211,8 +219,12 @@ export default function Profile() {
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
       setProfile(res.data);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        setNotFound(true);
+      } else {
+        console.error(err);
+      }
     } finally {
       setLoading(false);
     }
@@ -301,40 +313,31 @@ export default function Profile() {
     });
   };
 
-  const toggleFollow = async () => {
-    const newState = !isFollowing;
-    setIsFollowing(newState);
+  const toggleFollow = async (targetId: string) => {
+    const newState = !followingUsers[targetId];
+    setFollowingUsers((prev) => ({ ...prev, [targetId]: newState }));
 
-    // Optimistically persist
-    if (profile) {
-      const stored: string[] = JSON.parse(
-        localStorage.getItem("followingUsers") || "[]",
-      );
-      const updated = newState
-        ? [...stored, profile.id]
-        : stored.filter((id) => id !== profile.id);
-      localStorage.setItem("followingUsers", JSON.stringify(updated));
-    }
+    const stored: string[] = JSON.parse(
+      localStorage.getItem("followingUsers") || "[]",
+    );
+    const updated = newState
+      ? [...stored, targetId]
+      : stored.filter((id) => id !== targetId);
+    localStorage.setItem("followingUsers", JSON.stringify(updated));
 
     try {
       setFollowLoading(true);
       await axios.post(
         "/follow",
-        { personality_id: profile?.id },
+        { personality_id: targetId },
         { headers: { Authorization: `Bearer ${await getToken()}` } },
       );
     } catch (err) {
-      // Revert both state and localStorage
-      setIsFollowing((prev) => !prev);
-      if (profile) {
-        const stored: string[] = JSON.parse(
-          localStorage.getItem("followingUsers") || "[]",
-        );
-        const reverted = !newState
-          ? [...stored, profile.id]
-          : stored.filter((id) => id !== profile.id);
-        localStorage.setItem("followingUsers", JSON.stringify(reverted));
-      }
+      setFollowingUsers((prev) => ({ ...prev, [targetId]: !newState }));
+      const revert = newState
+        ? stored.filter((id) => id !== targetId)
+        : [...stored, targetId];
+      localStorage.setItem("followingUsers", JSON.stringify(revert));
       console.error(err);
     } finally {
       setFollowLoading(false);
@@ -453,6 +456,62 @@ export default function Profile() {
     return !isLiked; // returns the new liked state
   };
 
+  const ThinkImageGrid = ({
+    urls,
+    onImageClick,
+  }: {
+    urls: string[];
+    onImageClick: (index: number) => void;
+  }) => {
+    if (!urls.length) return null;
+
+    const count = Math.min(urls.length, 4);
+    const clipped = urls.slice(0, count);
+
+    const gridClass = {
+      1: "grid-cols-1",
+      2: "grid-cols-2",
+      3: "grid-cols-2",
+      4: "grid-cols-2",
+    }[count];
+
+    return (
+      <div
+        className={`grid ${gridClass} gap-0.5 rounded-2xl overflow-hidden mt-3`}
+      >
+        {clipped.map((url, i) => {
+          const isLeftTall = count === 3 && i === 0;
+          return (
+            <div
+              key={i}
+              className={`overflow-hidden bg-gray-800 cursor-pointer ${isLeftTall ? "row-span-2" : ""}`}
+              onClick={() => onImageClick(i)}
+            >
+              <img
+                src={url}
+                alt={`image ${i + 1}`}
+                className={`w-full max-h-50 object-cover ${count === 1 ? "max-h-80 aspect-video" : "aspect-square"}`}
+                loading="lazy"
+              />
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderContent = (content: string) => {
+    return content.split(/(\s+)/).map((word, i) =>
+      word.startsWith("#") ? (
+        <span key={i} className="text-blue-400">
+          {word}
+        </span>
+      ) : (
+        <span key={i}>{word}</span>
+      ),
+    );
+  };
+
   useEffect(() => {
     const stored: string[] = JSON.parse(
       localStorage.getItem("likedThinks") || "[]",
@@ -474,6 +533,15 @@ export default function Profile() {
   }, []);
 
   const { username } = useParams<{ username: string }>();
+
+  if (notFound) {
+    return (
+      <div className="h-screen bg-black flex flex-col items-center justify-center text-white">
+        <p className="text-2xl font-bold">@{username}</p>
+        <p className="text-gray-500 mt-2">This account doesn't exist</p>
+      </div>
+    );
+  }
   return (
     <div
       ref={twemojiRef}
@@ -481,12 +549,12 @@ export default function Profile() {
     >
       {/* SUGGETIONS */}
       <div className="bg-mist-900 border-r-2 border border-gray-800">
-        {loading && (
+        {suggestLoading && (
           <div className="h-screen text-white flex justify-center items-center">
             <SpinnerCustom />
           </div>
         )}
-        {!loading && (
+        {!loading && !suggestLoading && (
           <div className="bg-black text-white p-4 h-screen sticky top-0">
             <h2 className="text-sm font-semibold text-gray-400 mb-4">
               Who to follow
@@ -500,14 +568,13 @@ export default function Profile() {
                 >
                   {/* Avatar + Info */}
                   <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 rounded-full bg-blue-800 flex items-center justify-center font-bold shrink-0">
+                    <div className="w-9 h-9 rounded-full bg-blue-800 flex items-center justify-center font-bold shrink-0 ">
                       {user.username?.[0]?.toUpperCase()}
                     </div>
                     <div>
                       <p className="font-semibold leading-tight">
-                        {user.firstName} {user.lastName}
+                        @{user.username}
                       </p>
-                      <p className="text-sm text-gray-500">@{user.username}</p>
                       {user.Profile?.profession && (
                         <p className="text-xs text-gray-600 capitalize">
                           {user.Profile.profession}
@@ -517,9 +584,19 @@ export default function Profile() {
                   </div>
 
                   {/* Follow Button */}
-                  <button className="text-sm border border-gray-600 px-3 py-1 rounded-full hover:bg-white hover:text-black transition-colors shrink-0">
-                    Follow
-                  </button>
+                  <div>
+                    <button
+                      onClick={() => toggleFollow(user.id)}
+                      disabled={followLoading}
+                      className={`px-4 py-1 rounded text-sm font-medium border transition-colors disabled:opacity-50 ${
+                        followingUsers[user.id]
+                          ? "bg-transparent border-gray-500 text-white hover:border-red-500 hover:text-red-400"
+                          : "bg-white text-black border-white hover:bg-gray-200"
+                      }`}
+                    >
+                      {followingUsers[user.id] ? "Following" : "Follow"}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -527,7 +604,6 @@ export default function Profile() {
         )}
       </div>
 
-      {/* PROFILE */}
       {/* PROFILE */}
       <div ref={containerRef} className="bg-black text-white z-20 relative">
         {loading && (
@@ -606,15 +682,15 @@ export default function Profile() {
                     <div className="flex justify-center">
                       {userId !== profile.id && (
                         <button
-                          onClick={toggleFollow}
+                          onClick={() => toggleFollow(profile.id)}
                           disabled={followLoading}
                           className={`mt-2 w-full px-4 py-1 rounded text-sm font-medium border transition-colors disabled:opacity-50 ${
-                            isFollowing
+                            followingUsers[profile.id]
                               ? "bg-transparent border-gray-500 text-white hover:border-red-500 hover:text-red-400"
                               : "bg-white text-black border-white hover:bg-gray-200"
                           }`}
                         >
-                          {isFollowing ? "Following" : "Follow"}
+                          {followingUsers[profile.id] ? "Following" : "Follow"}
                         </button>
                       )}
                     </div>
@@ -735,12 +811,12 @@ export default function Profile() {
 
       {/* THINK */}
       <div className="bg-black border-x-2 border border-gray-800 text-white h-screen overflow-y-auto thinks-scroll">
-        {loading && (
+        {thinkLoading && (
           <div className="h-screen flex justify-center items-center">
             <SpinnerCustom />
           </div>
         )}
-        {!loading && (
+        {!loading && !thinkLoading && (
           <div>
             {think &&
               think.map((think, i) => (
@@ -761,7 +837,22 @@ export default function Profile() {
                       {formatDate(think.createdAt)}
                     </span>
                   </div>
-                  <p className="mt-1 text-gray-300 pl-10">{think.content}</p>
+                  <p className="mt-1 text-gray-300 pl-10">
+                    {renderContent(think.content)}
+                  </p>
+                  {think.imageUrl && think.imageUrl.length > 0 && (
+                    <div className="pl-10 mt-2">
+                      <ThinkImageGrid
+                        urls={think.imageUrl.map((img) => img.url)}
+                        onImageClick={(index) =>
+                          setLightbox({
+                            urls: think.imageUrl!.map((img) => img.url),
+                            index,
+                          })
+                        }
+                      />
+                    </div>
+                  )}
                   <div className="flex gap-8 mt-4 pl-10">
                     <button
                       onClick={() => toggleRethink(think)}
@@ -797,6 +888,74 @@ export default function Profile() {
           </div>
         )}
       </div>
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          onClick={() => setLightbox(null)}
+        >
+          {/* Prev button */}
+          {lightbox.urls.length > 1 && (
+            <button
+              className="absolute left-4 text-white text-3xl px-3 py-1 hover:text-gray-300 z-10"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightbox((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        index:
+                          (prev.index - 1 + prev.urls.length) %
+                          prev.urls.length,
+                      }
+                    : null,
+                );
+              }}
+            >
+              ‹
+            </button>
+          )}
+
+          {/* Image */}
+          <img
+            src={lightbox.urls[lightbox.index]}
+            alt="Full view"
+            className="max-h-[90vh] max-w-[90vw] object-contain rounded-xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          {/* Next button */}
+          {lightbox.urls.length > 1 && (
+            <button
+              className="absolute right-4 text-white text-3xl px-3 py-1 hover:text-gray-300 z-10"
+              onClick={(e) => {
+                e.stopPropagation();
+                setLightbox((prev) =>
+                  prev
+                    ? { ...prev, index: (prev.index + 1) % prev.urls.length }
+                    : null,
+                );
+              }}
+            >
+              ›
+            </button>
+          )}
+
+          {/* Counter */}
+          {lightbox.urls.length > 1 && (
+            <p className="absolute bottom-4 text-gray-400 text-sm">
+              {lightbox.index + 1} / {lightbox.urls.length}
+            </p>
+          )}
+
+          {/* Close button */}
+          <button
+            className="absolute top-4 right-4 text-white text-xl hover:text-gray-300"
+            onClick={() => setLightbox(null)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }
