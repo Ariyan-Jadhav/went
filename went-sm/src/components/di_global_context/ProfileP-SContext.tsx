@@ -5,6 +5,8 @@ type FeedState = {
   setChooseProfileOptions: (val: "posted" | "saved") => void;
   openProfileOptions: boolean;
   setOpenProfileOptions: (val: boolean) => void;
+  shiftDI: boolean;
+  setShiftDI: (val: boolean) => void;
 };
 
 export const useProfileOptions = create<FeedState>((set) => ({
@@ -12,4 +14,6 @@ export const useProfileOptions = create<FeedState>((set) => ({
   setChooseProfileOptions: (val) => set({ chooseProfileOptions: val }),
   openProfileOptions: false,
   setOpenProfileOptions: (val) => set({ openProfileOptions: val }),
+  shiftDI: false,
+  setShiftDI: (val) => set({ shiftDI: val }),
 }));

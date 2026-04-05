@@ -1213,7 +1213,7 @@ export default function Createidentity() {
           <button
             onClick={createIdentity}
             disabled={loading || !allMediaSelected}
-            className="w-full py-4 rounded-2xl bg-blue-400 hover:bg-blue-300 text-black font-semibold text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_30px_rgba(251,191,36,0.2)] hover:shadow-[0_0_40px_rgba(251,191,36,0.35)] active:scale-[0.99]"
+            className="w-full py-4 rounded-2xl hover:bg-white hover:text-black font-semibold text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border "
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">

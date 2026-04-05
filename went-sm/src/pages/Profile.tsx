@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Zodiac } from "@/components/Zodiac";
 import { useTwemoji } from "@/hooks/useTwemoji";
 import Aurora from "@/components/Aurora";
-import { Pin, Mountain } from "lucide-react";
+import { Mountain } from "lucide-react";
 import Magnet from "@/components/Magnet";
 import VariableProximity from "@/components/VariableProximity";
 import { Heart, Repeat2 } from "lucide-react";
@@ -15,7 +15,6 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
-import TiltedCard from "@/components/TiltedCard";
 import { useRef } from "react";
 import { useDefaultOptions } from "@/components/di_global_context/default";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
@@ -150,7 +149,8 @@ export default function Profile() {
     setUpload,
   } = useDefaultOptions();
 
-  const { setOpenProfileOptions, chooseProfileOptions } = useProfileOptions();
+  const { setOpenProfileOptions, chooseProfileOptions, setShiftDI } =
+    useProfileOptions();
 
   // ---------------- STATE ----------------
   const [profile, setProfile] = useState<WentProfile | null>(null);
@@ -166,6 +166,7 @@ export default function Profile() {
     getProfile();
     getRandom();
     getThinks();
+    setShiftDI(true);
   }, []);
 
   useEffect(() => {
@@ -195,6 +196,80 @@ export default function Profile() {
       setLoading(false);
     }
   };
+  function capitalize(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  function SelectedMediaCard({
+    image,
+    title,
+    subtitle,
+    badge,
+    imdbID,
+  }: {
+    image?: string;
+    title: string;
+    subtitle?: string;
+    badge?: string;
+    imdbID?: string;
+  }) {
+    const [imgFailed, setImgFailed] = useState(false);
+    const hasImage = image && image !== "N/A" && !imgFailed;
+
+    return (
+      <div className="relative flex items-center gap-4 bg-zinc-900 border border-zinc-700/60 rounded-2xl p-4 group">
+        <div className="shrink-0">
+          {hasImage ? (
+            <img
+              src={image}
+              alt={title}
+              onError={() => setImgFailed(true)}
+              className="w-14 h-14 rounded-xl object-cover"
+            />
+          ) : (
+            <div className="w-14 h-14 rounded-xl bg-zinc-800 flex items-center justify-center text-zinc-600">
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 9l10.5-3m0 6.553v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 11-.99-3.467l2.31-.66a2.25 2.25 0 001.632-2.163zm0 0V2.25L9 5.25v10.303m0 0v3.75a2.25 2.25 0 01-1.632 2.163l-1.32.377a1.803 1.803 0 01-.99-3.467l2.31-.66A2.25 2.25 0 009 15.553z"
+                />
+              </svg>
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-white font-semibold truncate text-sm">{title}</p>
+          {subtitle && (
+            <p className="text-zinc-400 text-xs mt-0.5 truncate">{subtitle}</p>
+          )}
+          <div className="flex items-center gap-2 mt-1.5">
+            {badge && (
+              <span className="inline-block text-xs px-2 py-0.5 rounded-full bg-blue-400/15 text-amber-400 border border-amber-400/20">
+                {badge}
+              </span>
+            )}
+            {imdbID && (
+              <a
+                href={`https://www.imdb.com/title/${imdbID}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+              >
+                IMDb ↗
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "";
@@ -341,8 +416,47 @@ export default function Profile() {
   return (
     <div
       ref={twemojiRef}
-      className="grid h-screen grid-cols-[3fr_2.3fr_1.5fr] overflow-hidden"
+      className="grid h-screen grid-cols-[1.5fr_2.5fr_1.5fr] overflow-hidden"
     >
+      <div className="bg-mist-900 border-r-2 border border-gray-800">
+        <div className="bg-black text-white p-4 h-screen sticky top-0">
+          <h2 className="text-sm font-semibold text-gray-400 mb-4">
+            Who to follow
+          </h2>
+
+          <div className="flex flex-col gap-3">
+            {suggestions.map((user) => (
+              <div
+                key={user.id}
+                className="flex items-center justify-between gap-2"
+              >
+                {/* Avatar + Info */}
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-full bg-blue-800 flex items-center justify-center font-bold shrink-0">
+                    {user.username?.[0]?.toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-semibold leading-tight">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <p className="text-sm text-gray-500">@{user.username}</p>
+                    {user.Profile?.profession && (
+                      <p className="text-xs text-gray-600 capitalize">
+                        {user.Profile.profession}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Follow Button */}
+                <button className="text-sm border border-gray-600 px-3 py-1 rounded-full hover:bg-white hover:text-black transition-colors shrink-0">
+                  Follow
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
       {/* PROFILE */}
 
       <div className="bg-black text-white z-20 relative">
@@ -357,12 +471,12 @@ export default function Profile() {
         {/* LOADING */}
         <div>{loading && <p>Loading</p>}</div>
         {/* MAIN */}
-        <div className="ml-5 mt-5 relative z-10">
+        <div className="mt-20 relative z-10">
           {/* BASIC INFO */}
-          <div>
+          <div className="">
             {profile && (
-              <div>
-                <div className="flex items-center">
+              <div className="flex items-center gap-10">
+                <div className="flex items-center ml-5">
                   {profile.profilePicUrl ? (
                     <img className="h-25" src={profile.profilePicUrl} />
                   ) : (
@@ -375,7 +489,7 @@ export default function Profile() {
                       }
                     />
                   )}
-                  <div className=" ml-2">
+                  <div className="ml-2">
                     <div className="flex items-baseline-last">
                       <div ref={containerRef} style={{ position: "relative" }}>
                         <VariableProximity
@@ -399,14 +513,14 @@ export default function Profile() {
                     <h1 className="font-bold">@{profile.username}</h1>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <div className="flex items-baseline-last gap-0.5">
+                <div className="flex gap-2 mt-2 mb-2 ml-5">
+                  <div className="flex items-baseline-last gap-1">
                     <p>{profile.followersCount}</p>{" "}
-                    <p className="text-sm text-mist-400">Followers</p>
+                    <p className="text-xs text-mist-400">FOLLOWERS</p>
                   </div>
-                  <div className="flex items-baseline-last gap-0.5">
+                  <div className="flex items-baseline-last gap-1">
                     <p>{profile.followingCount}</p>{" "}
-                    <p className="text-sm text-mist-400">Following</p>
+                    <p className="text-xs text-mist-400">FOLLOWING</p>
                   </div>
                 </div>
               </div>
@@ -414,7 +528,7 @@ export default function Profile() {
           </div>
           {/* SHOWOFF */}
           {profile && (
-            <div className="mt-1 cursor-default relative z-30">
+            <div className="mt-1 cursor-default relative z-30 ml-5">
               <div className="flex gap-1">
                 <p className="text-blue-800 font-extrabold">|</p>{" "}
                 {profile?.Profile?.bio}
@@ -454,81 +568,41 @@ export default function Profile() {
             </div>
           )}
         </div>
-        {/* MEDIA */}
-        <div className=" ml-5 mt-5 z-10 relative border-mist-700 flex flex-col w-[90%]">
-          <div className="ml-2 flex items-center mb-1">
-            <Pin className="h-5" />
-            <h1>Pins</h1>
-          </div>
-          <div className="rounded-sm border flex bg-[rgb(255,255,255,0.2)] justify-center-safe gap-7 py-5 overflow-hidden">
-            <div className="flex flex-col items-center gap-1">
-              <TiltedCard
-                imageSrc={profile?.Profile?.movies[0]?.poster}
-                altText={profile?.Profile?.movies[0]?.title}
-                captionText={profile?.Profile?.movies[0]?.title}
-                containerHeight="180px"
-                containerWidth="120px"
-                imageHeight="180px"
-                imageWidth="120px"
-                rotateAmplitude={25}
-                scaleOnHover={1.05}
-                showMobileWarning={false}
-                showTooltip
-                displayOverlayContent
+        <div className="h-px border border-gray-800 my-2 mt-4" />
+
+        {/* Selected media display */}
+        <div className="mt-5 ml-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-mist-700 border bg-[rgb(255,255,255,0.2)]  p-4 w-[95%] rounded-sm">
+            {profile?.Profile && (
+              <SelectedMediaCard
+                image={profile?.Profile?.artists[0]?.image}
+                title={profile?.Profile?.artists[0]?.name}
+                badge="Artist"
               />
-              <h1 className="text-sm">FILM</h1>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <TiltedCard
-                imageSrc={profile?.Profile?.artists[0]?.image}
-                altText={profile?.Profile?.artists[0]?.name}
-                captionText={profile?.Profile?.artists[0]?.name}
-                containerHeight="180px"
-                containerWidth="120px"
-                imageHeight="180px"
-                imageWidth="120px"
-                rotateAmplitude={25}
-                scaleOnHover={1.05}
-                showMobileWarning={false}
-                showTooltip
-                displayOverlayContent
+            )}
+            {profile?.Profile && (
+              <SelectedMediaCard
+                image={profile?.Profile?.albums[0]?.image}
+                title={profile?.Profile?.albums[0]?.name}
+                badge="Album"
               />
-              <h1 className="text-sm">ARTIST</h1>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <TiltedCard
-                imageSrc={profile?.Profile?.tracks[0]?.image}
-                altText={profile?.Profile?.tracks[0]?.name}
-                captionText={profile?.Profile?.tracks[0]?.name}
-                containerHeight="180px"
-                containerWidth="120px"
-                imageHeight="180px"
-                imageWidth="120px"
-                rotateAmplitude={25}
-                scaleOnHover={1.05}
-                showMobileWarning={false}
-                showTooltip
-                displayOverlayContent
+            )}
+            {profile?.Profile && (
+              <SelectedMediaCard
+                image={profile?.Profile?.tracks[0]?.image}
+                title={profile?.Profile?.tracks[0]?.name}
+                subtitle={profile?.Profile?.tracks[0]?.artist}
+                badge="Track"
               />
-              <h1 className="text-sm">TRACK</h1>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <TiltedCard
-                imageSrc={profile?.Profile?.albums[0]?.image}
-                altText={profile?.Profile?.albums[0]?.name}
-                captionText={profile?.Profile?.albums[0]?.name}
-                containerHeight="180px"
-                containerWidth="120px"
-                imageHeight="180px"
-                imageWidth="120px"
-                rotateAmplitude={25}
-                scaleOnHover={1.05}
-                showMobileWarning={false}
-                showTooltip
-                displayOverlayContent
+            )}
+            {profile?.Profile && (
+              <SelectedMediaCard
+                image={profile?.Profile?.movies[0]?.poster}
+                title={profile?.Profile?.movies[0]?.title}
+                subtitle={profile?.Profile?.movies[0]?.year}
+                badge={capitalize(profile?.Profile?.movies[0]?.type)}
               />
-              <h1 className="text-sm">ALBUM</h1>
-            </div>
+            )}
           </div>
         </div>
         <div className=" ml-5 mt-5 z-10 relative border-mist-700 flex flex-col w-[90%]">
@@ -556,12 +630,12 @@ export default function Profile() {
       </div>
       {/* THINK */}
       <div className="bg-black border-x-2 border border-gray-800 text-white h-screen overflow-y-auto thinks-scroll">
-        <div className="mt-25">
+        <div>
           {think &&
             think.map((think, i) => (
               <div
                 key={i}
-                className="border-y border-gray-800 px-6 py-4 text-white hover:bg-gray-900 transition"
+                className="border-y border-gray-800 px-2 py-4 text-white hover:bg-gray-900 transition"
               >
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-xs font-bold text-white">
@@ -609,45 +683,6 @@ export default function Profile() {
                 </div>
               </div>
             ))}
-        </div>
-      </div>
-      <div className="bg-mist-900">
-        <div className="bg-black text-white p-4 h-screen sticky top-0">
-          <h2 className="text-sm font-semibold text-gray-400 mb-4">
-            Who to follow
-          </h2>
-
-          <div className="flex flex-col gap-3">
-            {suggestions.map((user) => (
-              <div
-                key={user.id}
-                className="flex items-center justify-between gap-2"
-              >
-                {/* Avatar + Info */}
-                <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-full bg-blue-800 flex items-center justify-center text-xs font-bold shrink-0">
-                    {user.username?.[0]?.toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold leading-tight">
-                      {user.firstName} {user.lastName}
-                    </p>
-                    <p className="text-xs text-gray-500">@{user.username}</p>
-                    {user.Profile?.profession && (
-                      <p className="text-xs text-gray-600 capitalize">
-                        {user.Profile.profession}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Follow Button */}
-                <button className="text-xs border border-gray-600 px-3 py-1 rounded-full hover:bg-white hover:text-black transition-colors shrink-0">
-                  Follow
-                </button>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>

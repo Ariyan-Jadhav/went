@@ -23,6 +23,11 @@ model User {
   isBot         Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  // twitter       String?
+  // instagram     String?
+  // linkedin      String?
+  // mail          String?
+  // github        String?
 
   Profile    Profile?
   followers  Follow[]      @relation("follower")

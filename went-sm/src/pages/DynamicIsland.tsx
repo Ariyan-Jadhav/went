@@ -72,13 +72,21 @@ export default function DynamicIsland() {
       });
     } else {
       // Default collapsed pill with nav icons
-      gsap.to(islandRef.current, {
-        width: 380,
-        height: 56,
-        borderRadius: 999,
-        duration: 0.4,
-        ease: "power3.out",
-      });
+      gsap.fromTo(
+        islandRef.current,
+        {
+          width: 100,
+          duration: 0.4,
+          ease: "power3.out",
+        },
+        {
+          width: 380,
+          height: 56,
+          borderRadius: 24,
+          duration: 0.4,
+          ease: "power3.out",
+        },
+      );
     }
   }, [openSearch, openFeedOptions, openProfileOptions]);
 
