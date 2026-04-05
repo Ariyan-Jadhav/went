@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 import gsap from "gsap";
 import { NavLink } from "react-router-dom";
@@ -10,12 +10,13 @@ import {
   FiSearch,
   FiUpload,
   FiArrowUp,
+  FiX,
 } from "react-icons/fi";
 import { useSearch } from "../components/di_global_context/SearchContextMusic";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 import { useDefaultOptions } from "@/components/di_global_context/default";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
-import SearchMusic from "@/components/di_animations/SearchMusic";
+import Shuffle from "@/components/Shuffle";
 import FeedOptions from "@/components/di_animations/FeedOptions";
 import ProfileOptions from "@/components/di_animations/ProfileOptions";
 
@@ -23,12 +24,22 @@ export default function DynamicIsland() {
   const islandRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const { openSearch } = useSearch();
+  const { openSearch, musicSearchInput, setMusicSearchInput, setOpenSearch } =
+    useSearch();
   const { openFeedOptions, gototop, scrollToTop } = useFeedOptions();
   const { openProfileOptions } = useProfileOptions();
-  const { feed, message, notification, profile1, upload, search } =
-    useDefaultOptions();
+  const {
+    feed,
+    message,
+    notification,
+    profile1,
+    upload,
+    search,
+    textBox,
+    openTextBox,
+  } = useDefaultOptions();
 
+  // ── Entry animation ───────────────────────────────────────────────────────
   useEffect(() => {
     gsap.fromTo(
       islandRef.current,
@@ -37,70 +48,37 @@ export default function DynamicIsland() {
     );
   }, []);
 
+  // ── Island size animation based on state ──────────────────────────────────
   useEffect(() => {
     if (!islandRef.current) return;
 
-    // Handle feed options expansion
-    if (openFeedOptions) {
-      gsap.fromTo(
-        islandRef.current,
-        {
-          width: 100,
-          duration: 0.4,
-          ease: "power3.out",
-        },
-        {
-          width: 380,
-          height: 56,
-          borderRadius: 24,
-          duration: 0.4,
-          ease: "power3.out",
-        },
-      );
-    }
-    // Handle search expansion
-    else if (openSearch) {
+    if (openSearch) {
+      // Wide pill for search input
       gsap.to(islandRef.current, {
-        width: 420,
-        height: 120,
+        width: 480,
+        height: 56,
         borderRadius: 24,
         duration: 0.4,
         ease: "power3.out",
       });
-    } else if (openProfileOptions) {
-      gsap.fromTo(
-        islandRef.current,
-        {
-          width: 100,
-          duration: 0.4,
-          ease: "power3.out",
-        },
-        {
-          width: 380,
-          height: 56,
-          borderRadius: 24,
-          duration: 0.4,
-          ease: "power3.out",
-        },
-      );
-    }
-    // Collapsed state
-    else {
-      gsap.fromTo(
-        islandRef.current,
-        {
-          width: 100,
-          duration: 0.4,
-          ease: "power3.out",
-        },
-        {
-          width: 380,
-          height: 56,
-          borderRadius: 24,
-          duration: 0.4,
-          ease: "power3.out",
-        },
-      );
+    } else if (openFeedOptions || openProfileOptions) {
+      // Medium expansion for options menus
+      gsap.to(islandRef.current, {
+        width: 380,
+        height: 56,
+        borderRadius: 24,
+        duration: 0.4,
+        ease: "power3.out",
+      });
+    } else {
+      // Default collapsed pill with nav icons
+      gsap.to(islandRef.current, {
+        width: 380,
+        height: 56,
+        borderRadius: 999,
+        duration: 0.4,
+        ease: "power3.out",
+      });
     }
   }, [openSearch, openFeedOptions, openProfileOptions]);
 
@@ -115,77 +93,113 @@ export default function DynamicIsland() {
             className="flex flex-col justify-center bg-[rgb(0,0,0,0.4)] border-2 border-gray-500 text-white shadow-xl rounded-full overflow-hidden"
           >
             <div ref={contentRef}>
-              {!openSearch && !openFeedOptions && !openProfileOptions && (
-                <div className="flex items-center justify-center w-full ">
-                  {!gototop && (
+              {/* ── Default nav icons ── */}
+              {!openSearch &&
+                !openFeedOptions &&
+                !openProfileOptions &&
+                !openTextBox && (
+                  <div className="flex items-center justify-center w-full">
+                    {!gototop ? (
+                      <button
+                        className={`h-full py-5 px-5.5 hover:bg-[rgb(255,255,255,0.1)] ${feed ? glowClass : ""}`}
+                      >
+                        <FiHome className="transition" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={scrollToTop}
+                        className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${feed ? glowClass : ""}`}
+                      >
+                        <FiArrowUp className="transition" />
+                      </button>
+                    )}
+
                     <button
-                      className={`h-full py-5 px-5.5 hover:bg-[rgb(255,255,255,0.1)] ${
-                        feed ? glowClass : ""
-                      }`}
+                      className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${notification ? glowClass : ""}`}
                     >
-                      <FiHome className="transition" />
+                      <FiBell className="transition" />
                     </button>
-                  )}
-                  {gototop && (
+
                     <button
-                      onClick={scrollToTop}
-                      className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${
-                        feed ? glowClass : ""
-                      }`}
+                      className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${message ? glowClass : ""}`}
                     >
-                      <FiArrowUp className="transition " />
+                      <FiMessageCircle className="transition" />
                     </button>
-                  )}
 
-                  <button
-                    className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${
-                      notification ? glowClass : ""
-                    }`}
-                  >
-                    <FiBell className="transition" />
-                  </button>
+                    <button
+                      className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${profile1 ? glowClass : ""}`}
+                    >
+                      <FiUser className="transition" />
+                    </button>
 
-                  <button
-                    className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${
-                      message ? glowClass : ""
-                    }`}
-                  >
-                    <FiMessageCircle className="transition" />
-                  </button>
+                    <button
+                      className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${upload ? glowClass : ""}`}
+                    >
+                      <FiUpload className="transition" />
+                    </button>
 
-                  <button
-                    className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${
-                      profile1 ? glowClass : ""
-                    }`}
-                  >
-                    <FiUser className="transition" />
-                  </button>
+                    <button
+                      onClick={() => setOpenSearch(true)}
+                      className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${search ? glowClass : ""}`}
+                    >
+                      <FiSearch className="transition" />
+                    </button>
+                  </div>
+                )}
 
+              {/* ── Search input (inside the island) ── */}
+              {openSearch && (
+                <div className="flex items-center w-full px-4 gap-2">
+                  <FiSearch className="text-zinc-400 shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Pick your Pins..."
+                    value={musicSearchInput}
+                    onChange={(e) => setMusicSearchInput(e.target.value)}
+                    className="flex-1 bg-transparent text-white placeholder-zinc-500 text-sm outline-none"
+                    autoFocus
+                  />
                   <button
-                    className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${
-                      upload ? glowClass : ""
-                    }`}
+                    onClick={() => {
+                      setOpenSearch(false);
+                      setMusicSearchInput("");
+                    }}
+                    className="text-zinc-400 hover:text-white transition"
                   >
-                    <FiUpload className="transition" />
-                  </button>
-
-                  <button
-                    className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${
-                      search ? glowClass : ""
-                    }`}
-                  >
-                    <FiSearch className="transition" />
+                    <FiX />
                   </button>
                 </div>
               )}
 
-              {openSearch && <SearchMusic />}
+              {/* ── Shuffle text ── */}
+              {!openSearch && openTextBox && (
+                <div className="flex items-center justify-center w-full text-white font-bold">
+                  <Shuffle
+                    text={textBox}
+                    shuffleDirection="right"
+                    duration={0.35}
+                    animationMode="evenodd"
+                    shuffleTimes={1}
+                    ease="power3.out"
+                    stagger={0.03}
+                    threshold={0.1}
+                    triggerOnce={true}
+                    triggerOnHover
+                    respectReducedMotion={true}
+                    loop={true}
+                    loopDelay={5}
+                  />
+                </div>
+              )}
+
+              {/* ── Expanded panels ── */}
               {openFeedOptions && <FeedOptions />}
               {openProfileOptions && <ProfileOptions />}
             </div>
           </div>
         </div>
       </div>
+
       <Outlet />
     </div>
   );

@@ -1,5 +1,5 @@
 const hobbies = {
-  general: [
+  General: [
     "3d printing",
     "3d printing projects",
     "accordion playing",
@@ -664,7 +664,7 @@ const hobbies = {
     "yodeling",
     "zumba dancing",
   ],
-  sports_and_outdoors: [
+  "Sports and Outdoors": [
     "aerial hoop",
     "aerial silks",
     "cricket",
@@ -924,7 +924,7 @@ const hobbies = {
     "yoga",
     "yoga retreats",
   ],
-  education: [
+  Education: [
     "archaeology",
     "asterology",
     "astronomy",
@@ -982,7 +982,7 @@ const hobbies = {
     "election forecasting",
     "stock market analysis",
   ],
-  collection: [
+  Collection: [
     "action figures",
     "advertising signs",
     "anime figurines",
@@ -1112,7 +1112,7 @@ const hobbies = {
     "wine bottles",
     "zippo lighters",
   ],
-  competition: [
+  Competition: [
     "air hockey",
     "animal fancy",
     "antakshari",
@@ -1272,7 +1272,7 @@ const hobbies = {
     "yo-yo contests",
     "zumba classes competition",
   ],
-  observation: [
+  Observation: [
     "amateur astronomy",
     "audiophile listening",
     "birdwatching",
@@ -1296,19 +1296,19 @@ const hobbies = {
 
 export default function searchEngineHobbie(
   category:
-    | "general"
-    | "sports_and_outdoors"
-    | "education"
-    | "collection"
-    | "competition"
-    | "observation",
+    | "General"
+    | "Sports and Outdoors"
+    | "Education"
+    | "Collection"
+    | "Competition"
+    | "Observation",
   query: string,
 ): string[] {
   const list = hobbies[category] || [];
 
   if (!query) return list;
 
-  const filtered = hobbies[category].filter((item) =>
+  const filtered = list.filter((item) =>
     item.toLowerCase().includes(query.toLowerCase()),
   );
 

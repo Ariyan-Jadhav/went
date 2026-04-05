@@ -18,6 +18,12 @@ type DefaultDI = {
 
   search: boolean;
   setSearch: (val: boolean) => void;
+
+  openTextBox: boolean;
+  setOpenTextBox: (val: boolean) => void;
+
+  textBox: string;
+  setTextBox: (val: string) => void;
 };
 
 export const useDefaultOptions = create<DefaultDI>((set) => ({
@@ -38,4 +44,10 @@ export const useDefaultOptions = create<DefaultDI>((set) => ({
 
   search: false,
   setSearch: (val) => set({ search: val }),
+
+  openTextBox: false,
+  setOpenTextBox: (val) => set({ openTextBox: val }),
+
+  textBox: "WENT",
+  setTextBox: (val) => set({ textBox: val }),
 }));

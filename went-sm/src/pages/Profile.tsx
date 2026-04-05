@@ -124,6 +124,19 @@ interface Think {
   username?: string;
 }
 
+interface RandomUser {
+  id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  profilePicUrl: string | null;
+  Profile: {
+    user_id: string;
+    profession: string;
+    bio: string | null;
+  } | null;
+}
+
 export default function Profile() {
   const containerRef = useRef(null);
   const { getToken } = useAuth();
@@ -144,12 +157,14 @@ export default function Profile() {
   const [think, setThink] = useState<Think[]>([]);
   const [loading, setLoading] = useState(false);
   const [thinkLoading, setThinkLoading] = useState(false);
+  const [suggestLoading, setSuggestLoading] = useState(false);
   const [liked, setLiked] = useState<Record<string, boolean>>({});
+  const [suggestions, setSuggestions] = useState<RandomUser[]>([]);
   const [rethink, setRethink] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     getProfile();
-
+    getRandom();
     getThinks();
   }, []);
 
@@ -215,6 +230,21 @@ export default function Profile() {
       console.error(err);
     } finally {
       setThinkLoading(false);
+    }
+  };
+
+  const getRandom = async () => {
+    try {
+      setSuggestLoading(true);
+      const res = await axios.get("/profile/random", {
+        headers: { Authorization: `Bearer ${await getToken()}` },
+      });
+      console.log(res.data.users);
+      setSuggestions(res.data.users);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSuggestLoading(false);
     }
   };
 
@@ -581,7 +611,45 @@ export default function Profile() {
             ))}
         </div>
       </div>
-      <div className="bg-mist-900"></div>
+      <div className="bg-mist-900">
+        <div className="bg-black text-white p-4 h-screen sticky top-0">
+          <h2 className="text-sm font-semibold text-gray-400 mb-4">
+            Who to follow
+          </h2>
+
+          <div className="flex flex-col gap-3">
+            {suggestions.map((user) => (
+              <div
+                key={user.id}
+                className="flex items-center justify-between gap-2"
+              >
+                {/* Avatar + Info */}
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-full bg-blue-800 flex items-center justify-center text-xs font-bold shrink-0">
+                    {user.username?.[0]?.toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold leading-tight">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <p className="text-xs text-gray-500">@{user.username}</p>
+                    {user.Profile?.profession && (
+                      <p className="text-xs text-gray-600 capitalize">
+                        {user.Profile.profession}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Follow Button */}
+                <button className="text-xs border border-gray-600 px-3 py-1 rounded-full hover:bg-white hover:text-black transition-colors shrink-0">
+                  Follow
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
