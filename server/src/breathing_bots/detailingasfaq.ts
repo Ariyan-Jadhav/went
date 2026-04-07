@@ -108,7 +108,7 @@ export async function engagePost(
     [allIds[i]!, allIds[j]!] = [allIds[j]!, allIds[i]!];
   }
 
-  const selected = allIds.slice(0, 60);
+  const selected = allIds.slice(0, 20);
   console.log(
     `engagePost started — ${selected.length} bots selected for post ${postId}`,
   );

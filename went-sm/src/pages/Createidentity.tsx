@@ -14,7 +14,6 @@ import { Zodiac } from "@/components/Zodiac";
 import searchEngineHobbie from "@/components/Hobbies";
 import { professions } from "@/components/Profession";
 import { states } from "@/components/Location";
-import { useDefaultOptions } from "@/components/di_global_context/default";
 import {
   Combobox,
   ComboboxChip,
@@ -30,6 +29,9 @@ import {
 } from "@/components/ui/combobox";
 import axios from "axios";
 import { useUser, useAuth } from "@clerk/clerk-react";
+import { useDefaultOptions } from "@/components/di_global_context/default";
+import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
+import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
 
 const CLIENT_ID = import.meta.env.VITE_MUSIC_CLIENT_ID;
 const CLIENT_SECRET = import.meta.env.VITE_MUSIC_CLIENT_SECRET;
@@ -289,8 +291,24 @@ function SectionHeader({
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function Createidentity() {
-  const { musicSearchInput, openSearch, setOpenSearch } = useSearch();
-  const { setOpenTextBox } = useDefaultOptions();
+  const { musicSearchInput, openSearch, setOpenSearch, setSearchMode } =
+    useSearch();
+
+  const {
+    setFeed,
+    setMessage,
+    setNotification,
+    setProfile1,
+    setSearch,
+    setUpload,
+    setOpenTextBox,
+    openTextBox,
+    setTextBox,
+  } = useDefaultOptions();
+
+  const { setOpenProfileOptions } = useProfileOptions();
+
+  const { setOpenFeedOptions, setGototop } = useFeedOptions();
   const { user } = useUser();
   const { getToken } = useAuth();
 
@@ -406,7 +424,6 @@ export default function Createidentity() {
 
   // ── Spotify token (on mount) ──────────────────────────────────────────────────
   useEffect(() => {
-    setOpenTextBox(true);
     fetch("https://accounts.spotify.com/api/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -467,6 +484,33 @@ export default function Createidentity() {
       }
     }
     loadProfile();
+  }, []);
+
+  useEffect(() => {
+    setFeed(false);
+    setMessage(false);
+    setNotification(false);
+    setSearch(false);
+    setUpload(false);
+    setOpenFeedOptions(false);
+    setGototop(false);
+    setOpenProfileOptions(false);
+  }, []);
+
+  useEffect(() => {
+    setTextBox("IDENTITY");
+  }, [openTextBox]);
+
+  useEffect(() => {
+    setOpenTextBox(true);
+    setProfile1(false);
+
+    const timer = setTimeout(() => {
+      setOpenTextBox(false);
+      setProfile1(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   // ── Spotify: Artist search ────────────────────────────────────────────────────
@@ -578,6 +622,7 @@ export default function Createidentity() {
 
   function openPanel(panel: "artist" | "album" | "track" | "movie") {
     setOpenSearch(true);
+    setSearchMode("media");
     setSelectArtistPanel(panel === "artist");
     setSelectAlbumPanel(panel === "album");
     setSelectTrackPanel(panel === "track");

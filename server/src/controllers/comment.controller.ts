@@ -3,7 +3,7 @@ import { catchAsync } from "../middleware/error.middleware.js";
 import { Response, Request } from "express";
 import { getAuth } from "@clerk/express";
 import { Comment } from "../models/comment.model.js";
-import { BreathingBots } from "../models/bots.model.js";
+import { createNotification } from "../utils/notification.js";
 import { Think } from "../models/think.model.js";
 import prisma from "../../lib/prisma.js";
 
@@ -40,6 +40,16 @@ export const createComment = catchAsync(async (req: Request, res: Response) => {
     },
     { $inc: { commentsCount: 1 } },
   );
+  const think = await Think.findById(interaction_id);
+  if (think) {
+    await createNotification(
+      think.user_id,
+      userId,
+      "comment",
+      "commented on your think",
+      interaction_id,
+    );
+  }
 
   if (comment)
     res.status(200).json({ message: "comment added successfully", username });

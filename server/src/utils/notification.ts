@@ -6,7 +6,7 @@ export const createNotification = async (
   sender_id: string,
   type: string,
   message: string,
-  reference_id: string
+  reference_id: string,
 ) => {
   if (recipient_id === sender_id) return;
 

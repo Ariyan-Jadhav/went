@@ -50,4 +50,20 @@ async function night() {
   return list;
 }
 
+async function random() {
+  const bots = await BreathingBots.find(
+    { activity_pattern: "random" },
+    { username: 1, id: 1 },
+  );
+
+  const list = bots.map((e) => e.id);
+
+  for (let i = list.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i]!, list[j]!] = [list[j]!, list[i]!];
+  }
+
+  return list;
+}
+
 export default { morning, evening, night };

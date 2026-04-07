@@ -1,7 +1,11 @@
 import { useEffect, useRef } from "react";
 import { Outlet } from "react-router-dom";
+import axios from "axios";
 import gsap from "gsap";
 import { NavLink } from "react-router-dom";
+import { useUserSearch } from "@/components/di_global_context/MainSearch";
+import UserSearchDrawer from "@/components/di_animations/MainOptions";
+import { useCallback } from "react";
 import {
   FiBell,
   FiUser,
@@ -19,20 +23,28 @@ import { useProfileOptions } from "@/components/di_global_context/ProfileP-SCont
 import Shuffle from "@/components/Shuffle";
 import FeedOptions from "@/components/di_animations/FeedOptions";
 import ProfileOptions from "@/components/di_animations/ProfileOptions";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, useAuth } from "@clerk/clerk-react";
 
 export default function DynamicIsland() {
   const islandRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const { user, isLoaded } = useUser();
-
-  if (!isLoaded) return null;
+  const { user } = useUser();
+  const { getToken } = useAuth();
 
   const username = user?.username;
 
-  const { openSearch, musicSearchInput, setMusicSearchInput, setOpenSearch } =
-    useSearch();
+  const {
+    openSearch,
+    musicSearchInput,
+    setMusicSearchInput,
+    setOpenSearch,
+    searchMode,
+    setSearchMode,
+  } = useSearch();
+  const { query, setQuery, setResults, setIsOpen, setIsLoading } =
+    useUserSearch();
+
   const { openFeedOptions, gototop, scrollToTop } = useFeedOptions();
   const { openProfileOptions } = useProfileOptions();
   const {
@@ -45,6 +57,57 @@ export default function DynamicIsland() {
     textBox,
     openTextBox,
   } = useDefaultOptions();
+
+  const searchUsers = useCallback(async (q: string) => {
+    if (!q.trim()) {
+      setResults([]);
+      return;
+    }
+
+    setIsLoading(true);
+    setIsOpen(true); // open drawer as soon as user starts typing
+
+    try {
+      const res = await axios.get(`/api/users/search`, {
+        params: { q }, // ✅ use function param
+        headers: { Authorization: `Bearer ${await getToken()}` },
+      });
+      setResults(res.data.users ?? []);
+    } catch {
+      setResults([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => searchUsers(query), 400); // 400ms debounce
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  useEffect(() => {
+    if (searchMode !== "users") return;
+    const timer = setTimeout(async () => {
+      if (!query.trim()) {
+        setResults([]);
+        return;
+      }
+      setIsLoading(true);
+      setIsOpen(true);
+      try {
+        const res = await fetch(
+          `/api/users/search?q=${encodeURIComponent(query)}`,
+        );
+        const data = await res.json();
+        setResults(data.users ?? []);
+      } catch {
+        setResults([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [query, searchMode]);
 
   // ── Entry animation ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -155,7 +218,10 @@ export default function DynamicIsland() {
                     </NavLink>
 
                     <button
-                      onClick={() => setOpenSearch(true)}
+                      onClick={() => {
+                        setSearchMode("users");
+                        setOpenSearch(true);
+                      }}
                       className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${search ? glowClass : ""}`}
                     >
                       <FiSearch className="transition" />
@@ -167,18 +233,35 @@ export default function DynamicIsland() {
               {openSearch && (
                 <div className="flex items-center w-full px-4 gap-2">
                   <FiSearch className="text-zinc-400 shrink-0" />
-                  <input
-                    type="text"
-                    placeholder="Pick your Pins..."
-                    value={musicSearchInput}
-                    onChange={(e) => setMusicSearchInput(e.target.value)}
-                    className="flex-1 bg-transparent text-white placeholder-zinc-500 text-sm outline-none"
-                    autoFocus
-                  />
+
+                  {searchMode === "users" ? (
+                    <input
+                      type="text"
+                      placeholder="Search users..."
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      className="flex-1 bg-transparent text-white placeholder-zinc-500 text-sm outline-none"
+                      autoFocus
+                    />
+                  ) : (
+                    <input
+                      type="text"
+                      placeholder="Pick your Pins..."
+                      value={musicSearchInput}
+                      onChange={(e) => setMusicSearchInput(e.target.value)}
+                      className="flex-1 bg-transparent text-white placeholder-zinc-500 text-sm outline-none"
+                      autoFocus
+                    />
+                  )}
+
                   <button
                     onClick={() => {
                       setOpenSearch(false);
                       setMusicSearchInput("");
+                      setQuery("");
+                      setResults([]);
+                      setIsOpen(false);
+                      setSearchMode("media"); // reset to default
                     }}
                     className="text-zinc-400 hover:text-white transition"
                   >
@@ -203,7 +286,7 @@ export default function DynamicIsland() {
                     triggerOnHover
                     respectReducedMotion={true}
                     loop={true}
-                    loopDelay={3}
+                    loopDelay={2}
                   />
                 </div>
               )}
@@ -217,6 +300,7 @@ export default function DynamicIsland() {
       </div>
 
       <Outlet />
+      <UserSearchDrawer />
     </div>
   );
 }

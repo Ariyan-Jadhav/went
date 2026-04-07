@@ -3,8 +3,7 @@ import { AppError } from "../middleware/error.middleware.js";
 import { catchAsync } from "../middleware/error.middleware.js";
 import { Response, Request } from "express";
 import { getAuth } from "@clerk/express";
-import { Notification } from "../models/notification.model.js";
-import { io, userSockets } from "../index.js";
+import { createNotification } from "../utils/notification.js";
 
 export const toggleFollow = catchAsync(async (req: Request, res: Response) => {
   const { personality_id } = req.body;
@@ -14,15 +13,6 @@ export const toggleFollow = catchAsync(async (req: Request, res: Response) => {
   const { userId, isAuthenticated } = getAuth(req);
   if (!isAuthenticated) throw new AppError("User not authenticated", 401);
   if (!userId) throw new AppError("User not found", 401);
-
-  // const user = await prisma.user.findUnique({
-  //   where: {
-  //     username: personality_id,
-  //   },
-  // });
-
-  // if (!user?.id)
-  //   throw new AppError("could not find the user u wanna follow", 401);
 
   const existingFollow = await prisma.follow.findUnique({
     where: {
@@ -41,31 +31,13 @@ export const toggleFollow = catchAsync(async (req: Request, res: Response) => {
       },
     });
 
-    const notification = await Notification.create({
-      recipient_id: personality_id,
-      sender_id: userId,
-      type: "follow",
-      message: "started following you",
-      reference_id: userId, // Reference to the follower
-    });
-
-    const recipientSocketId = userSockets.get(personality_id);
-
-    if (recipientSocketId) {
-      io.to(recipientSocketId).emit("new-notification", {
-        id: notification._id,
-        sender_id: userId,
-        type: "follow",
-        message: "started following you",
-        createdAt: notification.createdAt,
-        read: false,
-      });
-      console.log(`Notification sent to user ${personality_id}`);
-    } else {
-      console.log(
-        `User ${personality_id} is offline, notification saved to database`,
-      );
-    }
+    await createNotification(
+      personality_id,
+      userId,
+      "follow",
+      "started following you",
+      userId,
+    );
 
     return res.status(200).json({
       success: true,

@@ -112,3 +112,28 @@ export const following = catchAsync(async (req: Request, res: Response) => {
     isEnd,
   });
 });
+
+export const getNews = catchAsync(async (req: Request, res: Response) => {
+  const { isAuthenticated } = getAuth(req);
+  if (!isAuthenticated) throw new AppError("User not authenticated", 401);
+
+  let { skip }: { skip: number } = req.body;
+  if (!skip) skip = 0;
+
+  const LIMIT = 3;
+
+  const thinksRaw = await Think.find({ user_id: "news1" })
+    .sort({ _id: -1 })
+    .lean()
+    .skip(skip)
+    .limit(LIMIT + 1);
+
+  const isEnd = thinksRaw.length <= LIMIT;
+  const thinks = thinksRaw.slice(0, LIMIT);
+
+  res.status(200).json({
+    message: "News fetched successfully",
+    personalizedThinks: thinks,
+    isEnd,
+  });
+});

@@ -69,6 +69,8 @@ function Feed() {
   const [commentLoading, setCommentLoading] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
+  const [news, setNews] = useState<Think[]>([]);
+  const [newsLoading, setNewsLoading] = useState(false);
   const [lightbox, setLightbox] = useState<{
     urls: string[];
     index: number;
@@ -104,6 +106,17 @@ function Feed() {
   }, [loading, caughtUp]);
 
   useEffect(() => {
+    const likedStored: string[] = JSON.parse(
+      localStorage.getItem("likedThinks") || "[]",
+    );
+    const rethinkStored: string[] = JSON.parse(
+      localStorage.getItem("rethinkThinks") || "[]",
+    );
+    setLiked(likedStored.reduce((acc, id) => ({ ...acc, [id]: true }), {}));
+    setRethink(rethinkStored.reduce((acc, id) => ({ ...acc, [id]: true }), {}));
+  }, []);
+
+  useEffect(() => {
     getThinkData();
   }, [skip, chooseFeedOptions]);
 
@@ -134,6 +147,7 @@ function Feed() {
     setOpenFeedOptions(true);
     setOpenProfileOptions(false);
     setOpenTextBox(false);
+    getNews();
   }, []);
 
   useEffect(() => {
@@ -189,34 +203,100 @@ function Feed() {
     const count = Math.min(urls.length, 4);
     const clipped = urls.slice(0, count);
 
-    const gridClass = {
-      1: "grid-cols-1",
-      2: "grid-cols-2",
-      3: "grid-cols-2",
-      4: "grid-cols-2",
-    }[count];
+    // 1 image — full width
+    if (count === 1) {
+      return (
+        <div
+          className="rounded-2xl overflow-hidden mt-3 cursor-pointer"
+          onClick={() => onImageClick(0)}
+        >
+          <img
+            src={clipped[0]}
+            alt="image 1"
+            className="w-full max-h-80 object-cover"
+            loading="lazy"
+          />
+        </div>
+      );
+    }
 
-    return (
-      <div
-        className={`grid ${gridClass} gap-0.5 rounded-2xl overflow-hidden mt-3`}
-      >
-        {clipped.map((url, i) => {
-          const isLeftTall = count === 3 && i === 0;
-          return (
+    // 2 images — side by side
+    if (count === 2) {
+      return (
+        <div className="grid grid-cols-2 gap-0.5 rounded-2xl overflow-hidden mt-3">
+          {clipped.map((url, i) => (
             <div
               key={i}
-              className={`overflow-hidden bg-gray-800 cursor-pointer ${isLeftTall ? "row-span-2" : ""}`}
+              className="cursor-pointer overflow-hidden bg-gray-800"
               onClick={() => onImageClick(i)}
             >
               <img
                 src={url}
                 alt={`image ${i + 1}`}
-                className={`w-full max-h-50 object-cover ${count === 1 ? "max-h-80 aspect-video" : "aspect-square"}`}
+                className="w-full h-56 object-cover"
                 loading="lazy"
               />
             </div>
-          );
-        })}
+          ))}
+        </div>
+      );
+    }
+
+    // 3 images — left tall, right two stacked
+    if (count === 3) {
+      return (
+        <div
+          className="grid grid-cols-2 gap-0.5 rounded-2xl overflow-hidden mt-3"
+          style={{ height: "280px" }}
+        >
+          <div
+            className="cursor-pointer overflow-hidden bg-gray-800 h-full"
+            onClick={() => onImageClick(0)}
+          >
+            <img
+              src={clipped[0]}
+              alt="image 1"
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+          <div className="grid grid-rows-2 gap-0.5 h-full">
+            {clipped.slice(1).map((url, i) => (
+              <div
+                key={i}
+                className="cursor-pointer overflow-hidden bg-gray-800"
+                onClick={() => onImageClick(i + 1)}
+              >
+                <img
+                  src={url}
+                  alt={`image ${i + 2}`}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // 4 images — 2x2 grid
+    return (
+      <div className="grid grid-cols-2 gap-0.5 rounded-2xl overflow-hidden mt-3">
+        {clipped.map((url, i) => (
+          <div
+            key={i}
+            className="cursor-pointer overflow-hidden bg-gray-800"
+            onClick={() => onImageClick(i)}
+          >
+            <img
+              src={url}
+              alt={`image ${i + 1}`}
+              className="w-full h-40 object-cover"
+              loading="lazy"
+            />
+          </div>
+        ))}
       </div>
     );
   };
@@ -315,29 +395,28 @@ function Feed() {
     }
   };
 
+  const getNews = async () => {
+    try {
+      setNewsLoading(true);
+      const res = await axios.post(
+        "/feed/getnews",
+        { skip: 0 },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+      setNews(res.data.personalizedThinks);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setNewsLoading(false);
+    }
+  };
+
   const handelInfiniteScroll = () => {
     if (
       window.innerHeight + document.documentElement.scrollTop + 1 >=
       document.documentElement.scrollHeight
     ) {
       if (!loading && !caughtUp) setSkip((prev) => prev + 5);
-    }
-  };
-
-  const toggleLike = async (think: Think) => {
-    setLiked((prev) => ({
-      ...prev,
-      [think._id]: !prev[think._id],
-    }));
-    try {
-      const res = await axios.post(
-        "like/think",
-        { think_id: think._id },
-        { headers: { Authorization: `Bearer ${await getToken()}` } },
-      );
-      console.log(res);
-    } catch (err) {
-      console.error(err);
     }
   };
 
@@ -385,21 +464,59 @@ function Feed() {
     }
   };
 
-  const toggleRethink = async (think: Think) => {
-    setRethink((prev) => ({
-      ...prev,
-      [think._id]: !prev[think._id],
-    }));
+  const toggleLike = async (think: Think) => {
+    const newState = toggleLikeToLocalStorage(think._id);
+    setLiked((prev) => ({ ...prev, [think._id]: newState }));
     try {
-      const res = await axios.post(
+      await axios.post(
+        "like/think",
+        { think_id: think._id },
+        { headers: { Authorization: `Bearer ${await getToken()}` } },
+      );
+    } catch (err) {
+      toggleLikeToLocalStorage(think._id); // revert
+      setLiked((prev) => ({ ...prev, [think._id]: !newState }));
+      console.error(err);
+    }
+  };
+
+  const toggleRethink = async (think: Think) => {
+    const newState = toggleRethinkToLocalStorage(think._id);
+    setRethink((prev) => ({ ...prev, [think._id]: newState }));
+    try {
+      await axios.post(
         "think/rethink",
         { think_id: think._id },
         { headers: { Authorization: `Bearer ${await getToken()}` } },
       );
-      console.log(res);
     } catch (err) {
+      toggleRethinkToLocalStorage(think._id); // revert
+      setRethink((prev) => ({ ...prev, [think._id]: !newState }));
       console.error(err);
     }
+  };
+  const toggleLikeToLocalStorage = (thinkId: string) => {
+    const stored: string[] = JSON.parse(
+      localStorage.getItem("likedThinks") || "[]",
+    );
+    const isLiked = stored.includes(thinkId);
+    const updated = isLiked
+      ? stored.filter((id) => id !== thinkId)
+      : [...stored, thinkId];
+    localStorage.setItem("likedThinks", JSON.stringify(updated));
+    return !isLiked;
+  };
+
+  const toggleRethinkToLocalStorage = (thinkId: string) => {
+    const stored: string[] = JSON.parse(
+      localStorage.getItem("rethinkThinks") || "[]",
+    );
+    const isRethinked = stored.includes(thinkId);
+    const updated = isRethinked
+      ? stored.filter((id) => id !== thinkId)
+      : [...stored, thinkId];
+    localStorage.setItem("rethinkThinks", JSON.stringify(updated));
+    return !isRethinked;
   };
 
   // ---------------- UI ----------------
@@ -412,7 +529,60 @@ function Feed() {
       ref={twemojiRef}
       className="min-h-screen bg-black grid grid-cols-[1.5fr_1.9fr_1.5fr]"
     >
-      <div className="bg-gray-900" />
+      <div className="bg-black border-r border-gray-800 sticky top-0 h-screen overflow-y-auto thinks-scroll">
+        <div className="px-6 py-4 border-b border-gray-800">
+          <h2 className="text-white font-bold text-sm tracking-widest uppercase">
+            TRENDING
+          </h2>
+        </div>
+
+        {newsLoading ? (
+          <div>
+            {[...Array(5)].map((_, i) => (
+              <div
+                key={i}
+                className="border-y border-gray-800 px-6 py-4 animate-pulse"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-full bg-gray-700" />
+                  <div className="h-3 w-24 bg-gray-700 rounded" />
+                  <div className="h-3 w-12 bg-gray-800 rounded" />
+                </div>
+                <div className="pl-10 space-y-2">
+                  <div className="h-3 bg-gray-700 rounded w-3/4" />
+                  <div className="h-3 bg-gray-700 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div>
+            {news.map((item) => (
+              <div
+                key={item._id}
+                className="border-y border-gray-800 px-6 py-4 text-white hover:bg-gray-900 transition"
+              >
+                <p className="text-gray-200 font-medium text-[14.8px]">
+                  {renderContent(item.content)}
+                </p>
+                {item.imageUrl && item.imageUrl.length > 0 && (
+                  <div className="mt-2">
+                    <ThinkImageGrid
+                      urls={item.imageUrl.map((img) => img.url)}
+                      onImageClick={(index) =>
+                        setLightbox({
+                          urls: item.imageUrl!.map((img) => img.url),
+                          index,
+                        })
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="border-x border-gray-800 mt-22">
         {/* Initial full-page skeleton — fades out smoothly */}
@@ -662,6 +832,7 @@ function Feed() {
           </>
         )}
       </div>
+
       {lightbox && (
         <div
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"

@@ -5,8 +5,8 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+  // CarouselNext,
+  // CarouselPrevious,
 } from "@/components/ui/carousel";
 import { useDefaultOptions } from "@/components/di_global_context/default";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
@@ -78,7 +78,7 @@ function Post() {
 
     const timer = setTimeout(() => {
       setOpenTextBox(false);
-    }, 5000);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, []);

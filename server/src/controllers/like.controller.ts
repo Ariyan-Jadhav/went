@@ -5,6 +5,7 @@ import { Response, Request } from "express";
 import { getAuth } from "@clerk/express";
 import { Think } from "../models/think.model.js";
 import { Comment } from "../models/comment.model.js";
+import { createNotification } from "../utils/notification.js";
 
 export const toggleThinkLike = catchAsync(
   async (req: Request, res: Response) => {
@@ -41,6 +42,13 @@ export const toggleThinkLike = catchAsync(
           $inc: { likesCount: 1 },
         },
         { new: true },
+      );
+      await createNotification(
+        think.user_id, // think owner receives it
+        userId, // liker sends it
+        "like",
+        "liked your think",
+        think_id as string, // reference so frontend can link to the think
       );
 
       return res

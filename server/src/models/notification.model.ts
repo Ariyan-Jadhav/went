@@ -27,7 +27,7 @@ const notificationSchema = new Schema<INotification>(
       type: String,
       index: true,
       required: [true, "type is required"],
-      enum: ["follow", "like", "comment", "mention"], // Add more types as needed
+      enum: ["follow", "like", "comment"],
     },
     message: {
       type: String,
@@ -43,7 +43,7 @@ const notificationSchema = new Schema<INotification>(
       index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Compound index for efficient queries
@@ -52,5 +52,5 @@ notificationSchema.index({ recipient_id: 1, read: 1 });
 
 export const Notification = mongoose.model<INotification>(
   "Notification",
-  notificationSchema
+  notificationSchema,
 );

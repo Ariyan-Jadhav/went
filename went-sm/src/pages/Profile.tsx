@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -19,6 +19,9 @@ import { useRef } from "react";
 import { useDefaultOptions } from "@/components/di_global_context/default";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
+import { useSearch } from "@/components/di_global_context/SearchContextMusic";
+import { useUserSearch } from "@/components/di_global_context/MainSearch";
+
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
 interface WentProfile {
@@ -122,6 +125,7 @@ interface Think {
   updatedAt: string;
 
   username?: string;
+  userImageUrl?: string;
 }
 
 interface RandomUser {
@@ -140,6 +144,7 @@ interface RandomUser {
 export default function Profile() {
   const containerRef = useRef(null);
   const { getToken, userId } = useAuth();
+  const { username } = useParams<{ username: string }>();
   const twemojiRef = useTwemoji();
   const {
     setFeed,
@@ -151,6 +156,9 @@ export default function Profile() {
     setOpenTextBox,
     setTextBox,
   } = useDefaultOptions();
+
+  const { setOpenSearch } = useSearch();
+  const { setIsOpen } = useUserSearch();
 
   const { setOpenProfileOptions, chooseProfileOptions } = useProfileOptions();
   const { setOpenFeedOptions, setGototop } = useFeedOptions();
@@ -179,7 +187,7 @@ export default function Profile() {
     getRandom();
     getThinks();
     setTextBox("WELCOME");
-  }, []);
+  }, [username]);
 
   useEffect(() => {
     const stored: string[] = JSON.parse(
@@ -204,7 +212,7 @@ export default function Profile() {
 
   useEffect(() => {
     getThinks();
-  }, [chooseProfileOptions]);
+  }, [chooseProfileOptions, username]);
 
   useEffect(() => {
     setFeed(false);
@@ -215,6 +223,8 @@ export default function Profile() {
     setUpload(false);
     setOpenFeedOptions(false);
     setGototop(false);
+    setOpenSearch(false);
+    setIsOpen(false);
   }, []);
 
   useEffect(() => {
@@ -224,7 +234,7 @@ export default function Profile() {
     const timer = setTimeout(() => {
       setOpenTextBox(false);
       setOpenProfileOptions(true);
-    }, 5000);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -245,6 +255,18 @@ export default function Profile() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderContent = (content: string) => {
+    return content.split(/(\s+)/).map((word, i) =>
+      word.startsWith("#") ? (
+        <span key={i} className="text-blue-400">
+          {word}
+        </span>
+      ) : (
+        <span key={i}>{word}</span>
+      ),
+    );
   };
 
   function capitalize(str: string): string {
@@ -485,47 +507,101 @@ export default function Profile() {
     const count = Math.min(urls.length, 4);
     const clipped = urls.slice(0, count);
 
-    const gridClass = {
-      1: "grid-cols-1",
-      2: "grid-cols-2",
-      3: "grid-cols-2",
-      4: "grid-cols-2",
-    }[count];
+    // 1 image — full width
+    if (count === 1) {
+      return (
+        <div
+          className="rounded-2xl overflow-hidden mt-3 cursor-pointer"
+          onClick={() => onImageClick(0)}
+        >
+          <img
+            src={clipped[0]}
+            alt="image 1"
+            className="w-full max-h-80 object-cover"
+            loading="lazy"
+          />
+        </div>
+      );
+    }
 
-    return (
-      <div
-        className={`grid ${gridClass} gap-0.5 rounded-2xl overflow-hidden mt-3`}
-      >
-        {clipped.map((url, i) => {
-          const isLeftTall = count === 3 && i === 0;
-          return (
+    // 2 images — side by side
+    if (count === 2) {
+      return (
+        <div className="grid grid-cols-2 gap-0.5 rounded-2xl overflow-hidden mt-3">
+          {clipped.map((url, i) => (
             <div
               key={i}
-              className={`overflow-hidden bg-gray-800 cursor-pointer ${isLeftTall ? "row-span-2" : ""}`}
+              className="cursor-pointer overflow-hidden bg-gray-800"
               onClick={() => onImageClick(i)}
             >
               <img
                 src={url}
                 alt={`image ${i + 1}`}
-                className={`w-full max-h-50 object-cover ${count === 1 ? "max-h-80 aspect-video" : "aspect-square"}`}
+                className="w-full h-56 object-cover"
                 loading="lazy"
               />
             </div>
-          );
-        })}
-      </div>
-    );
-  };
+          ))}
+        </div>
+      );
+    }
 
-  const renderContent = (content: string) => {
-    return content.split(/(\s+)/).map((word, i) =>
-      word.startsWith("#") ? (
-        <span key={i} className="text-blue-400">
-          {word}
-        </span>
-      ) : (
-        <span key={i}>{word}</span>
-      ),
+    // 3 images — left tall, right two stacked
+    if (count === 3) {
+      return (
+        <div
+          className="grid grid-cols-2 gap-0.5 rounded-2xl overflow-hidden mt-3"
+          style={{ height: "280px" }}
+        >
+          <div
+            className="cursor-pointer overflow-hidden bg-gray-800 h-full"
+            onClick={() => onImageClick(0)}
+          >
+            <img
+              src={clipped[0]}
+              alt="image 1"
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+          <div className="grid grid-rows-2 gap-0.5 h-full">
+            {clipped.slice(1).map((url, i) => (
+              <div
+                key={i}
+                className="cursor-pointer overflow-hidden bg-gray-800"
+                onClick={() => onImageClick(i + 1)}
+              >
+                <img
+                  src={url}
+                  alt={`image ${i + 2}`}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // 4 images — 2x2 grid
+    return (
+      <div className="grid grid-cols-2 gap-0.5 rounded-2xl overflow-hidden mt-3">
+        {clipped.map((url, i) => (
+          <div
+            key={i}
+            className="cursor-pointer overflow-hidden bg-gray-800"
+            onClick={() => onImageClick(i)}
+          >
+            <img
+              src={url}
+              alt={`image ${i + 1}`}
+              className="w-full h-40 object-cover"
+              loading="lazy"
+            />
+          </div>
+        ))}
+      </div>
     );
   };
 
@@ -548,8 +624,6 @@ export default function Profile() {
     setLiked(likedStored.reduce((acc, id) => ({ ...acc, [id]: true }), {}));
     setRethink(rethinkStored.reduce((acc, id) => ({ ...acc, [id]: true }), {}));
   }, []);
-
-  const { username } = useParams<{ username: string }>();
 
   if (notFound) {
     return (
@@ -588,15 +662,22 @@ export default function Profile() {
                 >
                   {/* Avatar + Info */}
                   <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 rounded-full bg-blue-800 flex items-center justify-center font-bold shrink-0 ">
-                      {user.username?.[0]?.toUpperCase()}
+                    <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-xs font-bold text-white">
+                      {user.profilePicUrl ? (
+                        <img
+                          src={user.profilePicUrl}
+                          className="rounded-full"
+                        />
+                      ) : (
+                        user.username?.[0]?.toUpperCase()
+                      )}
                     </div>
                     <div>
-                      <p className="font-semibold leading-tight">
-                        @{user.username}
-                      </p>
+                      <NavLink to={`/profile/${user.username}`}>
+                        <h1 className="font-bold">{user.username}</h1>
+                      </NavLink>
                       {user.Profile?.profession && (
-                        <p className="text-xs text-gray-600 capitalize">
+                        <p className="text-xs text-gray-400 capitalize">
                           {user.Profile.profession}
                         </p>
                       )}
@@ -700,7 +781,7 @@ export default function Profile() {
                       </div>
                     </div>
                     <div className="flex justify-center">
-                      {userId !== profile.id && (
+                      {userId !== profile.id ? (
                         <button
                           onClick={() => toggleFollow(profile.id)}
                           disabled={followLoading}
@@ -712,6 +793,16 @@ export default function Profile() {
                         >
                           {followingUsers[profile.id] ? "Following" : "Follow"}
                         </button>
+                      ) : (
+                        <div>
+                          <NavLink to="/createidentity">
+                            <button
+                              className={`mt-2 w-full px-4 py-1 rounded text-sm font-medium border transition-colors disabled:opacity-50 bg-transparent border-gray-500 text-white hover:bg-white hover:text-black`}
+                            >
+                              Edit Account
+                            </button>
+                          </NavLink>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -845,14 +936,38 @@ export default function Profile() {
                   className="border-y border-gray-800 px-4 py-4 text-white hover:bg-gray-900 transition"
                 >
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-xs font-bold text-white">
-                      {username?.[0]?.toUpperCase()}
+                    <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-xs font-bold text-white overflow-hidden">
+                      {think.userImageUrl ? (
+                        <img
+                          src={think.userImageUrl}
+                          className="w-full h-full object-cover rounded-full"
+                        />
+                      ) : chooseProfileOptions === "posted" ? (
+                        profile?.profilePicUrl ? (
+                          <img
+                            src={profile.profilePicUrl}
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                        ) : (
+                          username?.[0]?.toUpperCase()
+                        )
+                      ) : (
+                        think.username?.[0]?.toUpperCase()
+                      )}
                     </div>
-                    <h1 className="font-bold">
-                      {chooseProfileOptions === "posted"
-                        ? username
-                        : think.username}
-                    </h1>
+                    <NavLink
+                      to={
+                        chooseProfileOptions === "posted"
+                          ? `/profile/${username}`
+                          : `/profile/${think.username}`
+                      }
+                    >
+                      <h1 className="font-bold text-[16px]">
+                        {chooseProfileOptions === "posted"
+                          ? username
+                          : think.username}
+                      </h1>
+                    </NavLink>
                     <span className="text-gray-500 text-sm">
                       {formatDate(think.createdAt)}
                     </span>

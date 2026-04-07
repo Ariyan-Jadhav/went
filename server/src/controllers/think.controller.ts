@@ -252,11 +252,34 @@ export const getThinksByUser = catchAsync(
 
     if (!user) throw new AppError("User not found", 404);
 
-    const thinks = await Think.find({
+    const data = await Think.find({
       user_id: user.id,
-    }).sort({ createdAt: -1 });
+    })
+      .sort({ createdAt: -1 })
+      .lean();
 
-    res.status(200).json({ thinks });
+    const thinksUsers = data.map((e) => e.user_id);
+
+    const dataset = await prisma.user.findMany({
+      where: { id: { in: thinksUsers } },
+      select: {
+        username: true,
+        profilePicUrl: true,
+        id: true,
+      },
+    });
+
+    const imageMap = new Map(dataset.map((u) => [u.id, u.profilePicUrl]));
+
+    const usernamesMap = new Map(dataset.map((u) => [u.id, u.username]));
+
+    const thinks = data.map((e) => ({
+      ...e,
+      username: usernamesMap.get(e.user_id),
+      userImageUrl: imageMap.get(e.user_id),
+    }));
+
+    res.status(200).json({ thinks, user });
   },
 );
 
@@ -297,9 +320,12 @@ export const getUserRepostThink = catchAsync(
       },
     });
     const usernamesMap = new Map(dataset.map((u) => [u.id, u.username]));
+    const imageMap = new Map(dataset.map((u) => [u.id, u.profilePicUrl]));
+
     const personalizedThinks = thinks.map((e) => ({
       ...e,
       username: usernamesMap.get(e.user_id),
+      userImageUrl: imageMap.get(e.user_id),
     }));
 
     res.status(200).json({ personalizedThinks });
