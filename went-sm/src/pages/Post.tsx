@@ -8,9 +8,10 @@ import {
   // CarouselNext,
   // CarouselPrevious,
 } from "@/components/ui/carousel";
-import { useDefaultOptions } from "@/components/di_global_context/default";
+import { useDefaultOptions } from "@/components/di_global_context/Default";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
+import RotatingText from "@/components/RotatingText";
 
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
@@ -158,14 +159,9 @@ function Post() {
 
     try {
       setLoading(true);
-      const response = await axios.post("/think/create", formData, {
+      await axios.post("/think/create", formData, {
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
-
-      if (!response.data.success) {
-        setError("Something went wrong. Try again.");
-        return;
-      }
 
       setSuccess(true);
       setContent("");
@@ -413,12 +409,22 @@ function Post() {
         </div>
 
         {/* ── Right panel ── */}
-        <div className="flex-1 flex flex-col gap-6 justify-center items-center min-h-screen">
-          <div className="w-px h-40 bg-zinc-800" />
-          <p className="text-zinc-700 text-xs tracking-widest uppercase rotate-90 whitespace-nowrap">
-            Share your world
-          </p>
-          <div className="w-px h-40 bg-zinc-800" />
+        <div className="flex-1 flex gap-6 justify-center items-center-safe min-h-screen">
+          <div className="flex gap-3">
+            <h1 className="text-white font-bold text-5xl">Think</h1>
+            <RotatingText
+              texts={["Endlessly", "Beyond", "Different"]}
+              mainClassName="px-4 bg-cyan-300 text-black overflow-hidden justify-center items-center text-4xl font-bold rounded-lg pt-1"
+              staggerFrom="last"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "-120%" }}
+              staggerDuration={0.025}
+              splitLevelClassName="overflow-hidden pb-0.5 md:pb-1"
+              transition={{ type: "spring", damping: 30, stiffness: 400 }}
+              rotationInterval={2000}
+            />
+          </div>
         </div>
       </div>
     </div>

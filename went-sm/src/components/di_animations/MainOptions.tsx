@@ -19,12 +19,12 @@ export default function UserSearchDrawer() {
     <>
       {/* Drawer */}
       <div
-        className={`fixed top-0 right-0 h-full w-[320px] sm:w-95 bg-black text-white z-40 shadow-xl transform transition-transform duration-300 ${
+        className={`fixed top-0 right-0 h-full w-[320px] sm:w-95 bg-black border-l border-gray-800 text-white z-40 shadow-xl transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b flex justify-between items-center">
+        <div className="px-5 py-4 border-b border-gray-800 flex justify-between items-center">
           <h2 className="text-base font-medium">
             {query ? `Results for "${query}"` : "Search users"}
           </h2>

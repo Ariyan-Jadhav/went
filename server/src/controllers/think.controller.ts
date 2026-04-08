@@ -23,54 +23,59 @@ export const createThink = catchAsync(async (req: Request, res: Response) => {
   const { content, hashtags }: thinkBody = req.body;
   if (!content) throw new AppError("content not found", 400);
 
-  let fixedHashtags: string[] = [];
-
   const parsedHashtags = Array.isArray(hashtags)
     ? hashtags
     : hashtags
       ? [hashtags]
       : [];
 
-  if (hashtags) {
-    fixedHashtags = parsedHashtags?.map((tag: string) =>
-      tag.startsWith("#") ? tag : `#${tag}`,
-    );
-  }
+  const fixedHashtags = parsedHashtags.map((tag: string) =>
+    tag.startsWith("#") ? tag : `#${tag}`,
+  );
+
   const images = req.files as Express.Multer.File[];
+  let imageUrl: { url: string; publicId: string }[] = [];
+
+  // ✅ Images are optional — only upload if present
   if (images?.length > 0) {
-    if (images.length > 5)
-      throw new AppError("you can only upload upto 5 images", 400);
+    if (images.length > 4)
+      throw new AppError("you can only upload up to 4 images", 400);
 
-    const uploadPromise = images.map((file) =>
-      uploadmedia(file.path, "went/thinks"),
+    const uploadResults = await Promise.all(
+      images.map((file) => uploadmedia(file.path, "went/thinks")),
     );
-    const uploadResult = await Promise.all(uploadPromise);
 
-    const imageUrl = uploadResult.map((url) => ({
+    imageUrl = uploadResults.map((url) => ({
       url: url.secure_url,
       publicId: url.public_id,
     }));
 
-    try {
-      const think = await Think.create({
-        user_id: userId,
-        content: content,
-        imageUrl: imageUrl,
-        hashtags: fixedHashtags,
-        likesCount: 0,
-        commentsCount: 0,
-        rethinkCount: 0,
-      });
-      await Promise.all(images.map((file) => fs.unlink(file.path)));
+    await Promise.all(
+      images.map((file) => fs.unlink(file.path).catch(console.error)),
+    );
+  }
 
-      res.status(201).json({ message: think });
-    } catch (error) {
-      if (images)
-        await Promise.all(
-          images.map((file) => fs.unlink(file.path).catch(console.error)),
-        );
-      throw new AppError(`Could not create post : ${error}`, 401);
+  // ✅ Always create the think, with or without images
+  try {
+    const think = await Think.create({
+      user_id: userId,
+      content: content,
+      imageUrl: imageUrl,
+      hashtags: fixedHashtags,
+      likesCount: 0,
+      commentsCount: 0,
+      rethinkCount: 0,
+    });
+
+    res.status(201).json({ message: think });
+  } catch (error) {
+    // cleanup images if think creation fails
+    if (images?.length > 0) {
+      await Promise.all(
+        images.map((file) => fs.unlink(file.path).catch(console.error)),
+      );
     }
+    throw new AppError(`Could not create post: ${error}`, 401);
   }
 });
 

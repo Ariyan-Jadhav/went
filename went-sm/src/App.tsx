@@ -8,11 +8,21 @@ import Home from "./pages/Home";
 import Post from "./pages/Post";
 import Profile from "./pages/Profile";
 import Createidentity from "./pages/Createidentity";
+import { ProtectedRoute } from "./components/ProtectedRoutes";
+import ComingSoon from "./pages/Comment";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<DynamicIsland />}>
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <DynamicIsland />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/message" element={<ComingSoon />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/feed" element={<Feed />} />

@@ -115,21 +115,19 @@ export const deleteComment = catchAsync(async (req: Request, res: Response) => {
   res.status(200).json({ message: "comment deleted successfully" });
 });
 
+// getComments — make public, keep user-first sort only when signed in
 export const getComments = catchAsync(async (req: Request, res: Response) => {
-  const { isAuthenticated, userId } = getAuth(req);
-  if (!isAuthenticated) throw new AppError("User not authenticated", 401);
-  if (!userId) throw new AppError("User not found", 401);
+  const { userId } = getAuth(req); // ✅ no auth check — guests allowed
 
   const { think_id } = req.body;
+  if (!think_id) throw new AppError("think_id is required", 400);
 
   const data = await Comment.find({ interaction_id: think_id }).lean();
 
   const fetchUserIds = data.map((e) => e.user_id);
 
   const users = await prisma.user.findMany({
-    where: {
-      id: { in: fetchUserIds },
-    },
+    where: { id: { in: fetchUserIds } },
   });
 
   const usernamesMap = new Map(users.map((u) => [u.id, u.username]));
@@ -141,11 +139,14 @@ export const getComments = catchAsync(async (req: Request, res: Response) => {
     userProfileImage: imageMap.get(e.user_id),
   }));
 
-  const sorted = personalizedComments.sort((a, b) => {
-    if (a.user_id === userId) return -1;
-    if (b.user_id === userId) return 1;
-    return 0;
-  });
+  // Only sort current user's comments to top if signed in
+  const sorted = userId
+    ? personalizedComments.sort((a, b) => {
+        if (a.user_id === userId) return -1;
+        if (b.user_id === userId) return 1;
+        return 0;
+      })
+    : personalizedComments;
 
   res.status(200).json({ personalizedComments: sorted, count: data.length });
 });

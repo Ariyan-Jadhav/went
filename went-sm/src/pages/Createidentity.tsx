@@ -5,6 +5,8 @@ import TrueFocus from "@/components/TrueFocus";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { useNavigate } from "react-router-dom";
+
 import {
   Popover,
   PopoverContent,
@@ -29,7 +31,7 @@ import {
 } from "@/components/ui/combobox";
 import axios from "axios";
 import { useUser, useAuth } from "@clerk/clerk-react";
-import { useDefaultOptions } from "@/components/di_global_context/default";
+import { useDefaultOptions } from "@/components/di_global_context/Default";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
 
@@ -302,11 +304,12 @@ export default function Createidentity() {
     setSearch,
     setUpload,
     setOpenTextBox,
-    openTextBox,
     setTextBox,
   } = useDefaultOptions();
 
   const { setOpenProfileOptions } = useProfileOptions();
+
+  const navigate = useNavigate();
 
   const { setOpenFeedOptions, setGototop } = useFeedOptions();
   const { user } = useUser();
@@ -393,8 +396,20 @@ export default function Createidentity() {
   const [selectTrack, setSelectTrack] = useState<SelectedTrack | null>(null);
   const [selectMovie, setSelectMovie] = useState<SelectedMovie | null>(null);
 
-  const allMediaSelected =
-    !!selectArtist && !!selectAlbum && !!selectTrack && !!selectMovie;
+  const allFieldsFilled =
+    !!selectArtist &&
+    !!selectAlbum &&
+    !!selectTrack &&
+    !!selectMovie &&
+    !!firstName.trim() &&
+    !!lastName.trim() &&
+    !!username.trim() &&
+    !!bio.trim() &&
+    !!gender &&
+    !!date &&
+    !!selectedProfession &&
+    !!selectedLocation &&
+    selectedHobbies.length > 0;
 
   // ── Hobbies categories ──
   const category = [
@@ -499,18 +514,8 @@ export default function Createidentity() {
 
   useEffect(() => {
     setTextBox("IDENTITY");
-  }, [openTextBox]);
-
-  useEffect(() => {
-    setOpenTextBox(true);
     setProfile1(false);
-
-    const timer = setTimeout(() => {
-      setOpenTextBox(false);
-      setProfile1(true);
-    }, 3000);
-
-    return () => clearTimeout(timer);
+    setOpenTextBox(true);
   }, []);
 
   // ── Spotify: Artist search ────────────────────────────────────────────────────
@@ -716,8 +721,17 @@ export default function Createidentity() {
         ),
       ]);
 
+      const verify = await axios.post("api/profile/me/verify", {}, { headers });
+
+      if (verify.data.message === true) {
+        setOpenTextBox(false);
+        setProfile1(true);
+      }
+
       setSuccess(true);
       setImageFile(null);
+      await user.reload();
+      navigate("/feed");
     } catch (err: any) {
       console.error("e:", err);
       setError(
@@ -727,6 +741,7 @@ export default function Createidentity() {
       setLoading(false);
     }
   };
+
   // ── Modal shared spinner ──────────────────────────────────────────────────────
   const ModalSpinner = ({ label }: { label: string }) => (
     <div className="flex flex-col items-center gap-3">
@@ -734,6 +749,17 @@ export default function Createidentity() {
       <p className="text-white/80">{label}</p>
     </div>
   );
+
+  const dynamicIslandAllow = async () => {
+    const token = await getToken();
+    const headers = { Authorization: `Bearer ${token}` };
+    const verify = await axios.post("api/profile/me/verify", {}, { headers });
+    console.log(verify.data.message, "omj");
+    if (verify.data.message === true) {
+      setOpenTextBox(false);
+      setProfile1(true);
+    }
+  };
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
@@ -913,6 +939,27 @@ export default function Createidentity() {
         <div className="fixed inset-0 pointer-events-none w-[50%] opacity-[0.03]" />
 
         <div className="relative z-10 max-w-2xl px-10 py-12 pb-24">
+          {(user?.publicMetadata?.verified as boolean) && (
+            <button
+              onClick={() => navigate(`/profile/${String(user?.username)}`)}
+              className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors mb-8 group"
+            >
+              <svg
+                className="w-4 h-4 transition-transform group-hover:-translate-x-0.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              <span className="text-sm font-medium">Back to profile</span>
+            </button>
+          )}
           {/* Page Title */}
           <div className="mb-12">
             <h1 className="text-4xl font-bold text-white leading-tight">
@@ -1366,11 +1413,81 @@ export default function Createidentity() {
               Identity saved successfully! 🎉
             </p>
           )}
+          {!allFieldsFilled && !loading && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              <h1 className="font-bold text-red-500">Missing :</h1>
+              {!firstName.trim() && (
+                <span className="text-xs text-zinc-500 bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-full">
+                  First name
+                </span>
+              )}
+              {!lastName.trim() && (
+                <span className="text-xs text-zinc-500 bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-full">
+                  Last name
+                </span>
+              )}
+              {!username.trim() && (
+                <span className="text-xs text-zinc-500 bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-full">
+                  Username
+                </span>
+              )}
+              {!bio.trim() && (
+                <span className="text-xs text-zinc-500 bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-full">
+                  Bio
+                </span>
+              )}
+              {!gender && (
+                <span className="text-xs text-zinc-500 bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-full">
+                  Pronouns
+                </span>
+              )}
+              {!date && (
+                <span className="text-xs text-zinc-500 bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-full">
+                  Birthday
+                </span>
+              )}
+              {!selectedProfession && (
+                <span className="text-xs text-zinc-500 bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-full">
+                  Profession
+                </span>
+              )}
+              {!selectedLocation && (
+                <span className="text-xs text-zinc-500 bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-full">
+                  Location
+                </span>
+              )}
+              {selectedHobbies.length === 0 && (
+                <span className="text-xs text-zinc-500 bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-full">
+                  Hobbies
+                </span>
+              )}
+              {!selectArtist && (
+                <span className="text-xs text-zinc-500 bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-full">
+                  Artist
+                </span>
+              )}
+              {!selectAlbum && (
+                <span className="text-xs text-zinc-500 bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-full">
+                  Album
+                </span>
+              )}
+              {!selectTrack && (
+                <span className="text-xs text-zinc-500 bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-full">
+                  Track
+                </span>
+              )}
+              {!selectMovie && (
+                <span className="text-xs text-zinc-500 bg-zinc-900 border border-zinc-700 px-2.5 py-1 rounded-full">
+                  Movie
+                </span>
+              )}
+            </div>
+          )}
 
           {/* ── Submit ───────────────────────────────────────────────────────── */}
           <button
             onClick={createIdentity}
-            disabled={loading || !allMediaSelected}
+            disabled={loading || !allFieldsFilled}
             className="w-full py-4 rounded-2xl hover:bg-white hover:text-black font-semibold text-base transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border"
           >
             {loading ? (
@@ -1385,15 +1502,20 @@ export default function Createidentity() {
         </div>
 
         {/* ── Right panel ── */}
-        <div className="flex-1 flex flex-col gap-20 justify-center w-[50%] items-center min-h-screen">
-          <TrueFocus
-            sentence="Developed By OMJ"
-            manualMode={true}
-            blurAmount={5}
-            borderColor="#5227FF"
-            animationDuration={0.5}
-            pauseBetweenAnimations={1}
-          />
+        <div className="flex-1 flex flex-col gap-2 justify-center w-[50%] items-center min-h-screen">
+          <div className="flex justify-center w-full">
+            <img src="/logo/white-went.png" className="w-[40%]" />
+          </div>
+          <div>
+            <TrueFocus
+              sentence="Developed By OMJ"
+              manualMode={true}
+              blurAmount={5}
+              borderColor="#5227FF"
+              animationDuration={0.5}
+              pauseBetweenAnimations={1}
+            />
+          </div>
         </div>
       </div>
     </div>

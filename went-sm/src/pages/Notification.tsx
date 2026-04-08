@@ -4,7 +4,7 @@ import { io, Socket } from "socket.io-client";
 import { toast } from "react-hot-toast";
 import { Bell, Check, CheckCheck, Trash2 } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { useDefaultOptions } from "@/components/di_global_context/default";
+import { useDefaultOptions } from "@/components/di_global_context/Default";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
 

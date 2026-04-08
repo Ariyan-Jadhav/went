@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { NavLink } from "react-router-dom";
 import { useUserSearch } from "@/components/di_global_context/MainSearch";
 import UserSearchDrawer from "@/components/di_animations/MainOptions";
+import { useNavigate } from "react-router-dom"; // add useNavigate
 import { useCallback } from "react";
 import {
   FiBell,
@@ -18,7 +19,7 @@ import {
 } from "react-icons/fi";
 import { useSearch } from "../components/di_global_context/SearchContextMusic";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
-import { useDefaultOptions } from "@/components/di_global_context/default";
+import { useDefaultOptions } from "@/components/di_global_context/Default";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
 import Shuffle from "@/components/Shuffle";
 import FeedOptions from "@/components/di_animations/FeedOptions";
@@ -30,7 +31,8 @@ export default function DynamicIsland() {
   const contentRef = useRef<HTMLDivElement>(null);
 
   const { user } = useUser();
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
+  const navigate = useNavigate();
 
   const username = user?.username;
 
@@ -186,46 +188,80 @@ export default function DynamicIsland() {
                       )}
                     </NavLink>
 
-                    <NavLink to="/noti">
-                      <button
-                        className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${notification ? glowClass : ""}`}
-                      >
-                        <FiBell className="transition" />
-                      </button>
-                    </NavLink>
+                    {isSignedIn ? (
+                      // ── Authenticated nav ──
+                      <>
+                        <NavLink to="/noti">
+                          <button
+                            className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${notification ? glowClass : ""}`}
+                          >
+                            <FiBell className="transition" />
+                          </button>
+                        </NavLink>
 
-                    <NavLink to={`/profile/${username}`}>
-                      <button
-                        className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${profile1 ? glowClass : ""}`}
-                      >
-                        <FiUser className="transition" />
-                      </button>
-                    </NavLink>
+                        <NavLink to={`/profile/${username}`}>
+                          <button
+                            className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${profile1 ? glowClass : ""}`}
+                          >
+                            <FiUser className="transition" />
+                          </button>
+                        </NavLink>
 
-                    <NavLink to="/justuploaditbrah">
-                      <button
-                        className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${upload ? glowClass : ""}`}
-                      >
-                        <FiUpload className="transition" />
-                      </button>
-                    </NavLink>
-                    <NavLink to="/message">
-                      <button
-                        className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${message ? glowClass : ""}`}
-                      >
-                        <FiMessageCircle className="transition" />
-                      </button>
-                    </NavLink>
+                        <NavLink to="/justuploaditbrah">
+                          <button
+                            className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${upload ? glowClass : ""}`}
+                          >
+                            <FiUpload className="transition" />
+                          </button>
+                        </NavLink>
 
-                    <button
-                      onClick={() => {
-                        setSearchMode("users");
-                        setOpenSearch(true);
-                      }}
-                      className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${search ? glowClass : ""}`}
-                    >
-                      <FiSearch className="transition" />
-                    </button>
+                        <NavLink to="/message">
+                          <button
+                            className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${message ? glowClass : ""}`}
+                          >
+                            <FiMessageCircle className="transition" />
+                          </button>
+                        </NavLink>
+
+                        <button
+                          onClick={() => {
+                            setSearchMode("users");
+                            setOpenSearch(true);
+                          }}
+                          className={`h-full py-5 px-6 hover:bg-[rgb(255,255,255,0.1)] ${search ? glowClass : ""}`}
+                        >
+                          <FiSearch className="transition" />
+                        </button>
+                      </>
+                    ) : (
+                      // ── Unauthenticated: shuffle text + sign in button ──
+                      <>
+                        <div className="flex items-center justify-center ml-2.25 pl-[20px] pr-2 text-white font-bold">
+                          <Shuffle
+                            className="text-[17px]"
+                            text="Prove you’re real"
+                            shuffleDirection="right"
+                            duration={0.35}
+                            animationMode="evenodd"
+                            shuffleTimes={1}
+                            ease="power3.out"
+                            stagger={0.03}
+                            threshold={0.1}
+                            triggerOnce={false}
+                            loop={true}
+                            loopDelay={4}
+                            respectReducedMotion={true}
+                          />
+                        </div>
+
+                        <button
+                          onClick={() => navigate("/signup")}
+                          className="max-h-9 py-2 px-4 mx-2 rounded-full bg-white text-black text-sm font-semibold hover:bg-zinc-200 transition cursor-pointer"
+                        >
+                          Sign up
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
 

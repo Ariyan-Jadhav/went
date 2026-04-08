@@ -1,6 +1,7 @@
 import { Webhook } from "svix";
 import { WebhookEvent } from "@clerk/clerk-sdk-node";
 import prisma from "../../lib/prisma.js";
+import { clerkClient } from "@clerk/express";
 import { AppError } from "../middleware/error.middleware.js";
 import { Request, type Response } from "express";
 
@@ -54,17 +55,14 @@ export const SignUpUsers = async (req: Request, res: Response) => {
   console.log("Webhook body:", body);
 
   if (eventType === "user.created") {
-    console.log("Event data:", JSON.stringify(evt.data, null, 2));
+    await clerkClient.users.updateUserMetadata(evt.data.id, {
+      publicMetadata: {
+        verified: false,
+      },
+    });
+
     try {
-      const {
-        email_addresses,
-        primary_email_address_id,
-        image_url,
-        first_name,
-        last_name,
-        username,
-      } = evt.data;
-      console.log(7);
+      const { email_addresses, primary_email_address_id } = evt.data;
 
       if (!id) {
         console.error("No user ID found");
@@ -76,30 +74,40 @@ export const SignUpUsers = async (req: Request, res: Response) => {
       );
       if (!primaryEmail) {
         console.error("No primary Email found");
-        // return res.status(404).json({ error: "no email found" });
+        return res.status(404).json({ error: "no email found" });
       }
-      console.log(8);
+
       const newUser = await prisma.user.create({
         data: {
           id: id,
-          firstName: first_name || "",
-          lastName: last_name || "",
-          username: username || "",
-          email: primaryEmail?.email_address || "",
-          profilePicUrl: image_url || null,
+          email: primaryEmail.email_address,
+          firstName: "",
+          lastName: "",
+          username: "",
+          profilePicUrl: "",
         },
       });
-      console.log(" New user created:", newUser);
+      console.log("New user created:", newUser);
+
       const newProfile = await prisma.profile.create({
-        data: {
-          user_id: id,
-        },
+        data: { user_id: id },
       });
-      console.log(" Profile created:", newProfile);
+      console.log("Profile created:", newProfile);
     } catch (error) {
       console.error("Error creating user in database", error);
       return res.status(500).json({ error: "Error creating user" });
     }
   }
   return res.status(200).json({ message: "Webhook received success" });
+};
+
+export const verifyUser = async (req: Request, res: Response) => {
+  const userId = (req as any).auth?.userId;
+  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+
+  await clerkClient.users.updateUserMetadata(userId, {
+    publicMetadata: { verified: true },
+  });
+
+  return res.status(200).json({ message: true });
 };

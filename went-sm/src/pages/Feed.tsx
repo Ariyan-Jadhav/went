@@ -4,9 +4,11 @@ import { Heart, MessageCircle, Repeat2 } from "lucide-react";
 import { useAuth } from "@clerk/clerk-react";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
-import { useDefaultOptions } from "@/components/di_global_context/default";
+import { useDefaultOptions } from "@/components/di_global_context/Default";
 import { useTwemoji } from "@/hooks/useTwemoji";
 import { NavLink } from "react-router-dom";
+import { SignInModal } from "@/components/SignIn";
+import { useGuestGuard } from "@/hooks/useGuestGuard";
 
 axios.defaults.baseURL = import.meta.env.VITE_BASE_URL;
 
@@ -49,6 +51,8 @@ function Feed() {
     setUpload,
     setOpenTextBox,
   } = useDefaultOptions();
+
+  const { showModal, modalReason, closeModal, requireAuth } = useGuestGuard();
 
   const { getToken, userId } = useAuth();
   const twemojiRef = useTwemoji();
@@ -334,11 +338,12 @@ function Feed() {
       const endpoint =
         chooseFeedOptions === "following" ? "/feed/following" : "/feed/explore";
 
-      const res = await axios.post(
-        endpoint,
-        { skip },
-        { headers: { Authorization: `Bearer ${await getToken()}` } },
-      );
+      const headers =
+        chooseFeedOptions === "following"
+          ? { Authorization: `Bearer ${await getToken()}` }
+          : {}; // no token needed for explore
+
+      const res = await axios.post(endpoint, { skip }, { headers });
 
       const newThinks: Think[] = res.data.personalizedThinks;
       const isEnd = res.data.isEnd;
@@ -398,11 +403,8 @@ function Feed() {
   const getNews = async () => {
     try {
       setNewsLoading(true);
-      const res = await axios.post(
-        "/feed/getnews",
-        { skip: 0 },
-        { headers: { Authorization: `Bearer ${await getToken()}` } },
-      );
+      // In getNews — no token needed
+      const res = await axios.post("/feed/getnews", { skip: 0 });
       setNews(res.data.personalizedThinks);
     } catch (err) {
       console.error(err);
@@ -647,7 +649,7 @@ function Feed() {
                 </button>
 
                 <button
-                  onClick={() => toggleRethink(think)}
+                  onClick={() => requireAuth(() => toggleRethink(think))}
                   className={`flex cursor-pointer items-center gap-1 text-sm transition-colors
                     ${
                       rethink[think._id]
@@ -661,7 +663,7 @@ function Feed() {
                 </button>
 
                 <button
-                  onClick={() => toggleLike(think)}
+                  onClick={() => requireAuth(() => toggleLike(think))}
                   className={`flex cursor-pointer items-center gap-1 text-sm transition-colors ${
                     liked[think._id]
                       ? "text-pink-500"
@@ -822,7 +824,7 @@ function Feed() {
                 className="flex-1 bg-gray-900 text-white text-sm rounded-full px-4 py-2 outline-none border border-gray-700 focus:border-gray-500 transition-colors"
               />
               <button
-                onClick={postComment}
+                onClick={() => requireAuth(() => postComment())}
                 disabled={!newComment.trim()}
                 className="text-sm text-blue-400 hover:text-blue-300 disabled:opacity-30 transition-colors"
               >
@@ -901,6 +903,7 @@ function Feed() {
           </button>
         </div>
       )}
+      {showModal && <SignInModal onClose={closeModal} reason={modalReason} />}
     </div>
   );
 }
