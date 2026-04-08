@@ -750,17 +750,6 @@ export default function Createidentity() {
     </div>
   );
 
-  const dynamicIslandAllow = async () => {
-    const token = await getToken();
-    const headers = { Authorization: `Bearer ${token}` };
-    const verify = await axios.post("api/profile/me/verify", {}, { headers });
-    console.log(verify.data.message, "omj");
-    if (verify.data.message === true) {
-      setOpenTextBox(false);
-      setProfile1(true);
-    }
-  };
-
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <div className="bg-black text-white overflow-hidden min-h-screen">

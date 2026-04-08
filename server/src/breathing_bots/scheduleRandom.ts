@@ -9,14 +9,10 @@ import { engagePost } from "./detailingasfaq.js";
 
 const THOUSAND_YEARS = process.env.THOUSAND_YEARS!;
 
-let morningBots: string[] = [];
-let eveningBots: string[] = [];
-let nightBots: string[] = [];
+let randomBots: string[] = [];
 
 export async function reloadBots() {
-  morningBots = await getBots.morning();
-  eveningBots = await getBots.evening();
-  nightBots = await getBots.night();
+  randomBots = await getBots.random();
   console.log("Bots reloaded at", new Date().toISOString());
 }
 
@@ -118,17 +114,15 @@ Output only the post. No explanation.`;
   engagePost(response._id.toString(), output, user);
 }
 
-async function processBot(
-  bots: string[],
-  reload: () => Promise<string[]>,
-  setter: (list: string[]) => void,
-) {
-  if (bots.length === 0) {
-    console.log("Bot list empty, reloading...");
-    setter(await reload());
+async function processBot() {
+  // Refill if empty — 108 bots fit perfectly into 108 slots (18hr / 10min)
+  // but reload anyway to handle restarts or drift
+  if (randomBots.length === 0) {
+    console.log("Random bot list empty, reloading...");
+    randomBots = await getBots.random();
   }
 
-  const user = bots.shift();
+  const user = randomBots.shift();
   if (!user) return;
 
   const data = await BreathingBots.findOne({ id: user });
@@ -138,32 +132,16 @@ async function processBot(
 }
 
 async function assembleBB() {
-  if (Math.random() < 0.5) return;
+  if (Math.random() < 0.2) return;
 
-  const delay = Math.floor(Math.random() * 8 * 60 * 1000);
-
-  setTimeout(async () => {
+  const hr = new Date().getHours();
+  if (hr >= 6 && hr < 24) {
     try {
-      const hr = new Date().getHours();
-
-      if (hr >= 6 && hr < 12)
-        await processBot(
-          morningBots,
-          getBots.morning,
-          (l) => (morningBots = l),
-        );
-      else if (hr >= 12 && hr < 18)
-        await processBot(
-          eveningBots,
-          getBots.evening,
-          (l) => (eveningBots = l),
-        );
-      else if (hr >= 18 && hr < 24)
-        await processBot(nightBots, getBots.night, (l) => (nightBots = l));
+      await processBot();
     } catch (err) {
-      console.error("assembleBB error:", err);
+      console.error("assembleBB random error:", err);
     }
-  }, delay);
+  }
 }
 
 cron.schedule("0 5 * * *", reloadBots);

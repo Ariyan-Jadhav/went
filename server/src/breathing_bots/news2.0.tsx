@@ -103,11 +103,4 @@ async function fetchNewsFromNewsdata() {
   );
 }
 
-fetchNewsFromNewsdata()
-  .catch((e) => {
-    console.error("failed to post:", e);
-    process.exit(1);
-  })
-  .finally(() => {
-    console.log("task completed!");
-  });
+cron.schedule("*/30 * * * *", fetchNewsFromNewsdata);

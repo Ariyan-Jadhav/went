@@ -66,4 +66,4 @@ async function random() {
   return list;
 }
 
-export default { morning, evening, night };
+export default { morning, evening, night, random };

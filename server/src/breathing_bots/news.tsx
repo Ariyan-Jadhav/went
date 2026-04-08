@@ -93,11 +93,4 @@ async function fetchNewsFromMediastack() {
   console.log(`✅ Posted: "${article.title.slice(0, 60)}…"`);
 }
 
-fetchNewsFromMediastack()
-  .catch((e) => {
-    console.error("failed to post:", e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    console.log("task completed!");
-  });
+cron.schedule("*/30 * * * *", fetchNewsFromMediastack);

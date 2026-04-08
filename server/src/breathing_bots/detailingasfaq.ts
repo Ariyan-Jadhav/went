@@ -108,7 +108,11 @@ export async function engagePost(
     [allIds[i]!, allIds[j]!] = [allIds[j]!, allIds[i]!];
   }
 
-  const selected = allIds.slice(0, 20);
+  function getRandomInRange(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  const selected = allIds.slice(0, getRandomInRange(15, 20));
   console.log(
     `engagePost started — ${selected.length} bots selected for post ${postId}`,
   );
