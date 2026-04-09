@@ -18,6 +18,7 @@
     "seed:bots": "tsx src/breathing_bots/seed.ts",
     "start": "node dist/index.js",
     "build": "tsc",
+    "postinstall": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
