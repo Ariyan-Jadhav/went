@@ -133,7 +133,7 @@ async function assembleBB() {
   if (Math.random() < 0.2) return;
 
   const hr = new Date().getHours();
-  if (hr >= 6 && hr < 24) {
+  if (hr >= 0 && hr < 24) {
     try {
       await processBot();
     } catch (err) {

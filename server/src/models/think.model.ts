@@ -69,5 +69,6 @@ const thinkSchema = new Schema<Ithink>(
 thinkSchema.index({ user_id: 1, createdAt: -1 });
 thinkSchema.index({ createdAt: -1 });
 thinkSchema.index({ hashtags: 1 });
+thinkSchema.index({ user_id: 1, content: 1 });
 
 export const Think = mongoose.model<Ithink>("Think", thinkSchema);

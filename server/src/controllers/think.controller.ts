@@ -65,7 +65,7 @@ export const createThink = catchAsync(async (req: Request, res: Response) => {
       rethinkCount: 0,
     });
 
-    engagePost3(think._id.toString(), content, userId);
+    await engagePost3(think._id.toString(), content, userId);
 
     res.status(201).json({ message: think });
   } catch (error) {

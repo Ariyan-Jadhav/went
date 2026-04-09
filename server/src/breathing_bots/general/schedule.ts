@@ -143,7 +143,7 @@ async function assembleBB() {
   try {
     const hr = new Date().getHours();
 
-    if (hr >= 6 && hr < 12)
+    if (hr >= 0 && hr < 12)
       await processBot(morningBots, getBots.morning, (l) => (morningBots = l));
     else if (hr >= 12 && hr < 18)
       await processBot(eveningBots, getBots.evening, (l) => (eveningBots = l));

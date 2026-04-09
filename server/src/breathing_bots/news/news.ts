@@ -34,12 +34,9 @@ function cleanText(text: string): string {
 }
 
 async function fetchNewsFromMediastack() {
-  await connectDB();
-
   const response = await fetch(
     `https://api.mediastack.com/v1/news?access_key=${CONFIG.NORTH_API_KEY}&countries=in&limit=5`,
   );
-
   const data = await response.json();
 
   if (!data || !Array.isArray(data.data)) {
@@ -49,13 +46,35 @@ async function fetchNewsFromMediastack() {
   const posted = await PostedArticle.find({}).select("article_id").lean();
   const postedUrls = new Set(posted.map((p) => p.article_id));
 
-  const article = (data.data as MediastackArticle[]).find(
+  const candidates = (data.data as MediastackArticle[]).filter(
     (a) => !postedUrls.has(a.url),
   );
 
-  if (!article) throw new AppError("No new articles found", 500);
+  if (!candidates.length) throw new AppError("No new articles found", 500);
 
-  const content = cleanText(article.description || article.title);
+  let article: MediastackArticle | null = null;
+  let content = "";
+
+  for (const candidate of candidates) {
+    const c = cleanText(candidate.description || candidate.title);
+    const exists = await Think.findOne({
+      user_id: CONFIG.BOT_USER_ID,
+      content: c,
+    }).lean();
+
+    if (exists) {
+      await PostedArticle.create({ article_id: candidate.url }).catch((err) => {
+        if (err.code !== 11000) throw err;
+      });
+      continue;
+    }
+
+    article = candidate;
+    content = c;
+    break;
+  }
+
+  if (!article) throw new AppError("All articles are duplicates", 500);
 
   const think = await Think.create({
     user_id: CONFIG.BOT_USER_ID,
@@ -71,9 +90,18 @@ async function fetchNewsFromMediastack() {
 
   if (!think) throw new AppError("could not post", 500);
 
-  await PostedArticle.create({ article_id: article.url }); // using URL as the unique ID since mediastack has no article_id
+  try {
+    await PostedArticle.create({ article_id: article.url });
+  } catch (err: any) {
+    if (err.code === 11000) {
+      console.log("Race condition caught — article already posted, skipping.");
+      return;
+    }
+    throw err;
+  }
 
   engagePost3(think._id.toString(), content, CONFIG.BOT_USER_ID);
   console.log(`Posted: "${article.title.slice(0, 60)}…"`);
 }
+
 cron.schedule("12 */1 * * *", fetchNewsFromMediastack);

@@ -12,13 +12,12 @@ const CONFIG = {
   BOT_USERNAME: "unmaskedofficial",
 };
 
-// Matches the actual newsdata.io response shape
 interface NewsdataArticle {
   article_id: string;
   title: string;
   description: string | null;
-  link: string; // "url" in mediastack, "link" here
-  image_url: string | null; // "image" in mediastack, "image_url" here
+  link: string;
+  image_url: string | null;
   pubDate: string;
   language: string;
   country: string[];
@@ -40,8 +39,6 @@ function cleanText(text: string): string {
 }
 
 async function fetchNewsFromNewsdata() {
-  await connectDB();
-
   const response = await fetch(
     `https://newsdata.io/api/1/latest?apikey=${CONFIG.NEWSDATA_API_KEY}&country=in&language=en`,
   );
@@ -51,17 +48,40 @@ async function fetchNewsFromNewsdata() {
     throw new AppError("Unexpected response shape", 500);
   }
 
-  // Fetch all already-posted IDs from DB
   const posted = await PostedArticle.find({}).select("article_id").lean();
   const postedIds = new Set(posted.map((p) => p.article_id));
 
-  const article = (data.results as NewsdataArticle[]).find(
+  const candidates = (data.results as NewsdataArticle[]).filter(
     (a) => !a.duplicate && !postedIds.has(a.article_id),
   );
 
-  if (!article) throw new AppError("No new articles found", 500);
+  if (!candidates.length) throw new AppError("No new articles found", 500);
 
-  const content = cleanText(article.description || article.title);
+  let article: NewsdataArticle | null = null;
+  let content = "";
+
+  for (const candidate of candidates) {
+    const c = cleanText(candidate.description || candidate.title);
+    const exists = await Think.findOne({
+      user_id: CONFIG.BOT_USER_ID,
+      content: c,
+    }).lean();
+
+    if (exists) {
+      await PostedArticle.create({ article_id: candidate.article_id }).catch(
+        (err) => {
+          if (err.code !== 11000) throw err;
+        },
+      );
+      continue;
+    }
+
+    article = candidate;
+    content = c;
+    break;
+  }
+
+  if (!article) throw new AppError("All articles are duplicates", 500);
 
   const think = await Think.create({
     user_id: CONFIG.BOT_USER_ID,
@@ -77,8 +97,15 @@ async function fetchNewsFromNewsdata() {
 
   if (!think) throw new AppError("could not post", 500);
 
-  // Mark this article as posted
-  await PostedArticle.create({ article_id: article.article_id });
+  try {
+    await PostedArticle.create({ article_id: article.article_id });
+  } catch (err: any) {
+    if (err.code === 11000) {
+      console.log("Race condition caught — article already posted, skipping.");
+      return;
+    }
+    throw err;
+  }
 
   engagePost3(think._id.toString(), content, CONFIG.BOT_USER_ID);
 }
