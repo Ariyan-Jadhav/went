@@ -27,7 +27,11 @@ const PORT = process.env.PORT || 6969;
 // ─── 3. SOCKET.IO ───────────────────────────────────────────────────────────
 const io = new Server(httpServer, {
   cors: {
-    origin: ["http://localhost:5173", "https://wentapp.me"],
+    origin: [
+      "http://localhost:5173",
+      "https://wentapp.me",
+      ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : []),
+    ],
     credentials: true,
     methods: ["GET", "POST"],
   },
@@ -62,7 +66,11 @@ if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 // ─── 5. CORS ─────────────────────────────────────────────────────────────────
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://wentapp.me"],
+    origin: [
+      "http://localhost:5173",
+      "https://wentapp.me",
+      ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : []),
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
     allowedHeaders: [
@@ -76,7 +84,6 @@ app.use(
     ],
   }),
 );
-
 // ─── 6. WEBHOOK ROUTE (raw body — MUST be before express.json()) ─────────────
 import userRouter from "./routes/user.route.js";
 app.use("/api", express.raw({ type: "application/json" }), userRouter);
