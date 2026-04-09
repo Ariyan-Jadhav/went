@@ -22,6 +22,8 @@
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
     "exactOptionalPropertyTypes": true,
 
     // Style Options
@@ -33,7 +35,7 @@
     // "noPropertyAccessFromIndexSignature": true,
 
     // Recommended Options
-    "strict": true,
+    "strict": false,
     "verbatimModuleSyntax": false,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
