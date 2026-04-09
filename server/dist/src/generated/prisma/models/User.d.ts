@@ -17,6 +17,7 @@ export type UserMinAggregateOutputType = {
     username: string | null;
     email: string | null;
     profilePicUrl: string | null;
+    isBot: boolean | null;
     createdAt: Date | null;
     updatedAt: Date | null;
 };
@@ -27,6 +28,7 @@ export type UserMaxAggregateOutputType = {
     username: string | null;
     email: string | null;
     profilePicUrl: string | null;
+    isBot: boolean | null;
     createdAt: Date | null;
     updatedAt: Date | null;
 };
@@ -37,6 +39,7 @@ export type UserCountAggregateOutputType = {
     username: number;
     email: number;
     profilePicUrl: number;
+    isBot: number;
     createdAt: number;
     updatedAt: number;
     _all: number;
@@ -48,6 +51,7 @@ export type UserMinAggregateInputType = {
     username?: true;
     email?: true;
     profilePicUrl?: true;
+    isBot?: true;
     createdAt?: true;
     updatedAt?: true;
 };
@@ -58,6 +62,7 @@ export type UserMaxAggregateInputType = {
     username?: true;
     email?: true;
     profilePicUrl?: true;
+    isBot?: true;
     createdAt?: true;
     updatedAt?: true;
 };
@@ -68,6 +73,7 @@ export type UserCountAggregateInputType = {
     username?: true;
     email?: true;
     profilePicUrl?: true;
+    isBot?: true;
     createdAt?: true;
     updatedAt?: true;
     _all?: true;
@@ -138,9 +144,10 @@ export type UserGroupByOutputType = {
     id: string;
     firstName: string;
     lastName: string;
-    username: string;
+    username: string | null;
     email: string;
     profilePicUrl: string | null;
+    isBot: boolean;
     createdAt: Date;
     updatedAt: Date;
     _count: UserCountAggregateOutputType | null;
@@ -157,18 +164,17 @@ export type UserWhereInput = {
     id?: Prisma.StringFilter<"User"> | string;
     firstName?: Prisma.StringFilter<"User"> | string;
     lastName?: Prisma.StringFilter<"User"> | string;
-    username?: Prisma.StringFilter<"User"> | string;
+    username?: Prisma.StringNullableFilter<"User"> | string | null;
     email?: Prisma.StringFilter<"User"> | string;
     profilePicUrl?: Prisma.StringNullableFilter<"User"> | string | null;
+    isBot?: Prisma.BoolFilter<"User"> | boolean;
     createdAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     Profile?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null;
     followers?: Prisma.FollowListRelationFilter;
     following?: Prisma.FollowListRelationFilter;
-    pending_req?: Prisma.FollowListRelationFilter;
     likes?: Prisma.LikeListRelationFilter;
-    story_views?: Prisma.Story_ViewListRelationFilter;
-    saved_post?: Prisma.Saved_PostListRelationFilter;
+    saved_post?: Prisma.Saved_ThinkListRelationFilter;
     blocked?: Prisma.BlockListRelationFilter;
     blocker?: Prisma.BlockListRelationFilter;
     reporter?: Prisma.ReportListRelationFilter;
@@ -178,18 +184,17 @@ export type UserOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
     firstName?: Prisma.SortOrder;
     lastName?: Prisma.SortOrder;
-    username?: Prisma.SortOrder;
+    username?: Prisma.SortOrderInput | Prisma.SortOrder;
     email?: Prisma.SortOrder;
     profilePicUrl?: Prisma.SortOrderInput | Prisma.SortOrder;
+    isBot?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
     Profile?: Prisma.ProfileOrderByWithRelationInput;
     followers?: Prisma.FollowOrderByRelationAggregateInput;
     following?: Prisma.FollowOrderByRelationAggregateInput;
-    pending_req?: Prisma.FollowOrderByRelationAggregateInput;
     likes?: Prisma.LikeOrderByRelationAggregateInput;
-    story_views?: Prisma.Story_ViewOrderByRelationAggregateInput;
-    saved_post?: Prisma.Saved_PostOrderByRelationAggregateInput;
+    saved_post?: Prisma.Saved_ThinkOrderByRelationAggregateInput;
     blocked?: Prisma.BlockOrderByRelationAggregateInput;
     blocker?: Prisma.BlockOrderByRelationAggregateInput;
     reporter?: Prisma.ReportOrderByRelationAggregateInput;
@@ -205,15 +210,14 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
     firstName?: Prisma.StringFilter<"User"> | string;
     lastName?: Prisma.StringFilter<"User"> | string;
     profilePicUrl?: Prisma.StringNullableFilter<"User"> | string | null;
+    isBot?: Prisma.BoolFilter<"User"> | boolean;
     createdAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     Profile?: Prisma.XOR<Prisma.ProfileNullableScalarRelationFilter, Prisma.ProfileWhereInput> | null;
     followers?: Prisma.FollowListRelationFilter;
     following?: Prisma.FollowListRelationFilter;
-    pending_req?: Prisma.FollowListRelationFilter;
     likes?: Prisma.LikeListRelationFilter;
-    story_views?: Prisma.Story_ViewListRelationFilter;
-    saved_post?: Prisma.Saved_PostListRelationFilter;
+    saved_post?: Prisma.Saved_ThinkListRelationFilter;
     blocked?: Prisma.BlockListRelationFilter;
     blocker?: Prisma.BlockListRelationFilter;
     reporter?: Prisma.ReportListRelationFilter;
@@ -223,9 +227,10 @@ export type UserOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
     firstName?: Prisma.SortOrder;
     lastName?: Prisma.SortOrder;
-    username?: Prisma.SortOrder;
+    username?: Prisma.SortOrderInput | Prisma.SortOrder;
     email?: Prisma.SortOrder;
     profilePicUrl?: Prisma.SortOrderInput | Prisma.SortOrder;
+    isBot?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
     _count?: Prisma.UserCountOrderByAggregateInput;
@@ -239,28 +244,28 @@ export type UserScalarWhereWithAggregatesInput = {
     id?: Prisma.StringWithAggregatesFilter<"User"> | string;
     firstName?: Prisma.StringWithAggregatesFilter<"User"> | string;
     lastName?: Prisma.StringWithAggregatesFilter<"User"> | string;
-    username?: Prisma.StringWithAggregatesFilter<"User"> | string;
+    username?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null;
     email?: Prisma.StringWithAggregatesFilter<"User"> | string;
     profilePicUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null;
+    isBot?: Prisma.BoolWithAggregatesFilter<"User"> | boolean;
     createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string;
     updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string;
 };
 export type UserCreateInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportCreateNestedManyWithoutReporterInput;
@@ -268,20 +273,19 @@ export type UserCreateInput = {
 };
 export type UserUncheckedCreateInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowUncheckedCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewUncheckedCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostUncheckedCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportUncheckedCreateNestedManyWithoutReporterInput;
@@ -291,18 +295,17 @@ export type UserUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUpdateManyWithoutReporterNestedInput;
@@ -312,18 +315,17 @@ export type UserUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUncheckedUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUncheckedUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUncheckedUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUncheckedUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUncheckedUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUncheckedUpdateManyWithoutReporterNestedInput;
@@ -331,11 +333,12 @@ export type UserUncheckedUpdateInput = {
 };
 export type UserCreateManyInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
 };
@@ -343,9 +346,10 @@ export type UserUpdateManyMutationInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -353,9 +357,10 @@ export type UserUncheckedUpdateManyInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -366,6 +371,7 @@ export type UserCountOrderByAggregateInput = {
     username?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
     profilePicUrl?: Prisma.SortOrder;
+    isBot?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
 };
@@ -376,6 +382,7 @@ export type UserMaxOrderByAggregateInput = {
     username?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
     profilePicUrl?: Prisma.SortOrder;
+    isBot?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
 };
@@ -386,6 +393,7 @@ export type UserMinOrderByAggregateInput = {
     username?: Prisma.SortOrder;
     email?: Prisma.SortOrder;
     profilePicUrl?: Prisma.SortOrder;
+    isBot?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
 };
@@ -402,6 +410,9 @@ export type StringFieldUpdateOperationsInput = {
 };
 export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null;
+};
+export type BoolFieldUpdateOperationsInput = {
+    set?: boolean;
 };
 export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string;
@@ -428,11 +439,6 @@ export type UserCreateNestedOneWithoutFollowingInput = {
     connectOrCreate?: Prisma.UserCreateOrConnectWithoutFollowingInput;
     connect?: Prisma.UserWhereUniqueInput;
 };
-export type UserCreateNestedOneWithoutPending_reqInput = {
-    create?: Prisma.XOR<Prisma.UserCreateWithoutPending_reqInput, Prisma.UserUncheckedCreateWithoutPending_reqInput>;
-    connectOrCreate?: Prisma.UserCreateOrConnectWithoutPending_reqInput;
-    connect?: Prisma.UserWhereUniqueInput;
-};
 export type UserUpdateOneRequiredWithoutFollowersNestedInput = {
     create?: Prisma.XOR<Prisma.UserCreateWithoutFollowersInput, Prisma.UserUncheckedCreateWithoutFollowersInput>;
     connectOrCreate?: Prisma.UserCreateOrConnectWithoutFollowersInput;
@@ -447,13 +453,6 @@ export type UserUpdateOneRequiredWithoutFollowingNestedInput = {
     connect?: Prisma.UserWhereUniqueInput;
     update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFollowingInput, Prisma.UserUpdateWithoutFollowingInput>, Prisma.UserUncheckedUpdateWithoutFollowingInput>;
 };
-export type UserUpdateOneRequiredWithoutPending_reqNestedInput = {
-    create?: Prisma.XOR<Prisma.UserCreateWithoutPending_reqInput, Prisma.UserUncheckedCreateWithoutPending_reqInput>;
-    connectOrCreate?: Prisma.UserCreateOrConnectWithoutPending_reqInput;
-    upsert?: Prisma.UserUpsertWithoutPending_reqInput;
-    connect?: Prisma.UserWhereUniqueInput;
-    update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPending_reqInput, Prisma.UserUpdateWithoutPending_reqInput>, Prisma.UserUncheckedUpdateWithoutPending_reqInput>;
-};
 export type UserCreateNestedOneWithoutLikesInput = {
     create?: Prisma.XOR<Prisma.UserCreateWithoutLikesInput, Prisma.UserUncheckedCreateWithoutLikesInput>;
     connectOrCreate?: Prisma.UserCreateOrConnectWithoutLikesInput;
@@ -465,18 +464,6 @@ export type UserUpdateOneRequiredWithoutLikesNestedInput = {
     upsert?: Prisma.UserUpsertWithoutLikesInput;
     connect?: Prisma.UserWhereUniqueInput;
     update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLikesInput, Prisma.UserUpdateWithoutLikesInput>, Prisma.UserUncheckedUpdateWithoutLikesInput>;
-};
-export type UserCreateNestedOneWithoutStory_viewsInput = {
-    create?: Prisma.XOR<Prisma.UserCreateWithoutStory_viewsInput, Prisma.UserUncheckedCreateWithoutStory_viewsInput>;
-    connectOrCreate?: Prisma.UserCreateOrConnectWithoutStory_viewsInput;
-    connect?: Prisma.UserWhereUniqueInput;
-};
-export type UserUpdateOneRequiredWithoutStory_viewsNestedInput = {
-    create?: Prisma.XOR<Prisma.UserCreateWithoutStory_viewsInput, Prisma.UserUncheckedCreateWithoutStory_viewsInput>;
-    connectOrCreate?: Prisma.UserCreateOrConnectWithoutStory_viewsInput;
-    upsert?: Prisma.UserUpsertWithoutStory_viewsInput;
-    connect?: Prisma.UserWhereUniqueInput;
-    update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStory_viewsInput, Prisma.UserUpdateWithoutStory_viewsInput>, Prisma.UserUncheckedUpdateWithoutStory_viewsInput>;
 };
 export type UserCreateNestedOneWithoutSaved_postInput = {
     create?: Prisma.XOR<Prisma.UserCreateWithoutSaved_postInput, Prisma.UserUncheckedCreateWithoutSaved_postInput>;
@@ -542,19 +529,18 @@ export type UserUpdateOneWithoutReportedNestedInput = {
 };
 export type UserCreateWithoutProfileInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     followers?: Prisma.FollowCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportCreateNestedManyWithoutReporterInput;
@@ -562,19 +548,18 @@ export type UserCreateWithoutProfileInput = {
 };
 export type UserUncheckedCreateWithoutProfileInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowUncheckedCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewUncheckedCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostUncheckedCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportUncheckedCreateNestedManyWithoutReporterInput;
@@ -597,17 +582,16 @@ export type UserUpdateWithoutProfileInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     followers?: Prisma.FollowUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUpdateManyWithoutReporterNestedInput;
@@ -617,17 +601,16 @@ export type UserUncheckedUpdateWithoutProfileInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUncheckedUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUncheckedUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUncheckedUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUncheckedUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUncheckedUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUncheckedUpdateManyWithoutReporterNestedInput;
@@ -635,19 +618,18 @@ export type UserUncheckedUpdateWithoutProfileInput = {
 };
 export type UserCreateWithoutFollowersInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
     following?: Prisma.FollowCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportCreateNestedManyWithoutReporterInput;
@@ -655,19 +637,18 @@ export type UserCreateWithoutFollowersInput = {
 };
 export type UserUncheckedCreateWithoutFollowersInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
     following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowUncheckedCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewUncheckedCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostUncheckedCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportUncheckedCreateNestedManyWithoutReporterInput;
@@ -679,19 +660,18 @@ export type UserCreateOrConnectWithoutFollowersInput = {
 };
 export type UserCreateWithoutFollowingInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowCreateNestedManyWithoutFollowerInput;
-    pending_req?: Prisma.FollowCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportCreateNestedManyWithoutReporterInput;
@@ -699,19 +679,18 @@ export type UserCreateWithoutFollowingInput = {
 };
 export type UserUncheckedCreateWithoutFollowingInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput;
-    pending_req?: Prisma.FollowUncheckedCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewUncheckedCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostUncheckedCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportUncheckedCreateNestedManyWithoutReporterInput;
@@ -720,50 +699,6 @@ export type UserUncheckedCreateWithoutFollowingInput = {
 export type UserCreateOrConnectWithoutFollowingInput = {
     where: Prisma.UserWhereUniqueInput;
     create: Prisma.XOR<Prisma.UserCreateWithoutFollowingInput, Prisma.UserUncheckedCreateWithoutFollowingInput>;
-};
-export type UserCreateWithoutPending_reqInput = {
-    id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
-    email: string;
-    profilePicUrl?: string | null;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-    Profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
-    followers?: Prisma.FollowCreateNestedManyWithoutFollowerInput;
-    following?: Prisma.FollowCreateNestedManyWithoutFollowingInput;
-    likes?: Prisma.LikeCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostCreateNestedManyWithoutUserInput;
-    blocked?: Prisma.BlockCreateNestedManyWithoutBlockedInput;
-    blocker?: Prisma.BlockCreateNestedManyWithoutBlockerInput;
-    reporter?: Prisma.ReportCreateNestedManyWithoutReporterInput;
-    reported?: Prisma.ReportCreateNestedManyWithoutReportedInput;
-};
-export type UserUncheckedCreateWithoutPending_reqInput = {
-    id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
-    email: string;
-    profilePicUrl?: string | null;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-    Profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
-    followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput;
-    following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput;
-    likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewUncheckedCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostUncheckedCreateNestedManyWithoutUserInput;
-    blocked?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockedInput;
-    blocker?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockerInput;
-    reporter?: Prisma.ReportUncheckedCreateNestedManyWithoutReporterInput;
-    reported?: Prisma.ReportUncheckedCreateNestedManyWithoutReportedInput;
-};
-export type UserCreateOrConnectWithoutPending_reqInput = {
-    where: Prisma.UserWhereUniqueInput;
-    create: Prisma.XOR<Prisma.UserCreateWithoutPending_reqInput, Prisma.UserUncheckedCreateWithoutPending_reqInput>;
 };
 export type UserUpsertWithoutFollowersInput = {
     update: Prisma.XOR<Prisma.UserUpdateWithoutFollowersInput, Prisma.UserUncheckedUpdateWithoutFollowersInput>;
@@ -778,17 +713,16 @@ export type UserUpdateWithoutFollowersInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
     following?: Prisma.FollowUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUpdateManyWithoutReporterNestedInput;
@@ -798,17 +732,16 @@ export type UserUncheckedUpdateWithoutFollowersInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
     following?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUncheckedUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUncheckedUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUncheckedUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUncheckedUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUncheckedUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUncheckedUpdateManyWithoutReporterNestedInput;
@@ -827,17 +760,16 @@ export type UserUpdateWithoutFollowingInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUpdateManyWithoutFollowerNestedInput;
-    pending_req?: Prisma.FollowUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUpdateManyWithoutReporterNestedInput;
@@ -847,66 +779,16 @@ export type UserUncheckedUpdateWithoutFollowingInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput;
-    pending_req?: Prisma.FollowUncheckedUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUncheckedUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUncheckedUpdateManyWithoutUserNestedInput;
-    blocked?: Prisma.BlockUncheckedUpdateManyWithoutBlockedNestedInput;
-    blocker?: Prisma.BlockUncheckedUpdateManyWithoutBlockerNestedInput;
-    reporter?: Prisma.ReportUncheckedUpdateManyWithoutReporterNestedInput;
-    reported?: Prisma.ReportUncheckedUpdateManyWithoutReportedNestedInput;
-};
-export type UserUpsertWithoutPending_reqInput = {
-    update: Prisma.XOR<Prisma.UserUpdateWithoutPending_reqInput, Prisma.UserUncheckedUpdateWithoutPending_reqInput>;
-    create: Prisma.XOR<Prisma.UserCreateWithoutPending_reqInput, Prisma.UserUncheckedCreateWithoutPending_reqInput>;
-    where?: Prisma.UserWhereInput;
-};
-export type UserUpdateToOneWithWhereWithoutPending_reqInput = {
-    where?: Prisma.UserWhereInput;
-    data: Prisma.XOR<Prisma.UserUpdateWithoutPending_reqInput, Prisma.UserUncheckedUpdateWithoutPending_reqInput>;
-};
-export type UserUpdateWithoutPending_reqInput = {
-    id?: Prisma.StringFieldUpdateOperationsInput | string;
-    firstName?: Prisma.StringFieldUpdateOperationsInput | string;
-    lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
-    email?: Prisma.StringFieldUpdateOperationsInput | string;
-    profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-    Profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
-    followers?: Prisma.FollowUpdateManyWithoutFollowerNestedInput;
-    following?: Prisma.FollowUpdateManyWithoutFollowingNestedInput;
-    likes?: Prisma.LikeUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUpdateManyWithoutUserNestedInput;
-    blocked?: Prisma.BlockUpdateManyWithoutBlockedNestedInput;
-    blocker?: Prisma.BlockUpdateManyWithoutBlockerNestedInput;
-    reporter?: Prisma.ReportUpdateManyWithoutReporterNestedInput;
-    reported?: Prisma.ReportUpdateManyWithoutReportedNestedInput;
-};
-export type UserUncheckedUpdateWithoutPending_reqInput = {
-    id?: Prisma.StringFieldUpdateOperationsInput | string;
-    firstName?: Prisma.StringFieldUpdateOperationsInput | string;
-    lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
-    email?: Prisma.StringFieldUpdateOperationsInput | string;
-    profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-    Profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
-    followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput;
-    following?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput;
-    likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUncheckedUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUncheckedUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUncheckedUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUncheckedUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUncheckedUpdateManyWithoutReporterNestedInput;
@@ -914,19 +796,18 @@ export type UserUncheckedUpdateWithoutPending_reqInput = {
 };
 export type UserCreateWithoutLikesInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowCreateNestedManyWithoutPending_reqInput;
-    story_views?: Prisma.Story_ViewCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportCreateNestedManyWithoutReporterInput;
@@ -934,19 +815,18 @@ export type UserCreateWithoutLikesInput = {
 };
 export type UserUncheckedCreateWithoutLikesInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowUncheckedCreateNestedManyWithoutPending_reqInput;
-    story_views?: Prisma.Story_ViewUncheckedCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostUncheckedCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportUncheckedCreateNestedManyWithoutReporterInput;
@@ -969,17 +849,16 @@ export type UserUpdateWithoutLikesInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUpdateManyWithoutPending_reqNestedInput;
-    story_views?: Prisma.Story_ViewUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUpdateManyWithoutReporterNestedInput;
@@ -989,110 +868,16 @@ export type UserUncheckedUpdateWithoutLikesInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUncheckedUpdateManyWithoutPending_reqNestedInput;
-    story_views?: Prisma.Story_ViewUncheckedUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUncheckedUpdateManyWithoutUserNestedInput;
-    blocked?: Prisma.BlockUncheckedUpdateManyWithoutBlockedNestedInput;
-    blocker?: Prisma.BlockUncheckedUpdateManyWithoutBlockerNestedInput;
-    reporter?: Prisma.ReportUncheckedUpdateManyWithoutReporterNestedInput;
-    reported?: Prisma.ReportUncheckedUpdateManyWithoutReportedNestedInput;
-};
-export type UserCreateWithoutStory_viewsInput = {
-    id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
-    email: string;
-    profilePicUrl?: string | null;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-    Profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
-    followers?: Prisma.FollowCreateNestedManyWithoutFollowerInput;
-    following?: Prisma.FollowCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowCreateNestedManyWithoutPending_reqInput;
-    likes?: Prisma.LikeCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostCreateNestedManyWithoutUserInput;
-    blocked?: Prisma.BlockCreateNestedManyWithoutBlockedInput;
-    blocker?: Prisma.BlockCreateNestedManyWithoutBlockerInput;
-    reporter?: Prisma.ReportCreateNestedManyWithoutReporterInput;
-    reported?: Prisma.ReportCreateNestedManyWithoutReportedInput;
-};
-export type UserUncheckedCreateWithoutStory_viewsInput = {
-    id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
-    email: string;
-    profilePicUrl?: string | null;
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
-    Profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
-    followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput;
-    following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowUncheckedCreateNestedManyWithoutPending_reqInput;
-    likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostUncheckedCreateNestedManyWithoutUserInput;
-    blocked?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockedInput;
-    blocker?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockerInput;
-    reporter?: Prisma.ReportUncheckedCreateNestedManyWithoutReporterInput;
-    reported?: Prisma.ReportUncheckedCreateNestedManyWithoutReportedInput;
-};
-export type UserCreateOrConnectWithoutStory_viewsInput = {
-    where: Prisma.UserWhereUniqueInput;
-    create: Prisma.XOR<Prisma.UserCreateWithoutStory_viewsInput, Prisma.UserUncheckedCreateWithoutStory_viewsInput>;
-};
-export type UserUpsertWithoutStory_viewsInput = {
-    update: Prisma.XOR<Prisma.UserUpdateWithoutStory_viewsInput, Prisma.UserUncheckedUpdateWithoutStory_viewsInput>;
-    create: Prisma.XOR<Prisma.UserCreateWithoutStory_viewsInput, Prisma.UserUncheckedCreateWithoutStory_viewsInput>;
-    where?: Prisma.UserWhereInput;
-};
-export type UserUpdateToOneWithWhereWithoutStory_viewsInput = {
-    where?: Prisma.UserWhereInput;
-    data: Prisma.XOR<Prisma.UserUpdateWithoutStory_viewsInput, Prisma.UserUncheckedUpdateWithoutStory_viewsInput>;
-};
-export type UserUpdateWithoutStory_viewsInput = {
-    id?: Prisma.StringFieldUpdateOperationsInput | string;
-    firstName?: Prisma.StringFieldUpdateOperationsInput | string;
-    lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
-    email?: Prisma.StringFieldUpdateOperationsInput | string;
-    profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-    Profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
-    followers?: Prisma.FollowUpdateManyWithoutFollowerNestedInput;
-    following?: Prisma.FollowUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUpdateManyWithoutPending_reqNestedInput;
-    likes?: Prisma.LikeUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUpdateManyWithoutUserNestedInput;
-    blocked?: Prisma.BlockUpdateManyWithoutBlockedNestedInput;
-    blocker?: Prisma.BlockUpdateManyWithoutBlockerNestedInput;
-    reporter?: Prisma.ReportUpdateManyWithoutReporterNestedInput;
-    reported?: Prisma.ReportUpdateManyWithoutReportedNestedInput;
-};
-export type UserUncheckedUpdateWithoutStory_viewsInput = {
-    id?: Prisma.StringFieldUpdateOperationsInput | string;
-    firstName?: Prisma.StringFieldUpdateOperationsInput | string;
-    lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
-    email?: Prisma.StringFieldUpdateOperationsInput | string;
-    profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
-    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-    Profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
-    followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput;
-    following?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUncheckedUpdateManyWithoutPending_reqNestedInput;
-    likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUncheckedUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUncheckedUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUncheckedUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUncheckedUpdateManyWithoutReporterNestedInput;
@@ -1100,19 +885,18 @@ export type UserUncheckedUpdateWithoutStory_viewsInput = {
 };
 export type UserCreateWithoutSaved_postInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportCreateNestedManyWithoutReporterInput;
@@ -1120,19 +904,18 @@ export type UserCreateWithoutSaved_postInput = {
 };
 export type UserUncheckedCreateWithoutSaved_postInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowUncheckedCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewUncheckedCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportUncheckedCreateNestedManyWithoutReporterInput;
@@ -1155,17 +938,16 @@ export type UserUpdateWithoutSaved_postInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUpdateManyWithoutReporterNestedInput;
@@ -1175,17 +957,16 @@ export type UserUncheckedUpdateWithoutSaved_postInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUncheckedUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUncheckedUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUncheckedUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUncheckedUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUncheckedUpdateManyWithoutReporterNestedInput;
@@ -1193,40 +974,38 @@ export type UserUncheckedUpdateWithoutSaved_postInput = {
 };
 export type UserCreateWithoutBlockerInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockCreateNestedManyWithoutBlockedInput;
     reporter?: Prisma.ReportCreateNestedManyWithoutReporterInput;
     reported?: Prisma.ReportCreateNestedManyWithoutReportedInput;
 };
 export type UserUncheckedCreateWithoutBlockerInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowUncheckedCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewUncheckedCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostUncheckedCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockedInput;
     reporter?: Prisma.ReportUncheckedCreateNestedManyWithoutReporterInput;
     reported?: Prisma.ReportUncheckedCreateNestedManyWithoutReportedInput;
@@ -1237,40 +1016,38 @@ export type UserCreateOrConnectWithoutBlockerInput = {
 };
 export type UserCreateWithoutBlockedInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkCreateNestedManyWithoutUserInput;
     blocker?: Prisma.BlockCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportCreateNestedManyWithoutReporterInput;
     reported?: Prisma.ReportCreateNestedManyWithoutReportedInput;
 };
 export type UserUncheckedCreateWithoutBlockedInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowUncheckedCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewUncheckedCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostUncheckedCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedCreateNestedManyWithoutUserInput;
     blocker?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportUncheckedCreateNestedManyWithoutReporterInput;
     reported?: Prisma.ReportUncheckedCreateNestedManyWithoutReportedInput;
@@ -1292,18 +1069,17 @@ export type UserUpdateWithoutBlockerInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUpdateManyWithoutBlockedNestedInput;
     reporter?: Prisma.ReportUpdateManyWithoutReporterNestedInput;
     reported?: Prisma.ReportUpdateManyWithoutReportedNestedInput;
@@ -1312,18 +1088,17 @@ export type UserUncheckedUpdateWithoutBlockerInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUncheckedUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUncheckedUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUncheckedUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUncheckedUpdateManyWithoutBlockedNestedInput;
     reporter?: Prisma.ReportUncheckedUpdateManyWithoutReporterNestedInput;
     reported?: Prisma.ReportUncheckedUpdateManyWithoutReportedNestedInput;
@@ -1341,18 +1116,17 @@ export type UserUpdateWithoutBlockedInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUpdateManyWithoutUserNestedInput;
     blocker?: Prisma.BlockUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUpdateManyWithoutReporterNestedInput;
     reported?: Prisma.ReportUpdateManyWithoutReportedNestedInput;
@@ -1361,58 +1135,55 @@ export type UserUncheckedUpdateWithoutBlockedInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUncheckedUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUncheckedUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUncheckedUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedUpdateManyWithoutUserNestedInput;
     blocker?: Prisma.BlockUncheckedUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUncheckedUpdateManyWithoutReporterNestedInput;
     reported?: Prisma.ReportUncheckedUpdateManyWithoutReportedNestedInput;
 };
 export type UserCreateWithoutReporterInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockCreateNestedManyWithoutBlockerInput;
     reported?: Prisma.ReportCreateNestedManyWithoutReportedInput;
 };
 export type UserUncheckedCreateWithoutReporterInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowUncheckedCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewUncheckedCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostUncheckedCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockerInput;
     reported?: Prisma.ReportUncheckedCreateNestedManyWithoutReportedInput;
@@ -1423,40 +1194,38 @@ export type UserCreateOrConnectWithoutReporterInput = {
 };
 export type UserCreateWithoutReportedInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportCreateNestedManyWithoutReporterInput;
 };
 export type UserUncheckedCreateWithoutReportedInput = {
     id?: string;
-    firstName: string;
-    lastName: string;
-    username: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string | null;
     email: string;
     profilePicUrl?: string | null;
+    isBot?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     Profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput;
     followers?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowerInput;
     following?: Prisma.FollowUncheckedCreateNestedManyWithoutFollowingInput;
-    pending_req?: Prisma.FollowUncheckedCreateNestedManyWithoutPending_reqInput;
     likes?: Prisma.LikeUncheckedCreateNestedManyWithoutUserInput;
-    story_views?: Prisma.Story_ViewUncheckedCreateNestedManyWithoutUserInput;
-    saved_post?: Prisma.Saved_PostUncheckedCreateNestedManyWithoutUserInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedCreateNestedManyWithoutUserInput;
     blocked?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockedInput;
     blocker?: Prisma.BlockUncheckedCreateNestedManyWithoutBlockerInput;
     reporter?: Prisma.ReportUncheckedCreateNestedManyWithoutReporterInput;
@@ -1478,18 +1247,17 @@ export type UserUpdateWithoutReporterInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUpdateManyWithoutBlockerNestedInput;
     reported?: Prisma.ReportUpdateManyWithoutReportedNestedInput;
@@ -1498,18 +1266,17 @@ export type UserUncheckedUpdateWithoutReporterInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUncheckedUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUncheckedUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUncheckedUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUncheckedUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUncheckedUpdateManyWithoutBlockerNestedInput;
     reported?: Prisma.ReportUncheckedUpdateManyWithoutReportedNestedInput;
@@ -1527,18 +1294,17 @@ export type UserUpdateWithoutReportedInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUpdateManyWithoutReporterNestedInput;
@@ -1547,18 +1313,17 @@ export type UserUncheckedUpdateWithoutReportedInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     firstName?: Prisma.StringFieldUpdateOperationsInput | string;
     lastName?: Prisma.StringFieldUpdateOperationsInput | string;
-    username?: Prisma.StringFieldUpdateOperationsInput | string;
+    username?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     email?: Prisma.StringFieldUpdateOperationsInput | string;
     profilePicUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isBot?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     Profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput;
     followers?: Prisma.FollowUncheckedUpdateManyWithoutFollowerNestedInput;
     following?: Prisma.FollowUncheckedUpdateManyWithoutFollowingNestedInput;
-    pending_req?: Prisma.FollowUncheckedUpdateManyWithoutPending_reqNestedInput;
     likes?: Prisma.LikeUncheckedUpdateManyWithoutUserNestedInput;
-    story_views?: Prisma.Story_ViewUncheckedUpdateManyWithoutUserNestedInput;
-    saved_post?: Prisma.Saved_PostUncheckedUpdateManyWithoutUserNestedInput;
+    saved_post?: Prisma.Saved_ThinkUncheckedUpdateManyWithoutUserNestedInput;
     blocked?: Prisma.BlockUncheckedUpdateManyWithoutBlockedNestedInput;
     blocker?: Prisma.BlockUncheckedUpdateManyWithoutBlockerNestedInput;
     reporter?: Prisma.ReportUncheckedUpdateManyWithoutReporterNestedInput;
@@ -1569,9 +1334,7 @@ export type UserUncheckedUpdateWithoutReportedInput = {
 export type UserCountOutputType = {
     followers: number;
     following: number;
-    pending_req: number;
     likes: number;
-    story_views: number;
     saved_post: number;
     blocked: number;
     blocker: number;
@@ -1581,9 +1344,7 @@ export type UserCountOutputType = {
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     followers?: boolean | UserCountOutputTypeCountFollowersArgs;
     following?: boolean | UserCountOutputTypeCountFollowingArgs;
-    pending_req?: boolean | UserCountOutputTypeCountPending_reqArgs;
     likes?: boolean | UserCountOutputTypeCountLikesArgs;
-    story_views?: boolean | UserCountOutputTypeCountStory_viewsArgs;
     saved_post?: boolean | UserCountOutputTypeCountSaved_postArgs;
     blocked?: boolean | UserCountOutputTypeCountBlockedArgs;
     blocker?: boolean | UserCountOutputTypeCountBlockerArgs;
@@ -1614,26 +1375,14 @@ export type UserCountOutputTypeCountFollowingArgs<ExtArgs extends runtime.Types.
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountPending_reqArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-    where?: Prisma.FollowWhereInput;
-};
-/**
- * UserCountOutputType without action
- */
 export type UserCountOutputTypeCountLikesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     where?: Prisma.LikeWhereInput;
 };
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountStory_viewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-    where?: Prisma.Story_ViewWhereInput;
-};
-/**
- * UserCountOutputType without action
- */
 export type UserCountOutputTypeCountSaved_postArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-    where?: Prisma.Saved_PostWhereInput;
+    where?: Prisma.Saved_ThinkWhereInput;
 };
 /**
  * UserCountOutputType without action
@@ -1666,14 +1415,13 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
     username?: boolean;
     email?: boolean;
     profilePicUrl?: boolean;
+    isBot?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
     Profile?: boolean | Prisma.User$ProfileArgs<ExtArgs>;
     followers?: boolean | Prisma.User$followersArgs<ExtArgs>;
     following?: boolean | Prisma.User$followingArgs<ExtArgs>;
-    pending_req?: boolean | Prisma.User$pending_reqArgs<ExtArgs>;
     likes?: boolean | Prisma.User$likesArgs<ExtArgs>;
-    story_views?: boolean | Prisma.User$story_viewsArgs<ExtArgs>;
     saved_post?: boolean | Prisma.User$saved_postArgs<ExtArgs>;
     blocked?: boolean | Prisma.User$blockedArgs<ExtArgs>;
     blocker?: boolean | Prisma.User$blockerArgs<ExtArgs>;
@@ -1688,6 +1436,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
     username?: boolean;
     email?: boolean;
     profilePicUrl?: boolean;
+    isBot?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 }, ExtArgs["result"]["user"]>;
@@ -1698,6 +1447,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
     username?: boolean;
     email?: boolean;
     profilePicUrl?: boolean;
+    isBot?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 }, ExtArgs["result"]["user"]>;
@@ -1708,17 +1458,16 @@ export type UserSelectScalar = {
     username?: boolean;
     email?: boolean;
     profilePicUrl?: boolean;
+    isBot?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 };
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "username" | "email" | "profilePicUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>;
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstName" | "lastName" | "username" | "email" | "profilePicUrl" | "isBot" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>;
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     Profile?: boolean | Prisma.User$ProfileArgs<ExtArgs>;
     followers?: boolean | Prisma.User$followersArgs<ExtArgs>;
     following?: boolean | Prisma.User$followingArgs<ExtArgs>;
-    pending_req?: boolean | Prisma.User$pending_reqArgs<ExtArgs>;
     likes?: boolean | Prisma.User$likesArgs<ExtArgs>;
-    story_views?: boolean | Prisma.User$story_viewsArgs<ExtArgs>;
     saved_post?: boolean | Prisma.User$saved_postArgs<ExtArgs>;
     blocked?: boolean | Prisma.User$blockedArgs<ExtArgs>;
     blocker?: boolean | Prisma.User$blockerArgs<ExtArgs>;
@@ -1734,10 +1483,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
         Profile: Prisma.$ProfilePayload<ExtArgs> | null;
         followers: Prisma.$FollowPayload<ExtArgs>[];
         following: Prisma.$FollowPayload<ExtArgs>[];
-        pending_req: Prisma.$FollowPayload<ExtArgs>[];
         likes: Prisma.$LikePayload<ExtArgs>[];
-        story_views: Prisma.$Story_ViewPayload<ExtArgs>[];
-        saved_post: Prisma.$Saved_PostPayload<ExtArgs>[];
+        saved_post: Prisma.$Saved_ThinkPayload<ExtArgs>[];
         blocked: Prisma.$BlockPayload<ExtArgs>[];
         blocker: Prisma.$BlockPayload<ExtArgs>[];
         reporter: Prisma.$ReportPayload<ExtArgs>[];
@@ -1747,9 +1494,10 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
         id: string;
         firstName: string;
         lastName: string;
-        username: string;
+        username: string | null;
         email: string;
         profilePicUrl: string | null;
+        isBot: boolean;
         createdAt: Date;
         updatedAt: Date;
     }, ExtArgs["result"]["user"]>;
@@ -2084,10 +1832,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
     Profile<T extends Prisma.User$ProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ProfileArgs<ExtArgs>>): Prisma.Prisma__ProfileClient<runtime.Types.Result.GetResult<Prisma.$ProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>;
     followers<T extends Prisma.User$followersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$followersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FollowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     following<T extends Prisma.User$followingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$followingArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FollowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
-    pending_req<T extends Prisma.User$pending_reqArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$pending_reqArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FollowPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     likes<T extends Prisma.User$likesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$likesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LikePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
-    story_views<T extends Prisma.User$story_viewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$story_viewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$Story_ViewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
-    saved_post<T extends Prisma.User$saved_postArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$saved_postArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$Saved_PostPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    saved_post<T extends Prisma.User$saved_postArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$saved_postArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$Saved_ThinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     blocked<T extends Prisma.User$blockedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$blockedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BlockPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     blocker<T extends Prisma.User$blockerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$blockerArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BlockPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     reporter<T extends Prisma.User$reporterArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reporterArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
@@ -2123,6 +1869,7 @@ export interface UserFieldRefs {
     readonly username: Prisma.FieldRef<"User", 'String'>;
     readonly email: Prisma.FieldRef<"User", 'String'>;
     readonly profilePicUrl: Prisma.FieldRef<"User", 'String'>;
+    readonly isBot: Prisma.FieldRef<"User", 'Boolean'>;
     readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>;
     readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>;
 }
@@ -2560,29 +2307,6 @@ export type User$followingArgs<ExtArgs extends runtime.Types.Extensions.Internal
     distinct?: Prisma.FollowScalarFieldEnum | Prisma.FollowScalarFieldEnum[];
 };
 /**
- * User.pending_req
- */
-export type User$pending_reqArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Follow
-     */
-    select?: Prisma.FollowSelect<ExtArgs> | null;
-    /**
-     * Omit specific fields from the Follow
-     */
-    omit?: Prisma.FollowOmit<ExtArgs> | null;
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: Prisma.FollowInclude<ExtArgs> | null;
-    where?: Prisma.FollowWhereInput;
-    orderBy?: Prisma.FollowOrderByWithRelationInput | Prisma.FollowOrderByWithRelationInput[];
-    cursor?: Prisma.FollowWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?: Prisma.FollowScalarFieldEnum | Prisma.FollowScalarFieldEnum[];
-};
-/**
  * User.likes
  */
 export type User$likesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2606,50 +2330,27 @@ export type User$likesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
     distinct?: Prisma.LikeScalarFieldEnum | Prisma.LikeScalarFieldEnum[];
 };
 /**
- * User.story_views
- */
-export type User$story_viewsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Story_View
-     */
-    select?: Prisma.Story_ViewSelect<ExtArgs> | null;
-    /**
-     * Omit specific fields from the Story_View
-     */
-    omit?: Prisma.Story_ViewOmit<ExtArgs> | null;
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: Prisma.Story_ViewInclude<ExtArgs> | null;
-    where?: Prisma.Story_ViewWhereInput;
-    orderBy?: Prisma.Story_ViewOrderByWithRelationInput | Prisma.Story_ViewOrderByWithRelationInput[];
-    cursor?: Prisma.Story_ViewWhereUniqueInput;
-    take?: number;
-    skip?: number;
-    distinct?: Prisma.Story_ViewScalarFieldEnum | Prisma.Story_ViewScalarFieldEnum[];
-};
-/**
  * User.saved_post
  */
 export type User$saved_postArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Saved_Post
+     * Select specific fields to fetch from the Saved_Think
      */
-    select?: Prisma.Saved_PostSelect<ExtArgs> | null;
+    select?: Prisma.Saved_ThinkSelect<ExtArgs> | null;
     /**
-     * Omit specific fields from the Saved_Post
+     * Omit specific fields from the Saved_Think
      */
-    omit?: Prisma.Saved_PostOmit<ExtArgs> | null;
+    omit?: Prisma.Saved_ThinkOmit<ExtArgs> | null;
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: Prisma.Saved_PostInclude<ExtArgs> | null;
-    where?: Prisma.Saved_PostWhereInput;
-    orderBy?: Prisma.Saved_PostOrderByWithRelationInput | Prisma.Saved_PostOrderByWithRelationInput[];
-    cursor?: Prisma.Saved_PostWhereUniqueInput;
+    include?: Prisma.Saved_ThinkInclude<ExtArgs> | null;
+    where?: Prisma.Saved_ThinkWhereInput;
+    orderBy?: Prisma.Saved_ThinkOrderByWithRelationInput | Prisma.Saved_ThinkOrderByWithRelationInput[];
+    cursor?: Prisma.Saved_ThinkWhereUniqueInput;
     take?: number;
     skip?: number;
-    distinct?: Prisma.Saved_PostScalarFieldEnum | Prisma.Saved_PostScalarFieldEnum[];
+    distinct?: Prisma.Saved_ThinkScalarFieldEnum | Prisma.Saved_ThinkScalarFieldEnum[];
 };
 /**
  * User.blocked

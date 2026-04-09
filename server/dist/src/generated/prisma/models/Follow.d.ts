@@ -14,21 +14,18 @@ export type FollowMinAggregateOutputType = {
     id: string | null;
     follower_id: string | null;
     following_id: string | null;
-    pending_status: string | null;
     createdAt: Date | null;
 };
 export type FollowMaxAggregateOutputType = {
     id: string | null;
     follower_id: string | null;
     following_id: string | null;
-    pending_status: string | null;
     createdAt: Date | null;
 };
 export type FollowCountAggregateOutputType = {
     id: number;
     follower_id: number;
     following_id: number;
-    pending_status: number;
     createdAt: number;
     _all: number;
 };
@@ -36,21 +33,18 @@ export type FollowMinAggregateInputType = {
     id?: true;
     follower_id?: true;
     following_id?: true;
-    pending_status?: true;
     createdAt?: true;
 };
 export type FollowMaxAggregateInputType = {
     id?: true;
     follower_id?: true;
     following_id?: true;
-    pending_status?: true;
     createdAt?: true;
 };
 export type FollowCountAggregateInputType = {
     id?: true;
     follower_id?: true;
     following_id?: true;
-    pending_status?: true;
     createdAt?: true;
     _all?: true;
 };
@@ -120,7 +114,6 @@ export type FollowGroupByOutputType = {
     id: string;
     follower_id: string;
     following_id: string;
-    pending_status: string;
     createdAt: Date;
     _count: FollowCountAggregateOutputType | null;
     _min: FollowMinAggregateOutputType | null;
@@ -136,41 +129,34 @@ export type FollowWhereInput = {
     id?: Prisma.StringFilter<"Follow"> | string;
     follower_id?: Prisma.StringFilter<"Follow"> | string;
     following_id?: Prisma.StringFilter<"Follow"> | string;
-    pending_status?: Prisma.StringFilter<"Follow"> | string;
     createdAt?: Prisma.DateTimeFilter<"Follow"> | Date | string;
     follower?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
     following?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
-    pending_req?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
 };
 export type FollowOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
     follower_id?: Prisma.SortOrder;
     following_id?: Prisma.SortOrder;
-    pending_status?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     follower?: Prisma.UserOrderByWithRelationInput;
     following?: Prisma.UserOrderByWithRelationInput;
-    pending_req?: Prisma.UserOrderByWithRelationInput;
 };
 export type FollowWhereUniqueInput = Prisma.AtLeast<{
     id?: string;
-    follower_id_following_id_pending_status?: Prisma.FollowFollower_idFollowing_idPending_statusCompoundUniqueInput;
+    follower_id_following_id?: Prisma.FollowFollower_idFollowing_idCompoundUniqueInput;
     AND?: Prisma.FollowWhereInput | Prisma.FollowWhereInput[];
     OR?: Prisma.FollowWhereInput[];
     NOT?: Prisma.FollowWhereInput | Prisma.FollowWhereInput[];
     follower_id?: Prisma.StringFilter<"Follow"> | string;
     following_id?: Prisma.StringFilter<"Follow"> | string;
-    pending_status?: Prisma.StringFilter<"Follow"> | string;
     createdAt?: Prisma.DateTimeFilter<"Follow"> | Date | string;
     follower?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
     following?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
-    pending_req?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
-}, "id" | "follower_id_following_id_pending_status">;
+}, "id" | "follower_id_following_id">;
 export type FollowOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
     follower_id?: Prisma.SortOrder;
     following_id?: Prisma.SortOrder;
-    pending_status?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     _count?: Prisma.FollowCountOrderByAggregateInput;
     _max?: Prisma.FollowMaxOrderByAggregateInput;
@@ -183,7 +169,6 @@ export type FollowScalarWhereWithAggregatesInput = {
     id?: Prisma.StringWithAggregatesFilter<"Follow"> | string;
     follower_id?: Prisma.StringWithAggregatesFilter<"Follow"> | string;
     following_id?: Prisma.StringWithAggregatesFilter<"Follow"> | string;
-    pending_status?: Prisma.StringWithAggregatesFilter<"Follow"> | string;
     createdAt?: Prisma.DateTimeWithAggregatesFilter<"Follow"> | Date | string;
 };
 export type FollowCreateInput = {
@@ -191,13 +176,11 @@ export type FollowCreateInput = {
     createdAt?: Date | string;
     follower: Prisma.UserCreateNestedOneWithoutFollowersInput;
     following: Prisma.UserCreateNestedOneWithoutFollowingInput;
-    pending_req: Prisma.UserCreateNestedOneWithoutPending_reqInput;
 };
 export type FollowUncheckedCreateInput = {
     id?: string;
     follower_id: string;
     following_id: string;
-    pending_status: string;
     createdAt?: Date | string;
 };
 export type FollowUpdateInput = {
@@ -205,20 +188,17 @@ export type FollowUpdateInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     follower?: Prisma.UserUpdateOneRequiredWithoutFollowersNestedInput;
     following?: Prisma.UserUpdateOneRequiredWithoutFollowingNestedInput;
-    pending_req?: Prisma.UserUpdateOneRequiredWithoutPending_reqNestedInput;
 };
 export type FollowUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     follower_id?: Prisma.StringFieldUpdateOperationsInput | string;
     following_id?: Prisma.StringFieldUpdateOperationsInput | string;
-    pending_status?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 export type FollowCreateManyInput = {
     id?: string;
     follower_id: string;
     following_id: string;
-    pending_status: string;
     createdAt?: Date | string;
 };
 export type FollowUpdateManyMutationInput = {
@@ -229,7 +209,6 @@ export type FollowUncheckedUpdateManyInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     follower_id?: Prisma.StringFieldUpdateOperationsInput | string;
     following_id?: Prisma.StringFieldUpdateOperationsInput | string;
-    pending_status?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 export type FollowListRelationFilter = {
@@ -240,30 +219,26 @@ export type FollowListRelationFilter = {
 export type FollowOrderByRelationAggregateInput = {
     _count?: Prisma.SortOrder;
 };
-export type FollowFollower_idFollowing_idPending_statusCompoundUniqueInput = {
+export type FollowFollower_idFollowing_idCompoundUniqueInput = {
     follower_id: string;
     following_id: string;
-    pending_status: string;
 };
 export type FollowCountOrderByAggregateInput = {
     id?: Prisma.SortOrder;
     follower_id?: Prisma.SortOrder;
     following_id?: Prisma.SortOrder;
-    pending_status?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
 };
 export type FollowMaxOrderByAggregateInput = {
     id?: Prisma.SortOrder;
     follower_id?: Prisma.SortOrder;
     following_id?: Prisma.SortOrder;
-    pending_status?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
 };
 export type FollowMinOrderByAggregateInput = {
     id?: Prisma.SortOrder;
     follower_id?: Prisma.SortOrder;
     following_id?: Prisma.SortOrder;
-    pending_status?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
 };
 export type FollowCreateNestedManyWithoutFollowerInput = {
@@ -278,12 +253,6 @@ export type FollowCreateNestedManyWithoutFollowingInput = {
     createMany?: Prisma.FollowCreateManyFollowingInputEnvelope;
     connect?: Prisma.FollowWhereUniqueInput | Prisma.FollowWhereUniqueInput[];
 };
-export type FollowCreateNestedManyWithoutPending_reqInput = {
-    create?: Prisma.XOR<Prisma.FollowCreateWithoutPending_reqInput, Prisma.FollowUncheckedCreateWithoutPending_reqInput> | Prisma.FollowCreateWithoutPending_reqInput[] | Prisma.FollowUncheckedCreateWithoutPending_reqInput[];
-    connectOrCreate?: Prisma.FollowCreateOrConnectWithoutPending_reqInput | Prisma.FollowCreateOrConnectWithoutPending_reqInput[];
-    createMany?: Prisma.FollowCreateManyPending_reqInputEnvelope;
-    connect?: Prisma.FollowWhereUniqueInput | Prisma.FollowWhereUniqueInput[];
-};
 export type FollowUncheckedCreateNestedManyWithoutFollowerInput = {
     create?: Prisma.XOR<Prisma.FollowCreateWithoutFollowerInput, Prisma.FollowUncheckedCreateWithoutFollowerInput> | Prisma.FollowCreateWithoutFollowerInput[] | Prisma.FollowUncheckedCreateWithoutFollowerInput[];
     connectOrCreate?: Prisma.FollowCreateOrConnectWithoutFollowerInput | Prisma.FollowCreateOrConnectWithoutFollowerInput[];
@@ -294,12 +263,6 @@ export type FollowUncheckedCreateNestedManyWithoutFollowingInput = {
     create?: Prisma.XOR<Prisma.FollowCreateWithoutFollowingInput, Prisma.FollowUncheckedCreateWithoutFollowingInput> | Prisma.FollowCreateWithoutFollowingInput[] | Prisma.FollowUncheckedCreateWithoutFollowingInput[];
     connectOrCreate?: Prisma.FollowCreateOrConnectWithoutFollowingInput | Prisma.FollowCreateOrConnectWithoutFollowingInput[];
     createMany?: Prisma.FollowCreateManyFollowingInputEnvelope;
-    connect?: Prisma.FollowWhereUniqueInput | Prisma.FollowWhereUniqueInput[];
-};
-export type FollowUncheckedCreateNestedManyWithoutPending_reqInput = {
-    create?: Prisma.XOR<Prisma.FollowCreateWithoutPending_reqInput, Prisma.FollowUncheckedCreateWithoutPending_reqInput> | Prisma.FollowCreateWithoutPending_reqInput[] | Prisma.FollowUncheckedCreateWithoutPending_reqInput[];
-    connectOrCreate?: Prisma.FollowCreateOrConnectWithoutPending_reqInput | Prisma.FollowCreateOrConnectWithoutPending_reqInput[];
-    createMany?: Prisma.FollowCreateManyPending_reqInputEnvelope;
     connect?: Prisma.FollowWhereUniqueInput | Prisma.FollowWhereUniqueInput[];
 };
 export type FollowUpdateManyWithoutFollowerNestedInput = {
@@ -328,19 +291,6 @@ export type FollowUpdateManyWithoutFollowingNestedInput = {
     updateMany?: Prisma.FollowUpdateManyWithWhereWithoutFollowingInput | Prisma.FollowUpdateManyWithWhereWithoutFollowingInput[];
     deleteMany?: Prisma.FollowScalarWhereInput | Prisma.FollowScalarWhereInput[];
 };
-export type FollowUpdateManyWithoutPending_reqNestedInput = {
-    create?: Prisma.XOR<Prisma.FollowCreateWithoutPending_reqInput, Prisma.FollowUncheckedCreateWithoutPending_reqInput> | Prisma.FollowCreateWithoutPending_reqInput[] | Prisma.FollowUncheckedCreateWithoutPending_reqInput[];
-    connectOrCreate?: Prisma.FollowCreateOrConnectWithoutPending_reqInput | Prisma.FollowCreateOrConnectWithoutPending_reqInput[];
-    upsert?: Prisma.FollowUpsertWithWhereUniqueWithoutPending_reqInput | Prisma.FollowUpsertWithWhereUniqueWithoutPending_reqInput[];
-    createMany?: Prisma.FollowCreateManyPending_reqInputEnvelope;
-    set?: Prisma.FollowWhereUniqueInput | Prisma.FollowWhereUniqueInput[];
-    disconnect?: Prisma.FollowWhereUniqueInput | Prisma.FollowWhereUniqueInput[];
-    delete?: Prisma.FollowWhereUniqueInput | Prisma.FollowWhereUniqueInput[];
-    connect?: Prisma.FollowWhereUniqueInput | Prisma.FollowWhereUniqueInput[];
-    update?: Prisma.FollowUpdateWithWhereUniqueWithoutPending_reqInput | Prisma.FollowUpdateWithWhereUniqueWithoutPending_reqInput[];
-    updateMany?: Prisma.FollowUpdateManyWithWhereWithoutPending_reqInput | Prisma.FollowUpdateManyWithWhereWithoutPending_reqInput[];
-    deleteMany?: Prisma.FollowScalarWhereInput | Prisma.FollowScalarWhereInput[];
-};
 export type FollowUncheckedUpdateManyWithoutFollowerNestedInput = {
     create?: Prisma.XOR<Prisma.FollowCreateWithoutFollowerInput, Prisma.FollowUncheckedCreateWithoutFollowerInput> | Prisma.FollowCreateWithoutFollowerInput[] | Prisma.FollowUncheckedCreateWithoutFollowerInput[];
     connectOrCreate?: Prisma.FollowCreateOrConnectWithoutFollowerInput | Prisma.FollowCreateOrConnectWithoutFollowerInput[];
@@ -367,29 +317,14 @@ export type FollowUncheckedUpdateManyWithoutFollowingNestedInput = {
     updateMany?: Prisma.FollowUpdateManyWithWhereWithoutFollowingInput | Prisma.FollowUpdateManyWithWhereWithoutFollowingInput[];
     deleteMany?: Prisma.FollowScalarWhereInput | Prisma.FollowScalarWhereInput[];
 };
-export type FollowUncheckedUpdateManyWithoutPending_reqNestedInput = {
-    create?: Prisma.XOR<Prisma.FollowCreateWithoutPending_reqInput, Prisma.FollowUncheckedCreateWithoutPending_reqInput> | Prisma.FollowCreateWithoutPending_reqInput[] | Prisma.FollowUncheckedCreateWithoutPending_reqInput[];
-    connectOrCreate?: Prisma.FollowCreateOrConnectWithoutPending_reqInput | Prisma.FollowCreateOrConnectWithoutPending_reqInput[];
-    upsert?: Prisma.FollowUpsertWithWhereUniqueWithoutPending_reqInput | Prisma.FollowUpsertWithWhereUniqueWithoutPending_reqInput[];
-    createMany?: Prisma.FollowCreateManyPending_reqInputEnvelope;
-    set?: Prisma.FollowWhereUniqueInput | Prisma.FollowWhereUniqueInput[];
-    disconnect?: Prisma.FollowWhereUniqueInput | Prisma.FollowWhereUniqueInput[];
-    delete?: Prisma.FollowWhereUniqueInput | Prisma.FollowWhereUniqueInput[];
-    connect?: Prisma.FollowWhereUniqueInput | Prisma.FollowWhereUniqueInput[];
-    update?: Prisma.FollowUpdateWithWhereUniqueWithoutPending_reqInput | Prisma.FollowUpdateWithWhereUniqueWithoutPending_reqInput[];
-    updateMany?: Prisma.FollowUpdateManyWithWhereWithoutPending_reqInput | Prisma.FollowUpdateManyWithWhereWithoutPending_reqInput[];
-    deleteMany?: Prisma.FollowScalarWhereInput | Prisma.FollowScalarWhereInput[];
-};
 export type FollowCreateWithoutFollowerInput = {
     id?: string;
     createdAt?: Date | string;
     following: Prisma.UserCreateNestedOneWithoutFollowingInput;
-    pending_req: Prisma.UserCreateNestedOneWithoutPending_reqInput;
 };
 export type FollowUncheckedCreateWithoutFollowerInput = {
     id?: string;
     following_id: string;
-    pending_status: string;
     createdAt?: Date | string;
 };
 export type FollowCreateOrConnectWithoutFollowerInput = {
@@ -404,12 +339,10 @@ export type FollowCreateWithoutFollowingInput = {
     id?: string;
     createdAt?: Date | string;
     follower: Prisma.UserCreateNestedOneWithoutFollowersInput;
-    pending_req: Prisma.UserCreateNestedOneWithoutPending_reqInput;
 };
 export type FollowUncheckedCreateWithoutFollowingInput = {
     id?: string;
     follower_id: string;
-    pending_status: string;
     createdAt?: Date | string;
 };
 export type FollowCreateOrConnectWithoutFollowingInput = {
@@ -418,26 +351,6 @@ export type FollowCreateOrConnectWithoutFollowingInput = {
 };
 export type FollowCreateManyFollowingInputEnvelope = {
     data: Prisma.FollowCreateManyFollowingInput | Prisma.FollowCreateManyFollowingInput[];
-    skipDuplicates?: boolean;
-};
-export type FollowCreateWithoutPending_reqInput = {
-    id?: string;
-    createdAt?: Date | string;
-    follower: Prisma.UserCreateNestedOneWithoutFollowersInput;
-    following: Prisma.UserCreateNestedOneWithoutFollowingInput;
-};
-export type FollowUncheckedCreateWithoutPending_reqInput = {
-    id?: string;
-    follower_id: string;
-    following_id: string;
-    createdAt?: Date | string;
-};
-export type FollowCreateOrConnectWithoutPending_reqInput = {
-    where: Prisma.FollowWhereUniqueInput;
-    create: Prisma.XOR<Prisma.FollowCreateWithoutPending_reqInput, Prisma.FollowUncheckedCreateWithoutPending_reqInput>;
-};
-export type FollowCreateManyPending_reqInputEnvelope = {
-    data: Prisma.FollowCreateManyPending_reqInput | Prisma.FollowCreateManyPending_reqInput[];
     skipDuplicates?: boolean;
 };
 export type FollowUpsertWithWhereUniqueWithoutFollowerInput = {
@@ -460,7 +373,6 @@ export type FollowScalarWhereInput = {
     id?: Prisma.StringFilter<"Follow"> | string;
     follower_id?: Prisma.StringFilter<"Follow"> | string;
     following_id?: Prisma.StringFilter<"Follow"> | string;
-    pending_status?: Prisma.StringFilter<"Follow"> | string;
     createdAt?: Prisma.DateTimeFilter<"Follow"> | Date | string;
 };
 export type FollowUpsertWithWhereUniqueWithoutFollowingInput = {
@@ -476,156 +388,99 @@ export type FollowUpdateManyWithWhereWithoutFollowingInput = {
     where: Prisma.FollowScalarWhereInput;
     data: Prisma.XOR<Prisma.FollowUpdateManyMutationInput, Prisma.FollowUncheckedUpdateManyWithoutFollowingInput>;
 };
-export type FollowUpsertWithWhereUniqueWithoutPending_reqInput = {
-    where: Prisma.FollowWhereUniqueInput;
-    update: Prisma.XOR<Prisma.FollowUpdateWithoutPending_reqInput, Prisma.FollowUncheckedUpdateWithoutPending_reqInput>;
-    create: Prisma.XOR<Prisma.FollowCreateWithoutPending_reqInput, Prisma.FollowUncheckedCreateWithoutPending_reqInput>;
-};
-export type FollowUpdateWithWhereUniqueWithoutPending_reqInput = {
-    where: Prisma.FollowWhereUniqueInput;
-    data: Prisma.XOR<Prisma.FollowUpdateWithoutPending_reqInput, Prisma.FollowUncheckedUpdateWithoutPending_reqInput>;
-};
-export type FollowUpdateManyWithWhereWithoutPending_reqInput = {
-    where: Prisma.FollowScalarWhereInput;
-    data: Prisma.XOR<Prisma.FollowUpdateManyMutationInput, Prisma.FollowUncheckedUpdateManyWithoutPending_reqInput>;
-};
 export type FollowCreateManyFollowerInput = {
     id?: string;
     following_id: string;
-    pending_status: string;
     createdAt?: Date | string;
 };
 export type FollowCreateManyFollowingInput = {
     id?: string;
     follower_id: string;
-    pending_status: string;
-    createdAt?: Date | string;
-};
-export type FollowCreateManyPending_reqInput = {
-    id?: string;
-    follower_id: string;
-    following_id: string;
     createdAt?: Date | string;
 };
 export type FollowUpdateWithoutFollowerInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     following?: Prisma.UserUpdateOneRequiredWithoutFollowingNestedInput;
-    pending_req?: Prisma.UserUpdateOneRequiredWithoutPending_reqNestedInput;
 };
 export type FollowUncheckedUpdateWithoutFollowerInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     following_id?: Prisma.StringFieldUpdateOperationsInput | string;
-    pending_status?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 export type FollowUncheckedUpdateManyWithoutFollowerInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     following_id?: Prisma.StringFieldUpdateOperationsInput | string;
-    pending_status?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 export type FollowUpdateWithoutFollowingInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     follower?: Prisma.UserUpdateOneRequiredWithoutFollowersNestedInput;
-    pending_req?: Prisma.UserUpdateOneRequiredWithoutPending_reqNestedInput;
 };
 export type FollowUncheckedUpdateWithoutFollowingInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     follower_id?: Prisma.StringFieldUpdateOperationsInput | string;
-    pending_status?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 export type FollowUncheckedUpdateManyWithoutFollowingInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     follower_id?: Prisma.StringFieldUpdateOperationsInput | string;
-    pending_status?: Prisma.StringFieldUpdateOperationsInput | string;
-    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-};
-export type FollowUpdateWithoutPending_reqInput = {
-    id?: Prisma.StringFieldUpdateOperationsInput | string;
-    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-    follower?: Prisma.UserUpdateOneRequiredWithoutFollowersNestedInput;
-    following?: Prisma.UserUpdateOneRequiredWithoutFollowingNestedInput;
-};
-export type FollowUncheckedUpdateWithoutPending_reqInput = {
-    id?: Prisma.StringFieldUpdateOperationsInput | string;
-    follower_id?: Prisma.StringFieldUpdateOperationsInput | string;
-    following_id?: Prisma.StringFieldUpdateOperationsInput | string;
-    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
-};
-export type FollowUncheckedUpdateManyWithoutPending_reqInput = {
-    id?: Prisma.StringFieldUpdateOperationsInput | string;
-    follower_id?: Prisma.StringFieldUpdateOperationsInput | string;
-    following_id?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
 export type FollowSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
     follower_id?: boolean;
     following_id?: boolean;
-    pending_status?: boolean;
     createdAt?: boolean;
     follower?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
     following?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
-    pending_req?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["follow"]>;
 export type FollowSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
     follower_id?: boolean;
     following_id?: boolean;
-    pending_status?: boolean;
     createdAt?: boolean;
     follower?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
     following?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
-    pending_req?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["follow"]>;
 export type FollowSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
     follower_id?: boolean;
     following_id?: boolean;
-    pending_status?: boolean;
     createdAt?: boolean;
     follower?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
     following?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
-    pending_req?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["follow"]>;
 export type FollowSelectScalar = {
     id?: boolean;
     follower_id?: boolean;
     following_id?: boolean;
-    pending_status?: boolean;
     createdAt?: boolean;
 };
-export type FollowOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "follower_id" | "following_id" | "pending_status" | "createdAt", ExtArgs["result"]["follow"]>;
+export type FollowOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "follower_id" | "following_id" | "createdAt", ExtArgs["result"]["follow"]>;
 export type FollowInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     follower?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
     following?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
-    pending_req?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
 };
 export type FollowIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     follower?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
     following?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
-    pending_req?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
 };
 export type FollowIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     follower?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
     following?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
-    pending_req?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
 };
 export type $FollowPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     name: "Follow";
     objects: {
         follower: Prisma.$UserPayload<ExtArgs>;
         following: Prisma.$UserPayload<ExtArgs>;
-        pending_req: Prisma.$UserPayload<ExtArgs>;
     };
     scalars: runtime.Types.Extensions.GetPayloadResult<{
         id: string;
         follower_id: string;
         following_id: string;
-        pending_status: string;
         createdAt: Date;
     }, ExtArgs["result"]["follow"]>;
     composites: {};
@@ -958,7 +813,6 @@ export interface Prisma__FollowClient<T, Null = never, ExtArgs extends runtime.T
     readonly [Symbol.toStringTag]: "PrismaPromise";
     follower<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>;
     following<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>;
-    pending_req<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>;
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -987,7 +841,6 @@ export interface FollowFieldRefs {
     readonly id: Prisma.FieldRef<"Follow", 'String'>;
     readonly follower_id: Prisma.FieldRef<"Follow", 'String'>;
     readonly following_id: Prisma.FieldRef<"Follow", 'String'>;
-    readonly pending_status: Prisma.FieldRef<"Follow", 'String'>;
     readonly createdAt: Prisma.FieldRef<"Follow", 'DateTime'>;
 }
 /**

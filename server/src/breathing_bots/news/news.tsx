@@ -76,4 +76,4 @@ async function fetchNewsFromMediastack() {
   engagePost3(think._id.toString(), content, CONFIG.BOT_USER_ID);
   console.log(`Posted: "${article.title.slice(0, 60)}…"`);
 }
-cron.schedule("*/15 * * * *", fetchNewsFromMediastack);
+cron.schedule("*/45 * * * *", fetchNewsFromMediastack);

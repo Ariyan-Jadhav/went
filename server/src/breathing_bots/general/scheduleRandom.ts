@@ -115,8 +115,6 @@ Output only the post. No explanation.`;
 }
 
 async function processBot() {
-  // Refill if empty — 108 bots fit perfectly into 108 slots (18hr / 10min)
-  // but reload anyway to handle restarts or drift
   if (randomBots.length === 0) {
     console.log("Random bot list empty, reloading...");
     randomBots = await getBots.random();

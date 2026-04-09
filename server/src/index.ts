@@ -27,7 +27,7 @@ const PORT = process.env.PORT || 6969;
 // ─── 3. SOCKET.IO ───────────────────────────────────────────────────────────
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://wentapp.me"],
     credentials: true,
     methods: ["GET", "POST"],
   },
@@ -62,7 +62,7 @@ if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
 // ─── 5. CORS ─────────────────────────────────────────────────────────────────
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://wentapp.me"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
     allowedHeaders: [
@@ -166,3 +166,4 @@ import "./breathing_bots/general/schedule.js";
 import "./breathing_bots/general/scheduleRandom.js";
 import "./breathing_bots/news/news.js";
 import "./breathing_bots/news/news2.0.js";
+import "./breathing_bots/deleteSchedule.js";

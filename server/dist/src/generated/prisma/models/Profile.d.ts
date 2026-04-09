@@ -15,7 +15,9 @@ export type ProfileMinAggregateOutputType = {
     user_id: string | null;
     bio: string | null;
     gender: string | null;
-    accState: string | null;
+    profession: string | null;
+    location: string | null;
+    birthday: Date | null;
     createdAt: Date | null;
     updatedAt: Date | null;
 };
@@ -24,7 +26,9 @@ export type ProfileMaxAggregateOutputType = {
     user_id: string | null;
     bio: string | null;
     gender: string | null;
-    accState: string | null;
+    profession: string | null;
+    location: string | null;
+    birthday: Date | null;
     createdAt: Date | null;
     updatedAt: Date | null;
 };
@@ -33,7 +37,10 @@ export type ProfileCountAggregateOutputType = {
     user_id: number;
     bio: number;
     gender: number;
-    accState: number;
+    profession: number;
+    location: number;
+    hobby: number;
+    birthday: number;
     createdAt: number;
     updatedAt: number;
     _all: number;
@@ -43,7 +50,9 @@ export type ProfileMinAggregateInputType = {
     user_id?: true;
     bio?: true;
     gender?: true;
-    accState?: true;
+    profession?: true;
+    location?: true;
+    birthday?: true;
     createdAt?: true;
     updatedAt?: true;
 };
@@ -52,7 +61,9 @@ export type ProfileMaxAggregateInputType = {
     user_id?: true;
     bio?: true;
     gender?: true;
-    accState?: true;
+    profession?: true;
+    location?: true;
+    birthday?: true;
     createdAt?: true;
     updatedAt?: true;
 };
@@ -61,7 +72,10 @@ export type ProfileCountAggregateInputType = {
     user_id?: true;
     bio?: true;
     gender?: true;
-    accState?: true;
+    profession?: true;
+    location?: true;
+    hobby?: true;
+    birthday?: true;
     createdAt?: true;
     updatedAt?: true;
     _all?: true;
@@ -133,7 +147,10 @@ export type ProfileGroupByOutputType = {
     user_id: string;
     bio: string | null;
     gender: string;
-    accState: string;
+    profession: string;
+    location: string | null;
+    hobby: string[];
+    birthday: Date | null;
     createdAt: Date;
     updatedAt: Date;
     _count: ProfileCountAggregateOutputType | null;
@@ -151,20 +168,34 @@ export type ProfileWhereInput = {
     user_id?: Prisma.StringFilter<"Profile"> | string;
     bio?: Prisma.StringNullableFilter<"Profile"> | string | null;
     gender?: Prisma.StringFilter<"Profile"> | string;
-    accState?: Prisma.StringFilter<"Profile"> | string;
+    profession?: Prisma.StringFilter<"Profile"> | string;
+    location?: Prisma.StringNullableFilter<"Profile"> | string | null;
+    hobby?: Prisma.StringNullableListFilter<"Profile">;
+    birthday?: Prisma.DateTimeNullableFilter<"Profile"> | Date | string | null;
     createdAt?: Prisma.DateTimeFilter<"Profile"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"Profile"> | Date | string;
     user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
+    movies?: Prisma.ProfileMovieListRelationFilter;
+    tracks?: Prisma.ProfileTrackListRelationFilter;
+    albums?: Prisma.ProfileAlbumListRelationFilter;
+    artists?: Prisma.ProfileArtistListRelationFilter;
 };
 export type ProfileOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
     user_id?: Prisma.SortOrder;
     bio?: Prisma.SortOrderInput | Prisma.SortOrder;
     gender?: Prisma.SortOrder;
-    accState?: Prisma.SortOrder;
+    profession?: Prisma.SortOrder;
+    location?: Prisma.SortOrderInput | Prisma.SortOrder;
+    hobby?: Prisma.SortOrder;
+    birthday?: Prisma.SortOrderInput | Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
     user?: Prisma.UserOrderByWithRelationInput;
+    movies?: Prisma.ProfileMovieOrderByRelationAggregateInput;
+    tracks?: Prisma.ProfileTrackOrderByRelationAggregateInput;
+    albums?: Prisma.ProfileAlbumOrderByRelationAggregateInput;
+    artists?: Prisma.ProfileArtistOrderByRelationAggregateInput;
 };
 export type ProfileWhereUniqueInput = Prisma.AtLeast<{
     id?: string;
@@ -174,17 +205,27 @@ export type ProfileWhereUniqueInput = Prisma.AtLeast<{
     NOT?: Prisma.ProfileWhereInput | Prisma.ProfileWhereInput[];
     bio?: Prisma.StringNullableFilter<"Profile"> | string | null;
     gender?: Prisma.StringFilter<"Profile"> | string;
-    accState?: Prisma.StringFilter<"Profile"> | string;
+    profession?: Prisma.StringFilter<"Profile"> | string;
+    location?: Prisma.StringNullableFilter<"Profile"> | string | null;
+    hobby?: Prisma.StringNullableListFilter<"Profile">;
+    birthday?: Prisma.DateTimeNullableFilter<"Profile"> | Date | string | null;
     createdAt?: Prisma.DateTimeFilter<"Profile"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"Profile"> | Date | string;
     user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
+    movies?: Prisma.ProfileMovieListRelationFilter;
+    tracks?: Prisma.ProfileTrackListRelationFilter;
+    albums?: Prisma.ProfileAlbumListRelationFilter;
+    artists?: Prisma.ProfileArtistListRelationFilter;
 }, "id" | "user_id">;
 export type ProfileOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
     user_id?: Prisma.SortOrder;
     bio?: Prisma.SortOrderInput | Prisma.SortOrder;
     gender?: Prisma.SortOrder;
-    accState?: Prisma.SortOrder;
+    profession?: Prisma.SortOrder;
+    location?: Prisma.SortOrderInput | Prisma.SortOrder;
+    hobby?: Prisma.SortOrder;
+    birthday?: Prisma.SortOrderInput | Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
     _count?: Prisma.ProfileCountOrderByAggregateInput;
@@ -199,7 +240,10 @@ export type ProfileScalarWhereWithAggregatesInput = {
     user_id?: Prisma.StringWithAggregatesFilter<"Profile"> | string;
     bio?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null;
     gender?: Prisma.StringWithAggregatesFilter<"Profile"> | string;
-    accState?: Prisma.StringWithAggregatesFilter<"Profile"> | string;
+    profession?: Prisma.StringWithAggregatesFilter<"Profile"> | string;
+    location?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null;
+    hobby?: Prisma.StringNullableListFilter<"Profile">;
+    birthday?: Prisma.DateTimeNullableWithAggregatesFilter<"Profile"> | Date | string | null;
     createdAt?: Prisma.DateTimeWithAggregatesFilter<"Profile"> | Date | string;
     updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Profile"> | Date | string;
 };
@@ -207,44 +251,75 @@ export type ProfileCreateInput = {
     id?: string;
     bio?: string | null;
     gender?: string;
-    accState?: string;
+    profession?: string;
+    location?: string | null;
+    hobby?: Prisma.ProfileCreatehobbyInput | string[];
+    birthday?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     user: Prisma.UserCreateNestedOneWithoutProfileInput;
+    movies?: Prisma.ProfileMovieCreateNestedManyWithoutProfileInput;
+    tracks?: Prisma.ProfileTrackCreateNestedManyWithoutProfileInput;
+    albums?: Prisma.ProfileAlbumCreateNestedManyWithoutProfileInput;
+    artists?: Prisma.ProfileArtistCreateNestedManyWithoutProfileInput;
 };
 export type ProfileUncheckedCreateInput = {
     id?: string;
     user_id: string;
     bio?: string | null;
     gender?: string;
-    accState?: string;
+    profession?: string;
+    location?: string | null;
+    hobby?: Prisma.ProfileCreatehobbyInput | string[];
+    birthday?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    movies?: Prisma.ProfileMovieUncheckedCreateNestedManyWithoutProfileInput;
+    tracks?: Prisma.ProfileTrackUncheckedCreateNestedManyWithoutProfileInput;
+    albums?: Prisma.ProfileAlbumUncheckedCreateNestedManyWithoutProfileInput;
+    artists?: Prisma.ProfileArtistUncheckedCreateNestedManyWithoutProfileInput;
 };
 export type ProfileUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     gender?: Prisma.StringFieldUpdateOperationsInput | string;
-    accState?: Prisma.StringFieldUpdateOperationsInput | string;
+    profession?: Prisma.StringFieldUpdateOperationsInput | string;
+    location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    hobby?: Prisma.ProfileUpdatehobbyInput | string[];
+    birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     user?: Prisma.UserUpdateOneRequiredWithoutProfileNestedInput;
+    movies?: Prisma.ProfileMovieUpdateManyWithoutProfileNestedInput;
+    tracks?: Prisma.ProfileTrackUpdateManyWithoutProfileNestedInput;
+    albums?: Prisma.ProfileAlbumUpdateManyWithoutProfileNestedInput;
+    artists?: Prisma.ProfileArtistUpdateManyWithoutProfileNestedInput;
 };
 export type ProfileUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     user_id?: Prisma.StringFieldUpdateOperationsInput | string;
     bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     gender?: Prisma.StringFieldUpdateOperationsInput | string;
-    accState?: Prisma.StringFieldUpdateOperationsInput | string;
+    profession?: Prisma.StringFieldUpdateOperationsInput | string;
+    location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    hobby?: Prisma.ProfileUpdatehobbyInput | string[];
+    birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    movies?: Prisma.ProfileMovieUncheckedUpdateManyWithoutProfileNestedInput;
+    tracks?: Prisma.ProfileTrackUncheckedUpdateManyWithoutProfileNestedInput;
+    albums?: Prisma.ProfileAlbumUncheckedUpdateManyWithoutProfileNestedInput;
+    artists?: Prisma.ProfileArtistUncheckedUpdateManyWithoutProfileNestedInput;
 };
 export type ProfileCreateManyInput = {
     id?: string;
     user_id: string;
     bio?: string | null;
     gender?: string;
-    accState?: string;
+    profession?: string;
+    location?: string | null;
+    hobby?: Prisma.ProfileCreatehobbyInput | string[];
+    birthday?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
 };
@@ -252,7 +327,10 @@ export type ProfileUpdateManyMutationInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     gender?: Prisma.StringFieldUpdateOperationsInput | string;
-    accState?: Prisma.StringFieldUpdateOperationsInput | string;
+    profession?: Prisma.StringFieldUpdateOperationsInput | string;
+    location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    hobby?: Prisma.ProfileUpdatehobbyInput | string[];
+    birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -261,7 +339,10 @@ export type ProfileUncheckedUpdateManyInput = {
     user_id?: Prisma.StringFieldUpdateOperationsInput | string;
     bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     gender?: Prisma.StringFieldUpdateOperationsInput | string;
-    accState?: Prisma.StringFieldUpdateOperationsInput | string;
+    profession?: Prisma.StringFieldUpdateOperationsInput | string;
+    location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    hobby?: Prisma.ProfileUpdatehobbyInput | string[];
+    birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -269,12 +350,22 @@ export type ProfileNullableScalarRelationFilter = {
     is?: Prisma.ProfileWhereInput | null;
     isNot?: Prisma.ProfileWhereInput | null;
 };
+export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null;
+    has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null;
+    hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>;
+    hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>;
+    isEmpty?: boolean;
+};
 export type ProfileCountOrderByAggregateInput = {
     id?: Prisma.SortOrder;
     user_id?: Prisma.SortOrder;
     bio?: Prisma.SortOrder;
     gender?: Prisma.SortOrder;
-    accState?: Prisma.SortOrder;
+    profession?: Prisma.SortOrder;
+    location?: Prisma.SortOrder;
+    hobby?: Prisma.SortOrder;
+    birthday?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
 };
@@ -283,7 +374,9 @@ export type ProfileMaxOrderByAggregateInput = {
     user_id?: Prisma.SortOrder;
     bio?: Prisma.SortOrder;
     gender?: Prisma.SortOrder;
-    accState?: Prisma.SortOrder;
+    profession?: Prisma.SortOrder;
+    location?: Prisma.SortOrder;
+    birthday?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
 };
@@ -292,9 +385,15 @@ export type ProfileMinOrderByAggregateInput = {
     user_id?: Prisma.SortOrder;
     bio?: Prisma.SortOrder;
     gender?: Prisma.SortOrder;
-    accState?: Prisma.SortOrder;
+    profession?: Prisma.SortOrder;
+    location?: Prisma.SortOrder;
+    birthday?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
+};
+export type ProfileScalarRelationFilter = {
+    is?: Prisma.ProfileWhereInput;
+    isNot?: Prisma.ProfileWhereInput;
 };
 export type ProfileCreateNestedOneWithoutUserInput = {
     create?: Prisma.XOR<Prisma.ProfileCreateWithoutUserInput, Prisma.ProfileUncheckedCreateWithoutUserInput>;
@@ -324,21 +423,93 @@ export type ProfileUncheckedUpdateOneWithoutUserNestedInput = {
     connect?: Prisma.ProfileWhereUniqueInput;
     update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutUserInput, Prisma.ProfileUpdateWithoutUserInput>, Prisma.ProfileUncheckedUpdateWithoutUserInput>;
 };
+export type ProfileCreatehobbyInput = {
+    set: string[];
+};
+export type ProfileUpdatehobbyInput = {
+    set?: string[];
+    push?: string | string[];
+};
+export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null;
+};
+export type ProfileCreateNestedOneWithoutMoviesInput = {
+    create?: Prisma.XOR<Prisma.ProfileCreateWithoutMoviesInput, Prisma.ProfileUncheckedCreateWithoutMoviesInput>;
+    connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutMoviesInput;
+    connect?: Prisma.ProfileWhereUniqueInput;
+};
+export type ProfileUpdateOneRequiredWithoutMoviesNestedInput = {
+    create?: Prisma.XOR<Prisma.ProfileCreateWithoutMoviesInput, Prisma.ProfileUncheckedCreateWithoutMoviesInput>;
+    connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutMoviesInput;
+    upsert?: Prisma.ProfileUpsertWithoutMoviesInput;
+    connect?: Prisma.ProfileWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutMoviesInput, Prisma.ProfileUpdateWithoutMoviesInput>, Prisma.ProfileUncheckedUpdateWithoutMoviesInput>;
+};
+export type ProfileCreateNestedOneWithoutTracksInput = {
+    create?: Prisma.XOR<Prisma.ProfileCreateWithoutTracksInput, Prisma.ProfileUncheckedCreateWithoutTracksInput>;
+    connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutTracksInput;
+    connect?: Prisma.ProfileWhereUniqueInput;
+};
+export type ProfileUpdateOneRequiredWithoutTracksNestedInput = {
+    create?: Prisma.XOR<Prisma.ProfileCreateWithoutTracksInput, Prisma.ProfileUncheckedCreateWithoutTracksInput>;
+    connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutTracksInput;
+    upsert?: Prisma.ProfileUpsertWithoutTracksInput;
+    connect?: Prisma.ProfileWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutTracksInput, Prisma.ProfileUpdateWithoutTracksInput>, Prisma.ProfileUncheckedUpdateWithoutTracksInput>;
+};
+export type ProfileCreateNestedOneWithoutAlbumsInput = {
+    create?: Prisma.XOR<Prisma.ProfileCreateWithoutAlbumsInput, Prisma.ProfileUncheckedCreateWithoutAlbumsInput>;
+    connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutAlbumsInput;
+    connect?: Prisma.ProfileWhereUniqueInput;
+};
+export type ProfileUpdateOneRequiredWithoutAlbumsNestedInput = {
+    create?: Prisma.XOR<Prisma.ProfileCreateWithoutAlbumsInput, Prisma.ProfileUncheckedCreateWithoutAlbumsInput>;
+    connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutAlbumsInput;
+    upsert?: Prisma.ProfileUpsertWithoutAlbumsInput;
+    connect?: Prisma.ProfileWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutAlbumsInput, Prisma.ProfileUpdateWithoutAlbumsInput>, Prisma.ProfileUncheckedUpdateWithoutAlbumsInput>;
+};
+export type ProfileCreateNestedOneWithoutArtistsInput = {
+    create?: Prisma.XOR<Prisma.ProfileCreateWithoutArtistsInput, Prisma.ProfileUncheckedCreateWithoutArtistsInput>;
+    connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutArtistsInput;
+    connect?: Prisma.ProfileWhereUniqueInput;
+};
+export type ProfileUpdateOneRequiredWithoutArtistsNestedInput = {
+    create?: Prisma.XOR<Prisma.ProfileCreateWithoutArtistsInput, Prisma.ProfileUncheckedCreateWithoutArtistsInput>;
+    connectOrCreate?: Prisma.ProfileCreateOrConnectWithoutArtistsInput;
+    upsert?: Prisma.ProfileUpsertWithoutArtistsInput;
+    connect?: Prisma.ProfileWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.ProfileUpdateToOneWithWhereWithoutArtistsInput, Prisma.ProfileUpdateWithoutArtistsInput>, Prisma.ProfileUncheckedUpdateWithoutArtistsInput>;
+};
 export type ProfileCreateWithoutUserInput = {
     id?: string;
     bio?: string | null;
     gender?: string;
-    accState?: string;
+    profession?: string;
+    location?: string | null;
+    hobby?: Prisma.ProfileCreatehobbyInput | string[];
+    birthday?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    movies?: Prisma.ProfileMovieCreateNestedManyWithoutProfileInput;
+    tracks?: Prisma.ProfileTrackCreateNestedManyWithoutProfileInput;
+    albums?: Prisma.ProfileAlbumCreateNestedManyWithoutProfileInput;
+    artists?: Prisma.ProfileArtistCreateNestedManyWithoutProfileInput;
 };
 export type ProfileUncheckedCreateWithoutUserInput = {
     id?: string;
     bio?: string | null;
     gender?: string;
-    accState?: string;
+    profession?: string;
+    location?: string | null;
+    hobby?: Prisma.ProfileCreatehobbyInput | string[];
+    birthday?: Date | string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    movies?: Prisma.ProfileMovieUncheckedCreateNestedManyWithoutProfileInput;
+    tracks?: Prisma.ProfileTrackUncheckedCreateNestedManyWithoutProfileInput;
+    albums?: Prisma.ProfileAlbumUncheckedCreateNestedManyWithoutProfileInput;
+    artists?: Prisma.ProfileArtistUncheckedCreateNestedManyWithoutProfileInput;
 };
 export type ProfileCreateOrConnectWithoutUserInput = {
     where: Prisma.ProfileWhereUniqueInput;
@@ -357,34 +528,399 @@ export type ProfileUpdateWithoutUserInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     gender?: Prisma.StringFieldUpdateOperationsInput | string;
-    accState?: Prisma.StringFieldUpdateOperationsInput | string;
+    profession?: Prisma.StringFieldUpdateOperationsInput | string;
+    location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    hobby?: Prisma.ProfileUpdatehobbyInput | string[];
+    birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    movies?: Prisma.ProfileMovieUpdateManyWithoutProfileNestedInput;
+    tracks?: Prisma.ProfileTrackUpdateManyWithoutProfileNestedInput;
+    albums?: Prisma.ProfileAlbumUpdateManyWithoutProfileNestedInput;
+    artists?: Prisma.ProfileArtistUpdateManyWithoutProfileNestedInput;
 };
 export type ProfileUncheckedUpdateWithoutUserInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     gender?: Prisma.StringFieldUpdateOperationsInput | string;
-    accState?: Prisma.StringFieldUpdateOperationsInput | string;
+    profession?: Prisma.StringFieldUpdateOperationsInput | string;
+    location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    hobby?: Prisma.ProfileUpdatehobbyInput | string[];
+    birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    movies?: Prisma.ProfileMovieUncheckedUpdateManyWithoutProfileNestedInput;
+    tracks?: Prisma.ProfileTrackUncheckedUpdateManyWithoutProfileNestedInput;
+    albums?: Prisma.ProfileAlbumUncheckedUpdateManyWithoutProfileNestedInput;
+    artists?: Prisma.ProfileArtistUncheckedUpdateManyWithoutProfileNestedInput;
+};
+export type ProfileCreateWithoutMoviesInput = {
+    id?: string;
+    bio?: string | null;
+    gender?: string;
+    profession?: string;
+    location?: string | null;
+    hobby?: Prisma.ProfileCreatehobbyInput | string[];
+    birthday?: Date | string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    user: Prisma.UserCreateNestedOneWithoutProfileInput;
+    tracks?: Prisma.ProfileTrackCreateNestedManyWithoutProfileInput;
+    albums?: Prisma.ProfileAlbumCreateNestedManyWithoutProfileInput;
+    artists?: Prisma.ProfileArtistCreateNestedManyWithoutProfileInput;
+};
+export type ProfileUncheckedCreateWithoutMoviesInput = {
+    id?: string;
+    user_id: string;
+    bio?: string | null;
+    gender?: string;
+    profession?: string;
+    location?: string | null;
+    hobby?: Prisma.ProfileCreatehobbyInput | string[];
+    birthday?: Date | string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    tracks?: Prisma.ProfileTrackUncheckedCreateNestedManyWithoutProfileInput;
+    albums?: Prisma.ProfileAlbumUncheckedCreateNestedManyWithoutProfileInput;
+    artists?: Prisma.ProfileArtistUncheckedCreateNestedManyWithoutProfileInput;
+};
+export type ProfileCreateOrConnectWithoutMoviesInput = {
+    where: Prisma.ProfileWhereUniqueInput;
+    create: Prisma.XOR<Prisma.ProfileCreateWithoutMoviesInput, Prisma.ProfileUncheckedCreateWithoutMoviesInput>;
+};
+export type ProfileUpsertWithoutMoviesInput = {
+    update: Prisma.XOR<Prisma.ProfileUpdateWithoutMoviesInput, Prisma.ProfileUncheckedUpdateWithoutMoviesInput>;
+    create: Prisma.XOR<Prisma.ProfileCreateWithoutMoviesInput, Prisma.ProfileUncheckedCreateWithoutMoviesInput>;
+    where?: Prisma.ProfileWhereInput;
+};
+export type ProfileUpdateToOneWithWhereWithoutMoviesInput = {
+    where?: Prisma.ProfileWhereInput;
+    data: Prisma.XOR<Prisma.ProfileUpdateWithoutMoviesInput, Prisma.ProfileUncheckedUpdateWithoutMoviesInput>;
+};
+export type ProfileUpdateWithoutMoviesInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    gender?: Prisma.StringFieldUpdateOperationsInput | string;
+    profession?: Prisma.StringFieldUpdateOperationsInput | string;
+    location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    hobby?: Prisma.ProfileUpdatehobbyInput | string[];
+    birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    user?: Prisma.UserUpdateOneRequiredWithoutProfileNestedInput;
+    tracks?: Prisma.ProfileTrackUpdateManyWithoutProfileNestedInput;
+    albums?: Prisma.ProfileAlbumUpdateManyWithoutProfileNestedInput;
+    artists?: Prisma.ProfileArtistUpdateManyWithoutProfileNestedInput;
+};
+export type ProfileUncheckedUpdateWithoutMoviesInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    user_id?: Prisma.StringFieldUpdateOperationsInput | string;
+    bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    gender?: Prisma.StringFieldUpdateOperationsInput | string;
+    profession?: Prisma.StringFieldUpdateOperationsInput | string;
+    location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    hobby?: Prisma.ProfileUpdatehobbyInput | string[];
+    birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    tracks?: Prisma.ProfileTrackUncheckedUpdateManyWithoutProfileNestedInput;
+    albums?: Prisma.ProfileAlbumUncheckedUpdateManyWithoutProfileNestedInput;
+    artists?: Prisma.ProfileArtistUncheckedUpdateManyWithoutProfileNestedInput;
+};
+export type ProfileCreateWithoutTracksInput = {
+    id?: string;
+    bio?: string | null;
+    gender?: string;
+    profession?: string;
+    location?: string | null;
+    hobby?: Prisma.ProfileCreatehobbyInput | string[];
+    birthday?: Date | string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    user: Prisma.UserCreateNestedOneWithoutProfileInput;
+    movies?: Prisma.ProfileMovieCreateNestedManyWithoutProfileInput;
+    albums?: Prisma.ProfileAlbumCreateNestedManyWithoutProfileInput;
+    artists?: Prisma.ProfileArtistCreateNestedManyWithoutProfileInput;
+};
+export type ProfileUncheckedCreateWithoutTracksInput = {
+    id?: string;
+    user_id: string;
+    bio?: string | null;
+    gender?: string;
+    profession?: string;
+    location?: string | null;
+    hobby?: Prisma.ProfileCreatehobbyInput | string[];
+    birthday?: Date | string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    movies?: Prisma.ProfileMovieUncheckedCreateNestedManyWithoutProfileInput;
+    albums?: Prisma.ProfileAlbumUncheckedCreateNestedManyWithoutProfileInput;
+    artists?: Prisma.ProfileArtistUncheckedCreateNestedManyWithoutProfileInput;
+};
+export type ProfileCreateOrConnectWithoutTracksInput = {
+    where: Prisma.ProfileWhereUniqueInput;
+    create: Prisma.XOR<Prisma.ProfileCreateWithoutTracksInput, Prisma.ProfileUncheckedCreateWithoutTracksInput>;
+};
+export type ProfileUpsertWithoutTracksInput = {
+    update: Prisma.XOR<Prisma.ProfileUpdateWithoutTracksInput, Prisma.ProfileUncheckedUpdateWithoutTracksInput>;
+    create: Prisma.XOR<Prisma.ProfileCreateWithoutTracksInput, Prisma.ProfileUncheckedCreateWithoutTracksInput>;
+    where?: Prisma.ProfileWhereInput;
+};
+export type ProfileUpdateToOneWithWhereWithoutTracksInput = {
+    where?: Prisma.ProfileWhereInput;
+    data: Prisma.XOR<Prisma.ProfileUpdateWithoutTracksInput, Prisma.ProfileUncheckedUpdateWithoutTracksInput>;
+};
+export type ProfileUpdateWithoutTracksInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    gender?: Prisma.StringFieldUpdateOperationsInput | string;
+    profession?: Prisma.StringFieldUpdateOperationsInput | string;
+    location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    hobby?: Prisma.ProfileUpdatehobbyInput | string[];
+    birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    user?: Prisma.UserUpdateOneRequiredWithoutProfileNestedInput;
+    movies?: Prisma.ProfileMovieUpdateManyWithoutProfileNestedInput;
+    albums?: Prisma.ProfileAlbumUpdateManyWithoutProfileNestedInput;
+    artists?: Prisma.ProfileArtistUpdateManyWithoutProfileNestedInput;
+};
+export type ProfileUncheckedUpdateWithoutTracksInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    user_id?: Prisma.StringFieldUpdateOperationsInput | string;
+    bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    gender?: Prisma.StringFieldUpdateOperationsInput | string;
+    profession?: Prisma.StringFieldUpdateOperationsInput | string;
+    location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    hobby?: Prisma.ProfileUpdatehobbyInput | string[];
+    birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    movies?: Prisma.ProfileMovieUncheckedUpdateManyWithoutProfileNestedInput;
+    albums?: Prisma.ProfileAlbumUncheckedUpdateManyWithoutProfileNestedInput;
+    artists?: Prisma.ProfileArtistUncheckedUpdateManyWithoutProfileNestedInput;
+};
+export type ProfileCreateWithoutAlbumsInput = {
+    id?: string;
+    bio?: string | null;
+    gender?: string;
+    profession?: string;
+    location?: string | null;
+    hobby?: Prisma.ProfileCreatehobbyInput | string[];
+    birthday?: Date | string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    user: Prisma.UserCreateNestedOneWithoutProfileInput;
+    movies?: Prisma.ProfileMovieCreateNestedManyWithoutProfileInput;
+    tracks?: Prisma.ProfileTrackCreateNestedManyWithoutProfileInput;
+    artists?: Prisma.ProfileArtistCreateNestedManyWithoutProfileInput;
+};
+export type ProfileUncheckedCreateWithoutAlbumsInput = {
+    id?: string;
+    user_id: string;
+    bio?: string | null;
+    gender?: string;
+    profession?: string;
+    location?: string | null;
+    hobby?: Prisma.ProfileCreatehobbyInput | string[];
+    birthday?: Date | string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    movies?: Prisma.ProfileMovieUncheckedCreateNestedManyWithoutProfileInput;
+    tracks?: Prisma.ProfileTrackUncheckedCreateNestedManyWithoutProfileInput;
+    artists?: Prisma.ProfileArtistUncheckedCreateNestedManyWithoutProfileInput;
+};
+export type ProfileCreateOrConnectWithoutAlbumsInput = {
+    where: Prisma.ProfileWhereUniqueInput;
+    create: Prisma.XOR<Prisma.ProfileCreateWithoutAlbumsInput, Prisma.ProfileUncheckedCreateWithoutAlbumsInput>;
+};
+export type ProfileUpsertWithoutAlbumsInput = {
+    update: Prisma.XOR<Prisma.ProfileUpdateWithoutAlbumsInput, Prisma.ProfileUncheckedUpdateWithoutAlbumsInput>;
+    create: Prisma.XOR<Prisma.ProfileCreateWithoutAlbumsInput, Prisma.ProfileUncheckedCreateWithoutAlbumsInput>;
+    where?: Prisma.ProfileWhereInput;
+};
+export type ProfileUpdateToOneWithWhereWithoutAlbumsInput = {
+    where?: Prisma.ProfileWhereInput;
+    data: Prisma.XOR<Prisma.ProfileUpdateWithoutAlbumsInput, Prisma.ProfileUncheckedUpdateWithoutAlbumsInput>;
+};
+export type ProfileUpdateWithoutAlbumsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    gender?: Prisma.StringFieldUpdateOperationsInput | string;
+    profession?: Prisma.StringFieldUpdateOperationsInput | string;
+    location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    hobby?: Prisma.ProfileUpdatehobbyInput | string[];
+    birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    user?: Prisma.UserUpdateOneRequiredWithoutProfileNestedInput;
+    movies?: Prisma.ProfileMovieUpdateManyWithoutProfileNestedInput;
+    tracks?: Prisma.ProfileTrackUpdateManyWithoutProfileNestedInput;
+    artists?: Prisma.ProfileArtistUpdateManyWithoutProfileNestedInput;
+};
+export type ProfileUncheckedUpdateWithoutAlbumsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    user_id?: Prisma.StringFieldUpdateOperationsInput | string;
+    bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    gender?: Prisma.StringFieldUpdateOperationsInput | string;
+    profession?: Prisma.StringFieldUpdateOperationsInput | string;
+    location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    hobby?: Prisma.ProfileUpdatehobbyInput | string[];
+    birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    movies?: Prisma.ProfileMovieUncheckedUpdateManyWithoutProfileNestedInput;
+    tracks?: Prisma.ProfileTrackUncheckedUpdateManyWithoutProfileNestedInput;
+    artists?: Prisma.ProfileArtistUncheckedUpdateManyWithoutProfileNestedInput;
+};
+export type ProfileCreateWithoutArtistsInput = {
+    id?: string;
+    bio?: string | null;
+    gender?: string;
+    profession?: string;
+    location?: string | null;
+    hobby?: Prisma.ProfileCreatehobbyInput | string[];
+    birthday?: Date | string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    user: Prisma.UserCreateNestedOneWithoutProfileInput;
+    movies?: Prisma.ProfileMovieCreateNestedManyWithoutProfileInput;
+    tracks?: Prisma.ProfileTrackCreateNestedManyWithoutProfileInput;
+    albums?: Prisma.ProfileAlbumCreateNestedManyWithoutProfileInput;
+};
+export type ProfileUncheckedCreateWithoutArtistsInput = {
+    id?: string;
+    user_id: string;
+    bio?: string | null;
+    gender?: string;
+    profession?: string;
+    location?: string | null;
+    hobby?: Prisma.ProfileCreatehobbyInput | string[];
+    birthday?: Date | string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    movies?: Prisma.ProfileMovieUncheckedCreateNestedManyWithoutProfileInput;
+    tracks?: Prisma.ProfileTrackUncheckedCreateNestedManyWithoutProfileInput;
+    albums?: Prisma.ProfileAlbumUncheckedCreateNestedManyWithoutProfileInput;
+};
+export type ProfileCreateOrConnectWithoutArtistsInput = {
+    where: Prisma.ProfileWhereUniqueInput;
+    create: Prisma.XOR<Prisma.ProfileCreateWithoutArtistsInput, Prisma.ProfileUncheckedCreateWithoutArtistsInput>;
+};
+export type ProfileUpsertWithoutArtistsInput = {
+    update: Prisma.XOR<Prisma.ProfileUpdateWithoutArtistsInput, Prisma.ProfileUncheckedUpdateWithoutArtistsInput>;
+    create: Prisma.XOR<Prisma.ProfileCreateWithoutArtistsInput, Prisma.ProfileUncheckedCreateWithoutArtistsInput>;
+    where?: Prisma.ProfileWhereInput;
+};
+export type ProfileUpdateToOneWithWhereWithoutArtistsInput = {
+    where?: Prisma.ProfileWhereInput;
+    data: Prisma.XOR<Prisma.ProfileUpdateWithoutArtistsInput, Prisma.ProfileUncheckedUpdateWithoutArtistsInput>;
+};
+export type ProfileUpdateWithoutArtistsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    gender?: Prisma.StringFieldUpdateOperationsInput | string;
+    profession?: Prisma.StringFieldUpdateOperationsInput | string;
+    location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    hobby?: Prisma.ProfileUpdatehobbyInput | string[];
+    birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    user?: Prisma.UserUpdateOneRequiredWithoutProfileNestedInput;
+    movies?: Prisma.ProfileMovieUpdateManyWithoutProfileNestedInput;
+    tracks?: Prisma.ProfileTrackUpdateManyWithoutProfileNestedInput;
+    albums?: Prisma.ProfileAlbumUpdateManyWithoutProfileNestedInput;
+};
+export type ProfileUncheckedUpdateWithoutArtistsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    user_id?: Prisma.StringFieldUpdateOperationsInput | string;
+    bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    gender?: Prisma.StringFieldUpdateOperationsInput | string;
+    profession?: Prisma.StringFieldUpdateOperationsInput | string;
+    location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    hobby?: Prisma.ProfileUpdatehobbyInput | string[];
+    birthday?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    movies?: Prisma.ProfileMovieUncheckedUpdateManyWithoutProfileNestedInput;
+    tracks?: Prisma.ProfileTrackUncheckedUpdateManyWithoutProfileNestedInput;
+    albums?: Prisma.ProfileAlbumUncheckedUpdateManyWithoutProfileNestedInput;
+};
+/**
+ * Count Type ProfileCountOutputType
+ */
+export type ProfileCountOutputType = {
+    movies: number;
+    tracks: number;
+    albums: number;
+    artists: number;
+};
+export type ProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    movies?: boolean | ProfileCountOutputTypeCountMoviesArgs;
+    tracks?: boolean | ProfileCountOutputTypeCountTracksArgs;
+    albums?: boolean | ProfileCountOutputTypeCountAlbumsArgs;
+    artists?: boolean | ProfileCountOutputTypeCountArtistsArgs;
+};
+/**
+ * ProfileCountOutputType without action
+ */
+export type ProfileCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileCountOutputType
+     */
+    select?: Prisma.ProfileCountOutputTypeSelect<ExtArgs> | null;
+};
+/**
+ * ProfileCountOutputType without action
+ */
+export type ProfileCountOutputTypeCountMoviesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.ProfileMovieWhereInput;
+};
+/**
+ * ProfileCountOutputType without action
+ */
+export type ProfileCountOutputTypeCountTracksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.ProfileTrackWhereInput;
+};
+/**
+ * ProfileCountOutputType without action
+ */
+export type ProfileCountOutputTypeCountAlbumsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.ProfileAlbumWhereInput;
+};
+/**
+ * ProfileCountOutputType without action
+ */
+export type ProfileCountOutputTypeCountArtistsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.ProfileArtistWhereInput;
 };
 export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
     user_id?: boolean;
     bio?: boolean;
     gender?: boolean;
-    accState?: boolean;
+    profession?: boolean;
+    location?: boolean;
+    hobby?: boolean;
+    birthday?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
+    movies?: boolean | Prisma.Profile$moviesArgs<ExtArgs>;
+    tracks?: boolean | Prisma.Profile$tracksArgs<ExtArgs>;
+    albums?: boolean | Prisma.Profile$albumsArgs<ExtArgs>;
+    artists?: boolean | Prisma.Profile$artistsArgs<ExtArgs>;
+    _count?: boolean | Prisma.ProfileCountOutputTypeDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["profile"]>;
 export type ProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
     user_id?: boolean;
     bio?: boolean;
     gender?: boolean;
-    accState?: boolean;
+    profession?: boolean;
+    location?: boolean;
+    hobby?: boolean;
+    birthday?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
@@ -394,7 +930,10 @@ export type ProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
     user_id?: boolean;
     bio?: boolean;
     gender?: boolean;
-    accState?: boolean;
+    profession?: boolean;
+    location?: boolean;
+    hobby?: boolean;
+    birthday?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
@@ -404,13 +943,21 @@ export type ProfileSelectScalar = {
     user_id?: boolean;
     bio?: boolean;
     gender?: boolean;
-    accState?: boolean;
+    profession?: boolean;
+    location?: boolean;
+    hobby?: boolean;
+    birthday?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 };
-export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "bio" | "gender" | "accState" | "createdAt" | "updatedAt", ExtArgs["result"]["profile"]>;
+export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "bio" | "gender" | "profession" | "location" | "hobby" | "birthday" | "createdAt" | "updatedAt", ExtArgs["result"]["profile"]>;
 export type ProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
+    movies?: boolean | Prisma.Profile$moviesArgs<ExtArgs>;
+    tracks?: boolean | Prisma.Profile$tracksArgs<ExtArgs>;
+    albums?: boolean | Prisma.Profile$albumsArgs<ExtArgs>;
+    artists?: boolean | Prisma.Profile$artistsArgs<ExtArgs>;
+    _count?: boolean | Prisma.ProfileCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type ProfileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
@@ -422,13 +969,20 @@ export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     name: "Profile";
     objects: {
         user: Prisma.$UserPayload<ExtArgs>;
+        movies: Prisma.$ProfileMoviePayload<ExtArgs>[];
+        tracks: Prisma.$ProfileTrackPayload<ExtArgs>[];
+        albums: Prisma.$ProfileAlbumPayload<ExtArgs>[];
+        artists: Prisma.$ProfileArtistPayload<ExtArgs>[];
     };
     scalars: runtime.Types.Extensions.GetPayloadResult<{
         id: string;
         user_id: string;
         bio: string | null;
         gender: string;
-        accState: string;
+        profession: string;
+        location: string | null;
+        hobby: string[];
+        birthday: Date | null;
         createdAt: Date;
         updatedAt: Date;
     }, ExtArgs["result"]["profile"]>;
@@ -761,6 +1315,10 @@ export interface ProfileDelegate<ExtArgs extends runtime.Types.Extensions.Intern
 export interface Prisma__ProfileClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise";
     user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>;
+    movies<T extends Prisma.Profile$moviesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$moviesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProfileMoviePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    tracks<T extends Prisma.Profile$tracksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$tracksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProfileTrackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    albums<T extends Prisma.Profile$albumsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$albumsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProfileAlbumPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    artists<T extends Prisma.Profile$artistsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Profile$artistsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProfileArtistPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -790,7 +1348,10 @@ export interface ProfileFieldRefs {
     readonly user_id: Prisma.FieldRef<"Profile", 'String'>;
     readonly bio: Prisma.FieldRef<"Profile", 'String'>;
     readonly gender: Prisma.FieldRef<"Profile", 'String'>;
-    readonly accState: Prisma.FieldRef<"Profile", 'String'>;
+    readonly profession: Prisma.FieldRef<"Profile", 'String'>;
+    readonly location: Prisma.FieldRef<"Profile", 'String'>;
+    readonly hobby: Prisma.FieldRef<"Profile", 'String[]'>;
+    readonly birthday: Prisma.FieldRef<"Profile", 'DateTime'>;
     readonly createdAt: Prisma.FieldRef<"Profile", 'DateTime'>;
     readonly updatedAt: Prisma.FieldRef<"Profile", 'DateTime'>;
 }
@@ -1170,6 +1731,98 @@ export type ProfileDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
      * Limit how many Profiles to delete.
      */
     limit?: number;
+};
+/**
+ * Profile.movies
+ */
+export type Profile$moviesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileMovie
+     */
+    select?: Prisma.ProfileMovieSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the ProfileMovie
+     */
+    omit?: Prisma.ProfileMovieOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.ProfileMovieInclude<ExtArgs> | null;
+    where?: Prisma.ProfileMovieWhereInput;
+    orderBy?: Prisma.ProfileMovieOrderByWithRelationInput | Prisma.ProfileMovieOrderByWithRelationInput[];
+    cursor?: Prisma.ProfileMovieWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.ProfileMovieScalarFieldEnum | Prisma.ProfileMovieScalarFieldEnum[];
+};
+/**
+ * Profile.tracks
+ */
+export type Profile$tracksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileTrack
+     */
+    select?: Prisma.ProfileTrackSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the ProfileTrack
+     */
+    omit?: Prisma.ProfileTrackOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.ProfileTrackInclude<ExtArgs> | null;
+    where?: Prisma.ProfileTrackWhereInput;
+    orderBy?: Prisma.ProfileTrackOrderByWithRelationInput | Prisma.ProfileTrackOrderByWithRelationInput[];
+    cursor?: Prisma.ProfileTrackWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.ProfileTrackScalarFieldEnum | Prisma.ProfileTrackScalarFieldEnum[];
+};
+/**
+ * Profile.albums
+ */
+export type Profile$albumsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileAlbum
+     */
+    select?: Prisma.ProfileAlbumSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the ProfileAlbum
+     */
+    omit?: Prisma.ProfileAlbumOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.ProfileAlbumInclude<ExtArgs> | null;
+    where?: Prisma.ProfileAlbumWhereInput;
+    orderBy?: Prisma.ProfileAlbumOrderByWithRelationInput | Prisma.ProfileAlbumOrderByWithRelationInput[];
+    cursor?: Prisma.ProfileAlbumWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.ProfileAlbumScalarFieldEnum | Prisma.ProfileAlbumScalarFieldEnum[];
+};
+/**
+ * Profile.artists
+ */
+export type Profile$artistsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ProfileArtist
+     */
+    select?: Prisma.ProfileArtistSelect<ExtArgs> | null;
+    /**
+     * Omit specific fields from the ProfileArtist
+     */
+    omit?: Prisma.ProfileArtistOmit<ExtArgs> | null;
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: Prisma.ProfileArtistInclude<ExtArgs> | null;
+    where?: Prisma.ProfileArtistWhereInput;
+    orderBy?: Prisma.ProfileArtistOrderByWithRelationInput | Prisma.ProfileArtistOrderByWithRelationInput[];
+    cursor?: Prisma.ProfileArtistWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.ProfileArtistScalarFieldEnum | Prisma.ProfileArtistScalarFieldEnum[];
 };
 /**
  * Profile without action

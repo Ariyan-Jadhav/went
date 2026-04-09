@@ -15,7 +15,7 @@ export default function SignUp() {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false); // ✅ added
+  const [loading, setLoading] = useState(false);
 
   if (!isLoaded) return null;
 
@@ -36,7 +36,7 @@ export default function SignUp() {
     e.preventDefault();
     if (!signUp) return;
     try {
-      setLoading(true); // ✅
+      setLoading(true);
       await signUp.create({ emailAddress, password });
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setPendingVerification(true);
@@ -44,7 +44,7 @@ export default function SignUp() {
     } catch (error: any) {
       setError(error.errors?.[0]?.message || "Sign up failed");
     } finally {
-      setLoading(false); // ✅
+      setLoading(false);
     }
   }
 
@@ -52,7 +52,7 @@ export default function SignUp() {
     e.preventDefault();
     if (!signUp) return;
     try {
-      setLoading(true); // ✅
+      setLoading(true);
       const completeSignup = await signUp.attemptEmailAddressVerification({
         code,
       });
@@ -65,7 +65,7 @@ export default function SignUp() {
     } catch (error: any) {
       setError(error.errors?.[0]?.message || "Verification failed");
     } finally {
-      setLoading(false); // ✅
+      setLoading(false);
     }
   }
 
@@ -86,7 +86,6 @@ export default function SignUp() {
     setOpenTextBox(true);
   }, []);
 
-  // ✅ Reusable spinner button
   const Spinner = () => (
     <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin inline-block" />
   );

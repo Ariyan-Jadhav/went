@@ -2,7 +2,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 
-const PUBLIC_PATHS = ["/feed", "/signin", "/signup"];
+const PUBLIC_PATHS = ["/feed", "/signin", "/signup", "/terms"];
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isSignedIn, isLoaded } = useAuth();

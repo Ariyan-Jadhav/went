@@ -13,33 +13,33 @@ export type AggregateLike = {
 export type LikeMinAggregateOutputType = {
     id: string | null;
     user_id: string | null;
-    post_id: string | null;
+    interaction_id: string | null;
 };
 export type LikeMaxAggregateOutputType = {
     id: string | null;
     user_id: string | null;
-    post_id: string | null;
+    interaction_id: string | null;
 };
 export type LikeCountAggregateOutputType = {
     id: number;
     user_id: number;
-    post_id: number;
+    interaction_id: number;
     _all: number;
 };
 export type LikeMinAggregateInputType = {
     id?: true;
     user_id?: true;
-    post_id?: true;
+    interaction_id?: true;
 };
 export type LikeMaxAggregateInputType = {
     id?: true;
     user_id?: true;
-    post_id?: true;
+    interaction_id?: true;
 };
 export type LikeCountAggregateInputType = {
     id?: true;
     user_id?: true;
-    post_id?: true;
+    interaction_id?: true;
     _all?: true;
 };
 export type LikeAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -107,7 +107,7 @@ export type LikeGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type LikeGroupByOutputType = {
     id: string;
     user_id: string;
-    post_id: string;
+    interaction_id: string;
     _count: LikeCountAggregateOutputType | null;
     _min: LikeMinAggregateOutputType | null;
     _max: LikeMaxAggregateOutputType | null;
@@ -121,29 +121,29 @@ export type LikeWhereInput = {
     NOT?: Prisma.LikeWhereInput | Prisma.LikeWhereInput[];
     id?: Prisma.StringFilter<"Like"> | string;
     user_id?: Prisma.StringFilter<"Like"> | string;
-    post_id?: Prisma.StringFilter<"Like"> | string;
+    interaction_id?: Prisma.StringFilter<"Like"> | string;
     user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
 };
 export type LikeOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
     user_id?: Prisma.SortOrder;
-    post_id?: Prisma.SortOrder;
+    interaction_id?: Prisma.SortOrder;
     user?: Prisma.UserOrderByWithRelationInput;
 };
 export type LikeWhereUniqueInput = Prisma.AtLeast<{
     id?: string;
-    user_id_post_id?: Prisma.LikeUser_idPost_idCompoundUniqueInput;
+    user_id_interaction_id?: Prisma.LikeUser_idInteraction_idCompoundUniqueInput;
     AND?: Prisma.LikeWhereInput | Prisma.LikeWhereInput[];
     OR?: Prisma.LikeWhereInput[];
     NOT?: Prisma.LikeWhereInput | Prisma.LikeWhereInput[];
     user_id?: Prisma.StringFilter<"Like"> | string;
-    post_id?: Prisma.StringFilter<"Like"> | string;
+    interaction_id?: Prisma.StringFilter<"Like"> | string;
     user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>;
-}, "id" | "user_id_post_id">;
+}, "id" | "user_id_interaction_id">;
 export type LikeOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
     user_id?: Prisma.SortOrder;
-    post_id?: Prisma.SortOrder;
+    interaction_id?: Prisma.SortOrder;
     _count?: Prisma.LikeCountOrderByAggregateInput;
     _max?: Prisma.LikeMaxOrderByAggregateInput;
     _min?: Prisma.LikeMinOrderByAggregateInput;
@@ -154,41 +154,41 @@ export type LikeScalarWhereWithAggregatesInput = {
     NOT?: Prisma.LikeScalarWhereWithAggregatesInput | Prisma.LikeScalarWhereWithAggregatesInput[];
     id?: Prisma.StringWithAggregatesFilter<"Like"> | string;
     user_id?: Prisma.StringWithAggregatesFilter<"Like"> | string;
-    post_id?: Prisma.StringWithAggregatesFilter<"Like"> | string;
+    interaction_id?: Prisma.StringWithAggregatesFilter<"Like"> | string;
 };
 export type LikeCreateInput = {
     id?: string;
-    post_id: string;
+    interaction_id: string;
     user: Prisma.UserCreateNestedOneWithoutLikesInput;
 };
 export type LikeUncheckedCreateInput = {
     id?: string;
     user_id: string;
-    post_id: string;
+    interaction_id: string;
 };
 export type LikeUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
-    post_id?: Prisma.StringFieldUpdateOperationsInput | string;
+    interaction_id?: Prisma.StringFieldUpdateOperationsInput | string;
     user?: Prisma.UserUpdateOneRequiredWithoutLikesNestedInput;
 };
 export type LikeUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     user_id?: Prisma.StringFieldUpdateOperationsInput | string;
-    post_id?: Prisma.StringFieldUpdateOperationsInput | string;
+    interaction_id?: Prisma.StringFieldUpdateOperationsInput | string;
 };
 export type LikeCreateManyInput = {
     id?: string;
     user_id: string;
-    post_id: string;
+    interaction_id: string;
 };
 export type LikeUpdateManyMutationInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
-    post_id?: Prisma.StringFieldUpdateOperationsInput | string;
+    interaction_id?: Prisma.StringFieldUpdateOperationsInput | string;
 };
 export type LikeUncheckedUpdateManyInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
     user_id?: Prisma.StringFieldUpdateOperationsInput | string;
-    post_id?: Prisma.StringFieldUpdateOperationsInput | string;
+    interaction_id?: Prisma.StringFieldUpdateOperationsInput | string;
 };
 export type LikeListRelationFilter = {
     every?: Prisma.LikeWhereInput;
@@ -198,24 +198,24 @@ export type LikeListRelationFilter = {
 export type LikeOrderByRelationAggregateInput = {
     _count?: Prisma.SortOrder;
 };
-export type LikeUser_idPost_idCompoundUniqueInput = {
+export type LikeUser_idInteraction_idCompoundUniqueInput = {
     user_id: string;
-    post_id: string;
+    interaction_id: string;
 };
 export type LikeCountOrderByAggregateInput = {
     id?: Prisma.SortOrder;
     user_id?: Prisma.SortOrder;
-    post_id?: Prisma.SortOrder;
+    interaction_id?: Prisma.SortOrder;
 };
 export type LikeMaxOrderByAggregateInput = {
     id?: Prisma.SortOrder;
     user_id?: Prisma.SortOrder;
-    post_id?: Prisma.SortOrder;
+    interaction_id?: Prisma.SortOrder;
 };
 export type LikeMinOrderByAggregateInput = {
     id?: Prisma.SortOrder;
     user_id?: Prisma.SortOrder;
-    post_id?: Prisma.SortOrder;
+    interaction_id?: Prisma.SortOrder;
 };
 export type LikeCreateNestedManyWithoutUserInput = {
     create?: Prisma.XOR<Prisma.LikeCreateWithoutUserInput, Prisma.LikeUncheckedCreateWithoutUserInput> | Prisma.LikeCreateWithoutUserInput[] | Prisma.LikeUncheckedCreateWithoutUserInput[];
@@ -257,11 +257,11 @@ export type LikeUncheckedUpdateManyWithoutUserNestedInput = {
 };
 export type LikeCreateWithoutUserInput = {
     id?: string;
-    post_id: string;
+    interaction_id: string;
 };
 export type LikeUncheckedCreateWithoutUserInput = {
     id?: string;
-    post_id: string;
+    interaction_id: string;
 };
 export type LikeCreateOrConnectWithoutUserInput = {
     where: Prisma.LikeWhereUniqueInput;
@@ -290,48 +290,48 @@ export type LikeScalarWhereInput = {
     NOT?: Prisma.LikeScalarWhereInput | Prisma.LikeScalarWhereInput[];
     id?: Prisma.StringFilter<"Like"> | string;
     user_id?: Prisma.StringFilter<"Like"> | string;
-    post_id?: Prisma.StringFilter<"Like"> | string;
+    interaction_id?: Prisma.StringFilter<"Like"> | string;
 };
 export type LikeCreateManyUserInput = {
     id?: string;
-    post_id: string;
+    interaction_id: string;
 };
 export type LikeUpdateWithoutUserInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
-    post_id?: Prisma.StringFieldUpdateOperationsInput | string;
+    interaction_id?: Prisma.StringFieldUpdateOperationsInput | string;
 };
 export type LikeUncheckedUpdateWithoutUserInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
-    post_id?: Prisma.StringFieldUpdateOperationsInput | string;
+    interaction_id?: Prisma.StringFieldUpdateOperationsInput | string;
 };
 export type LikeUncheckedUpdateManyWithoutUserInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
-    post_id?: Prisma.StringFieldUpdateOperationsInput | string;
+    interaction_id?: Prisma.StringFieldUpdateOperationsInput | string;
 };
 export type LikeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
     user_id?: boolean;
-    post_id?: boolean;
+    interaction_id?: boolean;
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["like"]>;
 export type LikeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
     user_id?: boolean;
-    post_id?: boolean;
+    interaction_id?: boolean;
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["like"]>;
 export type LikeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
     user_id?: boolean;
-    post_id?: boolean;
+    interaction_id?: boolean;
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["like"]>;
 export type LikeSelectScalar = {
     id?: boolean;
     user_id?: boolean;
-    post_id?: boolean;
+    interaction_id?: boolean;
 };
-export type LikeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "post_id", ExtArgs["result"]["like"]>;
+export type LikeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "user_id" | "interaction_id", ExtArgs["result"]["like"]>;
 export type LikeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     user?: boolean | Prisma.UserDefaultArgs<ExtArgs>;
 };
@@ -349,7 +349,7 @@ export type $LikePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     scalars: runtime.Types.Extensions.GetPayloadResult<{
         id: string;
         user_id: string;
-        post_id: string;
+        interaction_id: string;
     }, ExtArgs["result"]["like"]>;
     composites: {};
 };
@@ -707,7 +707,7 @@ export interface Prisma__LikeClient<T, Null = never, ExtArgs extends runtime.Typ
 export interface LikeFieldRefs {
     readonly id: Prisma.FieldRef<"Like", 'String'>;
     readonly user_id: Prisma.FieldRef<"Like", 'String'>;
-    readonly post_id: Prisma.FieldRef<"Like", 'String'>;
+    readonly interaction_id: Prisma.FieldRef<"Like", 'String'>;
 }
 /**
  * Like findUnique

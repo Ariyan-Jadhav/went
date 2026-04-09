@@ -5,12 +5,13 @@ import {
   markAllAsRead,
   deleteNotification,
 } from "../controllers/notification.controller.js";
+import { requireAuth } from "@clerk/express";
 
 const router = express.Router();
 
-router.get("/", getNotifications);
-router.patch("/:notificationId/read", markAsRead);
-router.patch("/read-all", markAllAsRead);
-router.delete("/:notificationId", deleteNotification);
+router.get("/", requireAuth(), getNotifications);
+router.patch("/:notificationId/read", requireAuth(), markAsRead);
+router.patch("/read-all", requireAuth(), markAllAsRead);
+router.delete("/:notificationId", requireAuth(), deleteNotification);
 
 export default router;

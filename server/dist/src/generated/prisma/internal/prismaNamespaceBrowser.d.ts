@@ -28,10 +28,13 @@ export declare const AnyNull: import("@prisma/client-runtime-utils").AnyNullClas
 export declare const ModelName: {
     readonly User: "User";
     readonly Profile: "Profile";
+    readonly ProfileMovie: "ProfileMovie";
+    readonly ProfileTrack: "ProfileTrack";
+    readonly ProfileAlbum: "ProfileAlbum";
+    readonly ProfileArtist: "ProfileArtist";
     readonly Follow: "Follow";
     readonly Like: "Like";
-    readonly Story_View: "Story_View";
-    readonly Saved_Post: "Saved_Post";
+    readonly Saved_Think: "Saved_Think";
     readonly Block: "Block";
     readonly Report: "Report";
 };
@@ -50,6 +53,7 @@ export declare const UserScalarFieldEnum: {
     readonly username: "username";
     readonly email: "email";
     readonly profilePicUrl: "profilePicUrl";
+    readonly isBot: "isBot";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
 };
@@ -59,39 +63,69 @@ export declare const ProfileScalarFieldEnum: {
     readonly user_id: "user_id";
     readonly bio: "bio";
     readonly gender: "gender";
-    readonly accState: "accState";
+    readonly profession: "profession";
+    readonly location: "location";
+    readonly hobby: "hobby";
+    readonly birthday: "birthday";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
 };
 export type ProfileScalarFieldEnum = (typeof ProfileScalarFieldEnum)[keyof typeof ProfileScalarFieldEnum];
+export declare const ProfileMovieScalarFieldEnum: {
+    readonly id: "id";
+    readonly profile_id: "profile_id";
+    readonly title: "title";
+    readonly year: "year";
+    readonly type: "type";
+    readonly poster: "poster";
+    readonly createdAt: "createdAt";
+};
+export type ProfileMovieScalarFieldEnum = (typeof ProfileMovieScalarFieldEnum)[keyof typeof ProfileMovieScalarFieldEnum];
+export declare const ProfileTrackScalarFieldEnum: {
+    readonly id: "id";
+    readonly profile_id: "profile_id";
+    readonly name: "name";
+    readonly artist: "artist";
+    readonly image: "image";
+    readonly createdAt: "createdAt";
+};
+export type ProfileTrackScalarFieldEnum = (typeof ProfileTrackScalarFieldEnum)[keyof typeof ProfileTrackScalarFieldEnum];
+export declare const ProfileAlbumScalarFieldEnum: {
+    readonly id: "id";
+    readonly profile_id: "profile_id";
+    readonly name: "name";
+    readonly image: "image";
+    readonly createdAt: "createdAt";
+};
+export type ProfileAlbumScalarFieldEnum = (typeof ProfileAlbumScalarFieldEnum)[keyof typeof ProfileAlbumScalarFieldEnum];
+export declare const ProfileArtistScalarFieldEnum: {
+    readonly id: "id";
+    readonly profile_id: "profile_id";
+    readonly name: "name";
+    readonly image: "image";
+    readonly createdAt: "createdAt";
+};
+export type ProfileArtistScalarFieldEnum = (typeof ProfileArtistScalarFieldEnum)[keyof typeof ProfileArtistScalarFieldEnum];
 export declare const FollowScalarFieldEnum: {
     readonly id: "id";
     readonly follower_id: "follower_id";
     readonly following_id: "following_id";
-    readonly pending_status: "pending_status";
     readonly createdAt: "createdAt";
 };
 export type FollowScalarFieldEnum = (typeof FollowScalarFieldEnum)[keyof typeof FollowScalarFieldEnum];
 export declare const LikeScalarFieldEnum: {
     readonly id: "id";
     readonly user_id: "user_id";
-    readonly post_id: "post_id";
+    readonly interaction_id: "interaction_id";
 };
 export type LikeScalarFieldEnum = (typeof LikeScalarFieldEnum)[keyof typeof LikeScalarFieldEnum];
-export declare const Story_ViewScalarFieldEnum: {
-    readonly id: "id";
-    readonly story_id: "story_id";
-    readonly viewer_id: "viewer_id";
-    readonly viewedAt: "viewedAt";
-};
-export type Story_ViewScalarFieldEnum = (typeof Story_ViewScalarFieldEnum)[keyof typeof Story_ViewScalarFieldEnum];
-export declare const Saved_PostScalarFieldEnum: {
+export declare const Saved_ThinkScalarFieldEnum: {
     readonly id: "id";
     readonly user_id: "user_id";
     readonly post_id: "post_id";
     readonly savedAt: "savedAt";
 };
-export type Saved_PostScalarFieldEnum = (typeof Saved_PostScalarFieldEnum)[keyof typeof Saved_PostScalarFieldEnum];
+export type Saved_ThinkScalarFieldEnum = (typeof Saved_ThinkScalarFieldEnum)[keyof typeof Saved_ThinkScalarFieldEnum];
 export declare const BlockScalarFieldEnum: {
     readonly id: "id";
     readonly blocked_id: "blocked_id";

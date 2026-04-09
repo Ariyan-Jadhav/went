@@ -4,7 +4,6 @@ import { AppError, catchAsync } from "../middleware/error.middleware.js";
 import { uploadmedia, deleteMediafromCloudinary } from "../utils/cloudinary.js";
 import { promises as fs } from "fs";
 import { Think } from "../models/think.model.js";
-import { createNotification } from "../utils/notification.js";
 import prisma from "../../lib/prisma.js";
 
 interface thinkBody {
@@ -36,7 +35,6 @@ export const createThink = catchAsync(async (req: Request, res: Response) => {
   const images = req.files as Express.Multer.File[];
   let imageUrl: { url: string; publicId: string }[] = [];
 
-  // ✅ Images are optional — only upload if present
   if (images?.length > 0) {
     if (images.length > 4)
       throw new AppError("you can only upload up to 4 images", 400);
@@ -55,7 +53,6 @@ export const createThink = catchAsync(async (req: Request, res: Response) => {
     );
   }
 
-  // ✅ Always create the think, with or without images
   try {
     const think = await Think.create({
       user_id: userId,
@@ -69,7 +66,6 @@ export const createThink = catchAsync(async (req: Request, res: Response) => {
 
     res.status(201).json({ message: think });
   } catch (error) {
-    // cleanup images if think creation fails
     if (images?.length > 0) {
       await Promise.all(
         images.map((file) => fs.unlink(file.path).catch(console.error)),
@@ -103,7 +99,6 @@ export const updateThink = catchAsync(async (req: Request, res: Response) => {
 
   if (content !== undefined) availableUpdates.content = content;
   if (hashtags !== undefined) availableUpdates.hashtags = fixedHashtags;
-  // if (mentions !== undefined) availableUpdates.mentions = mentions;
 
   if (availableUpdates) {
     const think = await Think.findByIdAndUpdate(think_id, availableUpdates, {

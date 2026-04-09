@@ -5,7 +5,7 @@ import gsap from "gsap";
 import { NavLink } from "react-router-dom";
 import { useUserSearch } from "@/components/di_global_context/MainSearch";
 import UserSearchDrawer from "@/components/di_animations/MainOptions";
-import { useNavigate } from "react-router-dom"; // add useNavigate
+import { useNavigate } from "react-router-dom";
 import { useCallback } from "react";
 import {
   FiBell,
@@ -71,7 +71,7 @@ export default function DynamicIsland() {
 
     try {
       const res = await axios.get(`/api/users/search`, {
-        params: { q }, // ✅ use function param
+        params: { q }, // use function param
         headers: { Authorization: `Bearer ${await getToken()}` },
       });
       setResults(res.data.users ?? []);

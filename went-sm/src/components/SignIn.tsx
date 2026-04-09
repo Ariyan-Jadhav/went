@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 interface Props {
   onClose: () => void;
@@ -74,14 +74,12 @@ export function SignInModal({ onClose, reason }: Props) {
 
         <p className="text-gray-600 text-xs text-center mt-6">
           By signing up you agree to our{" "}
-          <span className="text-gray-400 hover:text-white cursor-pointer transition-colors">
+          <NavLink
+            to="/terms"
+            className="text-gray-400 hover:text-white cursor-pointer transition-colors"
+          >
             Terms
-          </span>{" "}
-          and{" "}
-          <span className="text-gray-400 hover:text-white cursor-pointer transition-colors">
-            Privacy Policy
-          </span>
-          .
+          </NavLink>
         </p>
       </div>
     </div>

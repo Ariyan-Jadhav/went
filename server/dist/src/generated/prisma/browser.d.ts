@@ -13,6 +13,26 @@ export type User = Prisma.UserModel;
  */
 export type Profile = Prisma.ProfileModel;
 /**
+ * Model ProfileMovie
+ *
+ */
+export type ProfileMovie = Prisma.ProfileMovieModel;
+/**
+ * Model ProfileTrack
+ *
+ */
+export type ProfileTrack = Prisma.ProfileTrackModel;
+/**
+ * Model ProfileAlbum
+ *
+ */
+export type ProfileAlbum = Prisma.ProfileAlbumModel;
+/**
+ * Model ProfileArtist
+ *
+ */
+export type ProfileArtist = Prisma.ProfileArtistModel;
+/**
  * Model Follow
  *
  */
@@ -23,15 +43,10 @@ export type Follow = Prisma.FollowModel;
  */
 export type Like = Prisma.LikeModel;
 /**
- * Model Story_View
+ * Model Saved_Think
  *
  */
-export type Story_View = Prisma.Story_ViewModel;
-/**
- * Model Saved_Post
- *
- */
-export type Saved_Post = Prisma.Saved_PostModel;
+export type Saved_Think = Prisma.Saved_ThinkModel;
 /**
  * Model Block
  *

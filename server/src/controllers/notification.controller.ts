@@ -5,7 +5,6 @@ import { catchAsync } from "../middleware/error.middleware.js";
 import { Notification } from "../models/notification.model.js";
 import prisma from "../../lib/prisma.js";
 
-// Get all notifications for the authenticated user
 export const getNotifications = catchAsync(
   async (req: Request, res: Response) => {
     const { userId, isAuthenticated } = getAuth(req);
@@ -58,7 +57,6 @@ export const getNotifications = catchAsync(
   },
 );
 
-// Mark notification as read
 export const markAsRead = catchAsync(async (req: Request, res: Response) => {
   const { userId, isAuthenticated } = getAuth(req);
   if (!isAuthenticated) throw new AppError("User not authenticated", 401);
@@ -102,7 +100,6 @@ export const markAllAsRead = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// Delete a notification
 export const deleteNotification = catchAsync(
   async (req: Request, res: Response) => {
     const { userId, isAuthenticated } = getAuth(req);

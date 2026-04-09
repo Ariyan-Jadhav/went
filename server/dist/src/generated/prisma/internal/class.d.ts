@@ -134,6 +134,50 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
         omit: OmitOpts;
     }>;
     /**
+     * `prisma.profileMovie`: Exposes CRUD operations for the **ProfileMovie** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more ProfileMovies
+      * const profileMovies = await prisma.profileMovie.findMany()
+      * ```
+      */
+    get profileMovie(): Prisma.ProfileMovieDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.profileTrack`: Exposes CRUD operations for the **ProfileTrack** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more ProfileTracks
+      * const profileTracks = await prisma.profileTrack.findMany()
+      * ```
+      */
+    get profileTrack(): Prisma.ProfileTrackDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.profileAlbum`: Exposes CRUD operations for the **ProfileAlbum** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more ProfileAlbums
+      * const profileAlbums = await prisma.profileAlbum.findMany()
+      * ```
+      */
+    get profileAlbum(): Prisma.ProfileAlbumDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
+     * `prisma.profileArtist`: Exposes CRUD operations for the **ProfileArtist** model.
+      * Example usage:
+      * ```ts
+      * // Fetch zero or more ProfileArtists
+      * const profileArtists = await prisma.profileArtist.findMany()
+      * ```
+      */
+    get profileArtist(): Prisma.ProfileArtistDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
+    /**
      * `prisma.follow`: Exposes CRUD operations for the **Follow** model.
       * Example usage:
       * ```ts
@@ -156,25 +200,14 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
         omit: OmitOpts;
     }>;
     /**
-     * `prisma.story_View`: Exposes CRUD operations for the **Story_View** model.
+     * `prisma.saved_Think`: Exposes CRUD operations for the **Saved_Think** model.
       * Example usage:
       * ```ts
-      * // Fetch zero or more Story_Views
-      * const story_Views = await prisma.story_View.findMany()
+      * // Fetch zero or more Saved_Thinks
+      * const saved_Thinks = await prisma.saved_Think.findMany()
       * ```
       */
-    get story_View(): Prisma.Story_ViewDelegate<ExtArgs, {
-        omit: OmitOpts;
-    }>;
-    /**
-     * `prisma.saved_Post`: Exposes CRUD operations for the **Saved_Post** model.
-      * Example usage:
-      * ```ts
-      * // Fetch zero or more Saved_Posts
-      * const saved_Posts = await prisma.saved_Post.findMany()
-      * ```
-      */
-    get saved_Post(): Prisma.Saved_PostDelegate<ExtArgs, {
+    get saved_Think(): Prisma.Saved_ThinkDelegate<ExtArgs, {
         omit: OmitOpts;
     }>;
     /**

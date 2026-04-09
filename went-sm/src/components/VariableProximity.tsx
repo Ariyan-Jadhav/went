@@ -1,4 +1,12 @@
-import { forwardRef, useMemo, useRef, useEffect, MutableRefObject, CSSProperties, HTMLAttributes } from 'react';
+import {
+  forwardRef,
+  useMemo,
+  useRef,
+  useEffect,
+  type MutableRefObject,
+  type CSSProperties,
+  type HTMLAttributes,
+} from 'react';
 import { motion } from 'motion/react';
 
 function useAnimationFrame(callback: () => void) {

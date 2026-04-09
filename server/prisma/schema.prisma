@@ -58,14 +58,13 @@ model Profile {
   @@map("profiles")
 }
 
-// Stores a movie the user has pinned to their profile (from OMDB)
 model ProfileMovie {
   id         String   @id @default(cuid())
   profile_id String
   title      String
   year       String
-  type       String // "movie" | "series" | "episode"
-  poster     String? // can be null/N/A — handled in UI
+  type       String
+  poster     String?
   createdAt  DateTime @default(now())
 
   profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
@@ -74,13 +73,12 @@ model ProfileMovie {
   @@map("profile_movies")
 }
 
-// Stores a Spotify track the user has pinned to their profile
 model ProfileTrack {
   id         String   @id @default(cuid())
   profile_id String
   name       String
-  artist     String // comma-joined artist names
-  image      String? // album cover URL
+  artist     String
+  image      String?
   createdAt  DateTime @default(now())
 
   profile Profile @relation(fields: [profile_id], references: [id], onDelete: Cascade)
@@ -89,7 +87,6 @@ model ProfileTrack {
   @@map("profile_tracks")
 }
 
-// Stores a Spotify album the user has pinned to their profile
 model ProfileAlbum {
   id         String   @id @default(cuid())
   profile_id String
@@ -103,7 +100,6 @@ model ProfileAlbum {
   @@map("profile_albums")
 }
 
-// Stores a Spotify artist the user has pinned to their profile
 model ProfileArtist {
   id         String   @id @default(cuid())
   profile_id String

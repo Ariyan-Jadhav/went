@@ -69,10 +69,13 @@ export const AnyNull = runtime.AnyNull;
 export const ModelName = {
     User: 'User',
     Profile: 'Profile',
+    ProfileMovie: 'ProfileMovie',
+    ProfileTrack: 'ProfileTrack',
+    ProfileAlbum: 'ProfileAlbum',
+    ProfileArtist: 'ProfileArtist',
     Follow: 'Follow',
     Like: 'Like',
-    Story_View: 'Story_View',
-    Saved_Post: 'Saved_Post',
+    Saved_Think: 'Saved_Think',
     Block: 'Block',
     Report: 'Report'
 };
@@ -92,6 +95,7 @@ export const UserScalarFieldEnum = {
     username: 'username',
     email: 'email',
     profilePicUrl: 'profilePicUrl',
+    isBot: 'isBot',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };
@@ -100,29 +104,56 @@ export const ProfileScalarFieldEnum = {
     user_id: 'user_id',
     bio: 'bio',
     gender: 'gender',
-    accState: 'accState',
+    profession: 'profession',
+    location: 'location',
+    hobby: 'hobby',
+    birthday: 'birthday',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
+};
+export const ProfileMovieScalarFieldEnum = {
+    id: 'id',
+    profile_id: 'profile_id',
+    title: 'title',
+    year: 'year',
+    type: 'type',
+    poster: 'poster',
+    createdAt: 'createdAt'
+};
+export const ProfileTrackScalarFieldEnum = {
+    id: 'id',
+    profile_id: 'profile_id',
+    name: 'name',
+    artist: 'artist',
+    image: 'image',
+    createdAt: 'createdAt'
+};
+export const ProfileAlbumScalarFieldEnum = {
+    id: 'id',
+    profile_id: 'profile_id',
+    name: 'name',
+    image: 'image',
+    createdAt: 'createdAt'
+};
+export const ProfileArtistScalarFieldEnum = {
+    id: 'id',
+    profile_id: 'profile_id',
+    name: 'name',
+    image: 'image',
+    createdAt: 'createdAt'
 };
 export const FollowScalarFieldEnum = {
     id: 'id',
     follower_id: 'follower_id',
     following_id: 'following_id',
-    pending_status: 'pending_status',
     createdAt: 'createdAt'
 };
 export const LikeScalarFieldEnum = {
     id: 'id',
     user_id: 'user_id',
-    post_id: 'post_id'
+    interaction_id: 'interaction_id'
 };
-export const Story_ViewScalarFieldEnum = {
-    id: 'id',
-    story_id: 'story_id',
-    viewer_id: 'viewer_id',
-    viewedAt: 'viewedAt'
-};
-export const Saved_PostScalarFieldEnum = {
+export const Saved_ThinkScalarFieldEnum = {
     id: 'id',
     user_id: 'user_id',
     post_id: 'post_id',

@@ -138,7 +138,7 @@ async function processBot(
 }
 
 async function assembleBB() {
-  if (Math.random() < 0.5) return;
+  if (Math.random() < 0.2) return;
 
   const delay = Math.floor(Math.random() * 8 * 60 * 1000);
 
