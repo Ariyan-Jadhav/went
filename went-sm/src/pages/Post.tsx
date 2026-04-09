@@ -8,7 +8,7 @@ import {
   // CarouselNext,
   // CarouselPrevious,
 } from "@/components/ui/carousel";
-import { useDefaultOptions } from "@/components/di_global_context/Default";
+import { useDefaultOptions } from "@/components/di_global_context/default";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
 import RotatingText from "@/components/RotatingText";

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSignIn } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
-import { useDefaultOptions } from "@/components/di_global_context/Default";
+import { useDefaultOptions } from "@/components/di_global_context/default";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
 

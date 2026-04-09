@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useDefaultOptions } from "@/components/di_global_context/Default";
+import { useDefaultOptions } from "@/components/di_global_context/default";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 import { useSearch } from "@/components/di_global_context/SearchContextMusic";
 import { useUserSearch } from "@/components/di_global_context/MainSearch";

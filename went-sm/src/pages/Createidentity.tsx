@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/combobox";
 import axios from "axios";
 import { useUser, useAuth } from "@clerk/clerk-react";
-import { useDefaultOptions } from "@/components/di_global_context/Default";
+import { useDefaultOptions } from "@/components/di_global_context/default";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
 

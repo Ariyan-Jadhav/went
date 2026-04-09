@@ -4,7 +4,7 @@ import { Heart, MessageCircle, Repeat2 } from "lucide-react";
 import { useAuth } from "@clerk/clerk-react";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
-import { useDefaultOptions } from "@/components/di_global_context/Default";
+import { useDefaultOptions } from "@/components/di_global_context/default";
 import { useTwemoji } from "@/hooks/useTwemoji";
 import { NavLink } from "react-router-dom";
 import { SignInModal } from "@/components/SignIn";

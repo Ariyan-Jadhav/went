@@ -19,7 +19,7 @@ import {
 } from "react-icons/fi";
 import { useSearch } from "../components/di_global_context/SearchContextMusic";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
-import { useDefaultOptions } from "@/components/di_global_context/Default";
+import { useDefaultOptions } from "@/components/di_global_context/default";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
 import Shuffle from "@/components/Shuffle";
 import FeedOptions from "@/components/di_animations/FeedOptions";

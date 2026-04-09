@@ -16,7 +16,7 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { useRef } from "react";
-import { useDefaultOptions } from "@/components/di_global_context/Default";
+import { useDefaultOptions } from "@/components/di_global_context/default";
 import { useProfileOptions } from "@/components/di_global_context/ProfileP-SContext";
 import { useFeedOptions } from "@/components/di_global_context/FeedE-FContext";
 import { useSearch } from "@/components/di_global_context/SearchContextMusic";
