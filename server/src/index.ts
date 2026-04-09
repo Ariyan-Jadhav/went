@@ -30,6 +30,7 @@ const io = new Server(httpServer, {
     origin: [
       "http://localhost:5173",
       "https://wentapp.me",
+      "https://went-sm.vercel.app",
       ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : []),
     ],
     credentials: true,
@@ -69,6 +70,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://wentapp.me",
+      "https://went-sm.vercel.app",
       ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : []),
     ],
     credentials: true,

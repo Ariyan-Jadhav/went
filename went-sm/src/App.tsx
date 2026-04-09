@@ -10,6 +10,7 @@ import Createidentity from "./pages/Createidentity";
 import { ProtectedRoute } from "./components/ProtectedRoutes";
 import ComingSoon from "./pages/Message";
 import Terms from "./pages/Terms";
+import Landing from "./pages/Landing";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="/terms" element={<Terms />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/feed" element={<Feed />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/createidentity" element={<Createidentity />} />
         <Route path="/profile/:username" element={<Profile />} />
         <Route path="/justuploaditbrah" element={<Post />} />
