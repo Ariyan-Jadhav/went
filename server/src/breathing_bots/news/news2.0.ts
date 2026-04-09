@@ -83,4 +83,4 @@ async function fetchNewsFromNewsdata() {
   engagePost3(think._id.toString(), content, CONFIG.BOT_USER_ID);
 }
 
-cron.schedule("*/30 * * * *", fetchNewsFromNewsdata);
+cron.schedule("*/45 * * * *", fetchNewsFromNewsdata);

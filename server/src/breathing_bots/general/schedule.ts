@@ -140,30 +140,18 @@ async function processBot(
 async function assembleBB() {
   if (Math.random() < 0.2) return;
 
-  const delay = Math.floor(Math.random() * 8 * 60 * 1000);
+  try {
+    const hr = new Date().getHours();
 
-  setTimeout(async () => {
-    try {
-      const hr = new Date().getHours();
-
-      if (hr >= 6 && hr < 12)
-        await processBot(
-          morningBots,
-          getBots.morning,
-          (l) => (morningBots = l),
-        );
-      else if (hr >= 12 && hr < 18)
-        await processBot(
-          eveningBots,
-          getBots.evening,
-          (l) => (eveningBots = l),
-        );
-      else if (hr >= 18 && hr < 24)
-        await processBot(nightBots, getBots.night, (l) => (nightBots = l));
-    } catch (err) {
-      console.error("assembleBB error:", err);
-    }
-  }, delay);
+    if (hr >= 6 && hr < 12)
+      await processBot(morningBots, getBots.morning, (l) => (morningBots = l));
+    else if (hr >= 12 && hr < 18)
+      await processBot(eveningBots, getBots.evening, (l) => (eveningBots = l));
+    else if (hr >= 18 && hr < 24)
+      await processBot(nightBots, getBots.night, (l) => (nightBots = l));
+  } catch (err) {
+    console.error("assembleBB error:", err);
+  }
 }
 
 cron.schedule("0 5 * * *", reloadBots);
