@@ -1,4 +1,3 @@
-// server/src/db.ts (or wherever your file is)
 import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
