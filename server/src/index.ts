@@ -29,7 +29,7 @@ const io = new Server(httpServer, {
   cors: {
     origin: [
       "http://localhost:5173",
-      "https://wentapp.me",
+      "www.wentapp.me",
       "https://went-sm.vercel.app",
       ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : []),
     ],
@@ -69,7 +69,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://wentapp.me",
+      "www.wentapp.me",
       "https://went-sm.vercel.app",
       ...(process.env.CLIENT_URL ? [process.env.CLIENT_URL] : []),
     ],
