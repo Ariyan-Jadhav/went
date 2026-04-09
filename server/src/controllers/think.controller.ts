@@ -5,6 +5,7 @@ import { uploadmedia, deleteMediafromCloudinary } from "../utils/cloudinary.js";
 import { promises as fs } from "fs";
 import { Think } from "../models/think.model.js";
 import prisma from "../../lib/prisma.js";
+import { engagePost3 } from "../breathing_bots/comments/autoComments_3.js";
 
 interface thinkBody {
   content: string;
@@ -63,6 +64,8 @@ export const createThink = catchAsync(async (req: Request, res: Response) => {
       commentsCount: 0,
       rethinkCount: 0,
     });
+
+    engagePost3(think._id.toString(), content, userId);
 
     res.status(201).json({ message: think });
   } catch (error) {
