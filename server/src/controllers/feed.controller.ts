@@ -100,13 +100,12 @@ export const following = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const getNews = catchAsync(async (req: Request, res: Response) => {
-  // ✅ No auth required — public endpoint
   let { skip }: { skip: number } = req.body;
   if (!skip) skip = 0;
 
   const LIMIT = 3;
 
-  const thinksRaw = await Think.find({ user_id: "news1" })
+  const thinksRaw = await Think.find({ user_id: "news2" })
     .sort({ _id: -1 })
     .lean()
     .skip(skip)

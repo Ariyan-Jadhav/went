@@ -9,7 +9,7 @@ import Post from "./pages/Post";
 import Profile from "./pages/Profile";
 import Createidentity from "./pages/Createidentity";
 import { ProtectedRoute } from "./components/ProtectedRoutes";
-import ComingSoon from "./pages/Comment";
+import ComingSoon from "./pages/Message";
 
 function App() {
   return (

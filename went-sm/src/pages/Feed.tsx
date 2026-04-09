@@ -355,7 +355,6 @@ function Feed() {
       }
 
       const filtered = newThinks.filter((t) => !storedIdsSet.has(t._id));
-      console.log(filtered);
 
       if (filtered.length === 0) {
         stopLoading(startTime);
@@ -698,14 +697,14 @@ function Feed() {
       </div>
 
       {/* Comments Panel */}
-      <div className="border-l border-gray-800 text-white flex flex-col h-screen sticky top-0">
+      <div className="border-l border-gray-800 text-white flex flex-col h-screen sticky top-0 ">
         {!selectedThink ? (
           <div className="flex items-center justify-center h-full text-gray-600 text-sm">
             Click a post to view comments
           </div>
         ) : (
           <>
-            <div className="px-4 py-3 border-b border-gray-800">
+            <div className="px-4 py-3 border-b border-gray-800 ">
               <p className="font-bold">{selectedThink.username}</p>
               <p className="text-gray-500 text-xs">{comments_count} comments</p>
             </div>

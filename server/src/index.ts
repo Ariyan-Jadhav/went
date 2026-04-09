@@ -15,7 +15,7 @@ import { createServer } from "http";
 dotenv.config({ override: true });
 await connectDB();
 
-import { reloadBots } from "./breathing_bots/schedule.js";
+import { reloadBots } from "./breathing_bots/general/schedule.js";
 await reloadBots();
 
 // ─── 2. APP & HTTP SERVER (needed for Socket.IO) ────────────────────────────
@@ -162,7 +162,7 @@ httpServer.listen(PORT, () => {
 });
 
 // ─── 14. START SERVER ────────────────────────────────────────────────────────
-import "./breathing_bots/schedule.js";
-import "./breathing_bots/scheduleRandom.js";
-import "./breathing_bots/news.js";
-import "./breathing_bots/news2.0.js";
+import "./breathing_bots/general/schedule.js";
+import "./breathing_bots/general/scheduleRandom.js";
+import "./breathing_bots/news/news.js";
+import "./breathing_bots/news/news2.0.js";

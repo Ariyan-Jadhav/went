@@ -1,18 +1,16 @@
 import cron from "node-cron";
-import { Think } from "../models/think.model.js";
+import { Think } from "../../models/think.model.js";
 import "dotenv/config";
-import { AppError } from "../middleware/error.middleware.js";
-import connectDB from "../database/db.mongo.js";
-import fs from "fs";
-import { engagePost } from "./detailingasfaq.js";
+import { AppError } from "../../middleware/error.middleware.js";
+import connectDB from "../../database/db.mongo.js";
+import { engagePost3 } from "../comments/autoComments_3.js";
+import { PostedArticle } from "../../models/posted.model.js";
 
 const CONFIG = {
   NORTH_API_KEY: process.env.NORTH_API_KEY,
   BOT_USER_ID: "news1",
   BOT_USERNAME: "newsin24hrs",
 };
-
-const CACHE_FILE = "./last_posted.json";
 
 interface MediastackArticle {
   title: string;
@@ -21,19 +19,6 @@ interface MediastackArticle {
   image: string;
   published_at: string;
   language: string;
-}
-
-function loadPostedUrl(): string | null {
-  try {
-    const data = JSON.parse(fs.readFileSync(CACHE_FILE, "utf-8"));
-    return data.url ?? null;
-  } catch {
-    return null;
-  }
-}
-
-function savePostedUrl(url: string): void {
-  fs.writeFileSync(CACHE_FILE, JSON.stringify({ url }), "utf-8");
 }
 
 function cleanText(text: string): string {
@@ -61,17 +46,20 @@ async function fetchNewsFromMediastack() {
     throw new AppError("Unexpected response shape", 500);
   }
 
-  const storedUrl = loadPostedUrl();
+  const posted = await PostedArticle.find({}).select("article_id").lean();
+  const postedUrls = new Set(posted.map((p) => p.article_id));
 
   const article = (data.data as MediastackArticle[]).find(
-    (a) => a.url !== storedUrl, // doesn't match the last posted one
+    (a) => !postedUrls.has(a.url),
   );
 
   if (!article) throw new AppError("No new articles found", 500);
 
+  const content = cleanText(article.description || article.title);
+
   const think = await Think.create({
     user_id: CONFIG.BOT_USER_ID,
-    content: cleanText(article.description || article.title),
+    content,
     hashtags: [],
     imageUrl: article.image
       ? [{ url: article.image, publicId: "news_article" }]
@@ -83,14 +71,9 @@ async function fetchNewsFromMediastack() {
 
   if (!think) throw new AppError("could not post", 500);
 
-  engagePost(
-    think._id.toString(),
-    cleanText(article.description || article.title),
-    CONFIG.BOT_USER_ID,
-  );
+  await PostedArticle.create({ article_id: article.url }); // using URL as the unique ID since mediastack has no article_id
 
-  savePostedUrl(article.url); // overwrite old URL with new one
-  console.log(`✅ Posted: "${article.title.slice(0, 60)}…"`);
+  engagePost3(think._id.toString(), content, CONFIG.BOT_USER_ID);
+  console.log(`Posted: "${article.title.slice(0, 60)}…"`);
 }
-
-cron.schedule("*/30 * * * *", fetchNewsFromMediastack);
+cron.schedule("*/15 * * * *", fetchNewsFromMediastack);

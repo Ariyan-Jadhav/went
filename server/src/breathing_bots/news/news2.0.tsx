@@ -1,18 +1,16 @@
 import cron from "node-cron";
-import { Think } from "../models/think.model.js";
+import { Think } from "../../models/think.model.js";
 import "dotenv/config";
-import { AppError } from "../middleware/error.middleware.js";
-import connectDB from "../database/db.mongo.js";
-import fs from "fs";
-import { engagePost } from "./detailingasfaq.js";
+import { AppError } from "../../middleware/error.middleware.js";
+import connectDB from "../../database/db.mongo.js";
+import { PostedArticle } from "../../models/posted.model.js";
+import { engagePost3 } from "../comments/autoComments_3.js";
 
 const CONFIG = {
   NEWSDATA_API_KEY: process.env.NEWSDATA_API_KEY,
   BOT_USER_ID: "news2",
   BOT_USERNAME: "unmaskedofficial",
 };
-
-const CACHE_FILE = "./last_posted.json";
 
 // Matches the actual newsdata.io response shape
 interface NewsdataArticle {
@@ -27,22 +25,6 @@ interface NewsdataArticle {
   category: string[];
   source_name: string;
   duplicate: boolean;
-}
-
-function loadPostedIds(): string[] {
-  try {
-    const data = JSON.parse(fs.readFileSync(CACHE_FILE, "utf-8"));
-    return data.ids ?? [];
-  } catch {
-    return []; // first run, file doesn't exist yet
-  }
-}
-
-function savePostedId(id: string): void {
-  const ids = loadPostedIds();
-  ids.push(id);
-  if (ids.length > 10) ids.shift(); // keep last 10, drop oldest
-  fs.writeFileSync(CACHE_FILE, JSON.stringify({ ids }), "utf-8");
 }
 
 function cleanText(text: string): string {
@@ -63,18 +45,18 @@ async function fetchNewsFromNewsdata() {
   const response = await fetch(
     `https://newsdata.io/api/1/latest?apikey=${CONFIG.NEWSDATA_API_KEY}&country=in&language=en`,
   );
-
   const data = await response.json();
 
-  // newsdata.io returns { status, totalResults, results: [...] }
   if (!data || !Array.isArray(data.results)) {
     throw new AppError("Unexpected response shape", 500);
   }
 
-  const postedIds = loadPostedIds();
+  // Fetch all already-posted IDs from DB
+  const posted = await PostedArticle.find({}).select("article_id").lean();
+  const postedIds = new Set(posted.map((p) => p.article_id));
 
   const article = (data.results as NewsdataArticle[]).find(
-    (a) => !a.duplicate && !postedIds.includes(a.article_id), // skip duplicates AND already posted
+    (a) => !a.duplicate && !postedIds.has(a.article_id),
   );
 
   if (!article) throw new AppError("No new articles found", 500);
@@ -84,7 +66,7 @@ async function fetchNewsFromNewsdata() {
   const think = await Think.create({
     user_id: CONFIG.BOT_USER_ID,
     content,
-    hashtags: article.category ?? [], // newsdata.io gives us categories for free 🎁
+    hashtags: article.category ?? [],
     imageUrl: article.image_url
       ? [{ url: article.image_url, publicId: "news_article" }]
       : [],
@@ -95,12 +77,10 @@ async function fetchNewsFromNewsdata() {
 
   if (!think) throw new AppError("could not post", 500);
 
-  engagePost(think._id.toString(), content, CONFIG.BOT_USER_ID);
+  // Mark this article as posted
+  await PostedArticle.create({ article_id: article.article_id });
 
-  savePostedId(article.article_id); // store article_id, not URL
-  console.log(
-    `✅ Posted [${article.source_name}]: "${article.title.slice(0, 60)}…"`,
-  );
+  engagePost3(think._id.toString(), content, CONFIG.BOT_USER_ID);
 }
 
-cron.schedule("*/30 * * * *", fetchNewsFromNewsdata);
+cron.schedule("*/15 * * * *", fetchNewsFromNewsdata);

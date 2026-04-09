@@ -1027,7 +1027,7 @@ export default function Createidentity() {
                   </span>
                   <input
                     value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    onChange={(e) => setUsername(e.target.value.toLowerCase())}
                     className="w-full bg-zinc-900 border border-zinc-700 rounded-xl pl-8 pr-4 py-2.5 text-white text-sm outline-none focus:border-zinc-500 transition"
                   />
                 </div>

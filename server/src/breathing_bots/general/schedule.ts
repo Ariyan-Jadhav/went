@@ -1,13 +1,13 @@
-import { BreathingBots } from "../models/bots.model.js";
-import { Think } from "../models/think.model.js";
+import { BreathingBots } from "../../models/bots.model.js";
+import { Think } from "../../models/think.model.js";
 import "dotenv/config";
 import cron from "node-cron";
 import getBots from "./randomList.js";
 import { Groq } from "groq-sdk";
-import { AppError } from "../middleware/error.middleware.js";
-import { engagePost } from "./detailingasfaq.js";
+import { AppError } from "../../middleware/error.middleware.js";
+import { engagePost1 } from "../comments/autoComments_1.js";
 
-const THOUSAND_YEARS = process.env.THOUSAND_YEARS!;
+const GROQ_THINK = process.env.GROQ_THINK!;
 
 let morningBots: string[] = [];
 let eveningBots: string[] = [];
@@ -68,7 +68,7 @@ Strictly avoid:
 
 Output only the post. No explanation.`;
 
-  const groq = new Groq({ apiKey: THOUSAND_YEARS });
+  const groq = new Groq({ apiKey: GROQ_THINK });
 
   const chatCompletion = await groq.chat.completions.create({
     messages: [
@@ -115,7 +115,7 @@ Output only the post. No explanation.`;
   });
 
   if (!response) throw new AppError("could not post", 500);
-  engagePost(response._id.toString(), output, user);
+  engagePost1(response._id.toString(), output, user);
 }
 
 async function processBot(

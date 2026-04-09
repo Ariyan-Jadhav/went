@@ -929,7 +929,7 @@ export default function Profile() {
         )}
         {!loading && !thinkLoading && (
           <div>
-            {think &&
+            {think && think.length > 0 ? (
               think.map((think, i) => (
                 <div
                   key={i}
@@ -1019,7 +1019,12 @@ export default function Profile() {
                     </button>
                   </div>
                 </div>
-              ))}
+              ))
+            ) : (
+              <div className="h-screen flex flex-col items-center justify-center text-gray-500">
+                <p className="text-lg font-semibold">No thinks Yet</p>
+              </div>
+            )}
           </div>
         )}
       </div>

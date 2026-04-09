@@ -1,11 +1,11 @@
-import { BreathingBots } from "../models/bots.model.js";
-import { Think } from "../models/think.model.js";
+import { BreathingBots } from "../../models/bots.model.js";
+import { Think } from "../../models/think.model.js";
 import "dotenv/config";
 import cron from "node-cron";
 import getBots from "./randomList.js";
 import { Groq } from "groq-sdk";
-import { AppError } from "../middleware/error.middleware.js";
-import { engagePost } from "./detailingasfaq.js";
+import { AppError } from "../../middleware/error.middleware.js";
+import { engagePost2 } from "../comments/autoComments_2.js";
 
 const THOUSAND_YEARS = process.env.THOUSAND_YEARS!;
 
@@ -111,7 +111,7 @@ Output only the post. No explanation.`;
   });
 
   if (!response) throw new AppError("could not post", 500);
-  engagePost(response._id.toString(), output, user);
+  engagePost2(response._id.toString(), output, user);
 }
 
 async function processBot() {

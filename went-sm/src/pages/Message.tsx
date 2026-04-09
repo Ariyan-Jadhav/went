@@ -52,7 +52,7 @@ export default function ComingSoon() {
       <img src="/logo/white-went.png" className="w-[20%]" />
 
       {/* Message Section */}
-      <p className="text-center text-gray-400 max-w-xl mb-8">
+      <p className="text-center text-gray-400 w-[50%] mb-8">
         Messaging is coming soon. Soon you’ll be able to chat with breathing
         bots and connect with minds beyond your own.
       </p>

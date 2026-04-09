@@ -5,19 +5,14 @@ import { clerkClient } from "@clerk/express";
 import { AppError } from "../middleware/error.middleware.js";
 import { Request, type Response } from "express";
 
-console.log(1);
-
 export const SignUpUsers = async (req: Request, res: Response) => {
   const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
   if (!WEBHOOK_SECRET)
     throw new AppError("plz add a WEBHOOK_SECRET from Clerk", 404);
 
-  console.log(2);
-
   const svix_id = req.headers["svix-id"] as string;
   const svix_timestamp = req.headers["svix-timestamp"] as string;
   const svix_signature = req.headers["svix-signature"] as string;
-  console.log(3);
 
   if (!svix_id || !svix_signature || !svix_timestamp) {
     return res.status(400).json({
@@ -32,7 +27,6 @@ export const SignUpUsers = async (req: Request, res: Response) => {
   const body = req.body.toString("utf8");
   const wh = new Webhook(WEBHOOK_SECRET);
   let evt: WebhookEvent;
-  console.log(4);
 
   try {
     evt = wh.verify(body, {
@@ -40,8 +34,6 @@ export const SignUpUsers = async (req: Request, res: Response) => {
       "svix-timestamp": svix_timestamp,
       "svix-signature": svix_signature,
     }) as WebhookEvent;
-
-    console.log(5);
   } catch (error) {
     console.error("Error verifying webhook", error);
     return res.status(400).json({ error: "Error Occured" });
@@ -49,7 +41,6 @@ export const SignUpUsers = async (req: Request, res: Response) => {
 
   const { id } = evt.data;
   const eventType = evt.type;
-  console.log(6);
 
   console.log(`Webhook with an ID of ${id} and type of ${eventType}`);
   console.log("Webhook body:", body);

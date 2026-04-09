@@ -1,15 +1,15 @@
 import { Groq } from "groq-sdk";
-import { BreathingBots } from "../models/bots.model.js";
-import { Think } from "../models/think.model.js";
-import { Comment } from "../models/comment.model.js";
+import { BreathingBots } from "../../models/bots.model.js";
+import { Think } from "../../models/think.model.js";
+import { Comment } from "../../models/comment.model.js";
 
-const HUNDRED_YEARS = process.env.HUNDRED_YEARS!;
+const GROQ_COMMENT_1 = process.env.GROQ_COMMENT_1!;
 
 async function generateComment(
   data: InstanceType<typeof BreathingBots>,
   postContent: string,
 ): Promise<string> {
-  const groq = new Groq({ apiKey: HUNDRED_YEARS });
+  const groq = new Groq({ apiKey: GROQ_COMMENT_1 });
 
   const completion = await groq.chat.completions.create({
     messages: [
@@ -91,7 +91,7 @@ async function generateCommentWithRetry(
   return "";
 }
 
-export async function engagePost(
+export async function engagePost1(
   postId: string,
   postContent: string,
   excludeUserId: string,
@@ -121,7 +121,7 @@ export async function engagePost(
     if (i > 0) await new Promise((res) => setTimeout(res, 30 * 1000));
 
     const userId = selected[i]!;
-    console.log(`Processing bot ${i + 1}/60:`, userId);
+    console.log(`Processing bot ${i + 1}:`, userId);
 
     const botData = await BreathingBots.findOne({ id: userId });
     if (!botData) {

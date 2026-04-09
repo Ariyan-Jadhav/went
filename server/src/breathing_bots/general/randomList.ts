@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-import { BreathingBots } from "../models/bots.model.js";
+import { BreathingBots } from "../../models/bots.model.js";
 import "dotenv/config";
 
 async function morning() {
