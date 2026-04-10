@@ -741,14 +741,17 @@ function Feed() {
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-semibold">
+                          <NavLink
+                            to={`/profile/${comment.username}`}
+                            className="text-sm font-semibold"
+                          >
                             {comment.username}
                             {isOwner && (
                               <span className="ml-2 text-xs text-blue-400">
                                 you
                               </span>
                             )}
-                          </p>
+                          </NavLink>
 
                           {/* Edit/Delete — only visible to owner */}
                           {isOwner && !isEditing && (

@@ -118,7 +118,7 @@ export async function engagePost1(
   );
 
   for (let i = 0; i < selected.length; i++) {
-    if (i > 0) await new Promise((res) => setTimeout(res, 30 * 1000));
+    if (i > 0) await new Promise((res) => setTimeout(res, 2 * 60 * 1000));
 
     const userId = selected[i]!;
     console.log(`Processing bot ${i + 1}:`, userId);
