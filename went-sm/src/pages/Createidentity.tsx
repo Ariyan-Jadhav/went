@@ -639,6 +639,7 @@ export default function Createidentity() {
     e.preventDefault();
     setError(null);
     setSuccess(false);
+
     if (!user?.id) {
       setError("You're not authenticated.");
       return;
@@ -647,35 +648,38 @@ export default function Createidentity() {
     try {
       setLoading(true);
 
-      // 1. Safe to update without verification
-      await user.update({ firstName, lastName });
+      // 1. Upload image first so we get the updated URL
       if (imageFile) await user.setProfileImage({ file: imageFile });
 
-      // 2. Username — only update if it actually changed
+      // 2. Update name
+      await user.update({ firstName, lastName });
+
+      // 3. Username — only if changed
       if (username !== user.username) {
         try {
           await user.update({ username });
         } catch (clerkErr: any) {
           const msg = clerkErr?.errors?.[0]?.message ?? "";
-          if (msg.toLowerCase().includes("verification")) {
-            setError(
-              "Username change requires email verification. Please update it from your account settings.",
-            );
-            // Continue saving the rest anyway
-          } else {
-            throw clerkErr; // Re-throw unexpected errors
+          if (!msg.toLowerCase().includes("verification")) {
+            throw clerkErr;
           }
+          setError(
+            "Username change requires email verification. Update it from account settings.",
+          );
         }
       }
 
-      // 3. Update your DB
+      // 4. Reload Clerk so imageUrl is fresh
+      await user.reload();
+
+      // 5. Update DB
       const token = await getToken();
       const headers = { Authorization: `Bearer ${token}` };
 
       await Promise.all([
         axios.put(
           "profile/me/user",
-          { firstName, lastName, username, profilePicUrl: user?.imageUrl },
+          { firstName, lastName, username, profilePicUrl: user.imageUrl },
           { headers },
         ),
         axios.put(
@@ -722,7 +726,6 @@ export default function Createidentity() {
       ]);
 
       const verify = await axios.post("api/profile/me/verify", {}, { headers });
-
       if (verify.data.message === true) {
         setOpenTextBox(false);
         setProfile1(true);
@@ -730,12 +733,13 @@ export default function Createidentity() {
 
       setSuccess(true);
       setImageFile(null);
-      await user.reload();
       navigate("/feed");
     } catch (err: any) {
       console.error("e:", err);
       setError(
-        err?.errors?.[0]?.message ?? "Failed to save. Please try again.",
+        err?.errors?.[0]?.message ??
+          err?.message ??
+          "Failed to save. Please try again.",
       );
     } finally {
       setLoading(false);
