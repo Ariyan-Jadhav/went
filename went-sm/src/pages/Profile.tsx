@@ -732,7 +732,7 @@ export default function Profile() {
                   <div className="flex items-center ml-5">
                     {profile.profilePicUrl ? (
                       <img
-                        className="h-25 rounded-full"
+                        className="h-25 w-25 object-cover rounded-full"
                         src={profile.profilePicUrl}
                       />
                     ) : (
