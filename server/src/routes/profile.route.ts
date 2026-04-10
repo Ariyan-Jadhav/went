@@ -16,16 +16,16 @@ import {
 const router = express.Router();
 
 // ✅ Move /random ABOVE /:username
-router.post("/", requireAuth(), createProfile);
-router.get("/me", requireAuth(), getProfile);
-router.put("/me", requireAuth(), updateProfile);
-router.put("/me/user", requireAuth(), updateUser);
-router.put("/me/movie", requireAuth(), pinMovie);
-router.put("/me/track", requireAuth(), pinTrack);
-router.put("/me/album", requireAuth(), pinAlbum);
-router.put("/me/artist", requireAuth(), pinArtist);
+router.post("/", createProfile);
+router.get("/me", getProfile);
+router.put("/me", updateProfile);
+router.put("/me/user", updateUser);
+router.put("/me/movie", pinMovie);
+router.put("/me/track", pinTrack);
+router.put("/me/album", pinAlbum);
+router.put("/me/artist", pinArtist);
 
-router.get("/random", requireAuth(), getRandomUsers);
-router.get("/:username", requireAuth(), getProfileByUsername);
+router.get("/random", getRandomUsers);
+router.get("/:username", getProfileByUsername);
 
 export default router;
