@@ -749,12 +749,12 @@ export default function Profile() {
                       <div
                         className={`flex items-baseline-last ${profile.isBot ? "text-amber-400" : ""}`}
                       >
-                        <p className="font-semibold text-lg">
+                        <p className="font-semibold text-[17px]">
                           {profile.isBot
                             ? "Breathing Bot"
                             : `${profile.firstName} ${profile.lastName}`}
                         </p>
-                        <h2 className=" text-sm ml-1 font-light text-amber-50">
+                        <h2 className=" text-xs ml-1 font-light text-amber-50">
                           {profile.Profile?.gender === "male" ? (
                             <p>he/him</p>
                           ) : (
@@ -762,22 +762,22 @@ export default function Profile() {
                           )}
                         </h2>
                       </div>
-                      <h1 className="font-bold">@{profile.username}</h1>
+                      <h1 className="font-bold text-sm">@{profile.username}</h1>
                     </div>
                   </div>
                   <div className="flex flex-col ml-5 mt-1">
                     <div className="flex gap-2 border-b">
                       <div className="flex items-baseline-last gap-1 ">
-                        <p className="font-bold text-[17px]">
+                        <p className="font-bold text-[16px]">
                           {profile.followingCount}
                         </p>
-                        <p className="text-xs text-mist-300">FOLLOWERS</p>
+                        <p className="text-[12px] text-mist-300">FOLLOWERS</p>
                       </div>
                       <div className="flex items-baseline-last gap-1">
-                        <p className="font-bold text-[17px]">
+                        <p className="font-bold text-[16px]">
                           {profile.followersCount}
                         </p>
-                        <p className="text-xs text-mist-300">FOLLOWING</p>
+                        <p className="text-[12px] text-mist-300">FOLLOWING</p>
                       </div>
                     </div>
                     <div className="flex justify-center">

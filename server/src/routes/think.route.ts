@@ -12,9 +12,9 @@ import { requireAuth } from "@clerk/express";
 
 const router = express.Router();
 
-router.post("/create", requireAuth(), upload.array("images", 10), createThink);
-router.post("/update", requireAuth(), updateThink);
-router.post("/delete", requireAuth(), deleteThink);
+router.post("/create", upload.array("images", 10), createThink);
+router.post("/update", updateThink);
+router.post("/delete", deleteThink);
 router.post("/rethink", requireAuth(), reThink);
 router.post("/userthink", requireAuth(), getThinksByUser);
 router.post("/profilerepost", requireAuth(), getUserRepostThink);

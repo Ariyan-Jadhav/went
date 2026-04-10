@@ -642,28 +642,30 @@ export default function Createidentity() {
   // ── Submit ────────────────────────────────────────────────────────────────────
   const createIdentity = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading || !allFieldsFilled) return; // ← guard against double-click
     setError(null);
     setSuccess(false);
+    setLoading(true); // ← before the try
 
     if (!user?.id) {
       setError("You're not authenticated.");
+      setLoading(false);
       return;
     }
 
     try {
-      setLoading(true);
       await updateWithReverification(firstName, lastName, username);
       if (imageFile) await user!.setProfileImage({ file: imageFile });
-      await user!.reload();
+      await user!.reload(); // reload before reading user?.imageUrl
 
-      // 3. Update your DB — username lives here only
       const token = await getToken();
       const headers = { Authorization: `Bearer ${token}` };
+      const freshImageUrl = user?.imageUrl; // now up to date after reload
 
       await Promise.all([
         axios.put(
           "profile/me/user",
-          { firstName, lastName, username, profilePicUrl: user?.imageUrl },
+          { firstName, lastName, username, profilePicUrl: freshImageUrl },
           { headers },
         ),
         axios.put(
