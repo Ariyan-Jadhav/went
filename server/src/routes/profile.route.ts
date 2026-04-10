@@ -15,7 +15,6 @@ import {
 
 const router = express.Router();
 
-// ✅ Move /random ABOVE /:username
 router.post("/", createProfile);
 router.get("/me", getProfile);
 router.put("/me", updateProfile);
