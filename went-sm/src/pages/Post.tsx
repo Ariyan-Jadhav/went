@@ -244,7 +244,7 @@ function Post() {
             <SectionHeader
               step="02"
               label="Hashtags"
-              sublabel="Tag it so others can find it. Press Enter or comma to add."
+              sublabel="Note: these hashtags will not be displayed in your think. Tag it so others can find it. Press Enter or comma to add."
             />
 
             {/* Input row */}

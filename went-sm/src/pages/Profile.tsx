@@ -814,15 +814,18 @@ export default function Profile() {
               <div className="mt-1 cursor-default relative z-30 ml-5">
                 <div className="flex gap-1">
                   <p className="text-blue-800 font-extrabold">|</p>
-                  <VariableProximity
-                    label={profile.Profile?.bio as string}
-                    className={"variable-proximity-demo"}
-                    fromFontVariationSettings="'wght' 400, 'opsz' 9"
-                    toFontVariationSettings="'wght' 1000, 'opsz' 40"
-                    containerRef={containerRef}
-                    radius={100}
-                    falloff="linear"
-                  />
+                  {profile.Profile?.bio?.split("\n").map((line, i) => (
+                    <VariableProximity
+                      key={i}
+                      label={line || " "} // empty string fallback keeps the line height
+                      className="variable-proximity-demo"
+                      fromFontVariationSettings="'wght' 400, 'opsz' 9"
+                      toFontVariationSettings="'wght' 1000, 'opsz' 40"
+                      containerRef={containerRef}
+                      radius={100}
+                      falloff="linear"
+                    />
+                  ))}
                 </div>
                 <div className="mt-2">
                   <ul className="flex text-sm gap-2 text-mist-300">

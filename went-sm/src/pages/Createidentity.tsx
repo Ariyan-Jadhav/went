@@ -6,6 +6,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { useNavigate } from "react-router-dom";
+import { useReverification } from "@clerk/clerk-react";
 
 import {
   Popover,
@@ -357,7 +358,7 @@ export default function Createidentity() {
 
   // ── Profession & Location state ──
   const [selectedProfession, setSelectedProfession] =
-    useState<string>("Berozgar");
+    useState<string>("Student");
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [profileLoaded, setProfileLoaded] = useState(false);
 
@@ -634,6 +635,10 @@ export default function Createidentity() {
     setSelectMoviePanel(panel === "movie");
   }
 
+  const updateWithReverification = useReverification(
+    (firstName: string, lastName: string, username: string) =>
+      user!.update({ firstName, lastName, username }),
+  );
   // ── Submit ────────────────────────────────────────────────────────────────────
   const createIdentity = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -647,39 +652,18 @@ export default function Createidentity() {
 
     try {
       setLoading(true);
+      await updateWithReverification(firstName, lastName, username);
+      if (imageFile) await user!.setProfileImage({ file: imageFile });
+      await user!.reload();
 
-      // 1. Upload image first so we get the updated URL
-      if (imageFile) await user.setProfileImage({ file: imageFile });
-
-      // 2. Update name
-      await user.update({ firstName, lastName });
-
-      // 3. Username — only if changed
-      if (username !== user.username) {
-        try {
-          await user.update({ username });
-        } catch (clerkErr: any) {
-          const msg = clerkErr?.errors?.[0]?.message ?? "";
-          if (!msg.toLowerCase().includes("verification")) {
-            throw clerkErr;
-          }
-          setError(
-            "Username change requires email verification. Update it from account settings.",
-          );
-        }
-      }
-
-      // 4. Reload Clerk so imageUrl is fresh
-      await user.reload();
-
-      // 5. Update DB
+      // 3. Update your DB — username lives here only
       const token = await getToken();
       const headers = { Authorization: `Bearer ${token}` };
 
       await Promise.all([
         axios.put(
           "profile/me/user",
-          { firstName, lastName, username, profilePicUrl: user.imageUrl },
+          { firstName, lastName, username, profilePicUrl: user?.imageUrl },
           { headers },
         ),
         axios.put(
@@ -735,11 +719,9 @@ export default function Createidentity() {
       setImageFile(null);
       navigate("/feed");
     } catch (err: any) {
-      console.error("e:", err);
+      console.error(err);
       setError(
-        err?.errors?.[0]?.message ??
-          err?.message ??
-          "Failed to save. Please try again.",
+        err?.errors?.[0]?.message ?? "Failed to save. Please try again.",
       );
     } finally {
       setLoading(false);

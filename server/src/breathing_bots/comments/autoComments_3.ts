@@ -114,7 +114,7 @@ export async function engagePost3(
 
   const selected = allIds.slice(0, getRandomInRange(15, 20));
   console.log(
-    `engagePost started — ${selected.length} bots selected for post ${postId}`,
+    `API-3 engagePost started — ${selected.length} bots selected for post ${postId}`,
   );
 
   for (let i = 0; i < selected.length; i++) {
