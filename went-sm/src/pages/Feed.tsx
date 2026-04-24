@@ -608,7 +608,10 @@ function Feed() {
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center text-xs font-bold text-white">
                   {think.userImageUrl ? (
-                    <img src={think.userImageUrl} className="rounded-full" />
+                    <img
+                      src={think.userImageUrl}
+                      className="w-full h-full object-cover rounded-full"
+                    />
                   ) : (
                     think.username?.[0]?.toUpperCase()
                   )}
@@ -733,7 +736,7 @@ function Feed() {
                         {comment.userProfileImage ? (
                           <img
                             src={comment.userProfileImage}
-                            className="rounded-full"
+                            className="w-full h-full object-cover rounded-full"
                           />
                         ) : (
                           comment.username?.[0]?.toUpperCase()
