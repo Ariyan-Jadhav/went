@@ -325,11 +325,13 @@ export default function Createidentity() {
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   // Sync Clerk user data once loaded
+  const hasSyncedUser = useRef(false);
   useEffect(() => {
-    if (user) {
+    if (user && !hasSyncedUser.current) {
       setFirstName(user.firstName ?? "");
       setLastName(user.lastName ?? "");
       setUsername(user.username ?? "");
+      hasSyncedUser.current = true; // never run again
     }
   }, [user]);
 
