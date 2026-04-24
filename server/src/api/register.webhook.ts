@@ -15,15 +15,15 @@ export const SignUpUsers = async (req: Request, res: Response) => {
   const svix_signature = req.headers["svix-signature"] as string;
 
   if (!svix_id || !svix_signature || !svix_timestamp) {
-    return res.status(400).json({
-      error: "Error occured - no svix headers",
-    });
+    return res.status(400).json({ error: "Error occured - no svix headers" });
   }
+
   if (!Buffer.isBuffer(req.body)) {
     return res
       .status(400)
       .json({ error: "Raw body not available - check body parser setup" });
   }
+
   const body = req.body.toString("utf8");
   const wh = new Webhook(WEBHOOK_SECRET);
   let evt: WebhookEvent;
@@ -42,16 +42,7 @@ export const SignUpUsers = async (req: Request, res: Response) => {
   const { id } = evt.data;
   const eventType = evt.type;
 
-  console.log(`Webhook with an ID of ${id} and type of ${eventType}`);
-  console.log("Webhook body:", body);
-
   if (eventType === "user.created") {
-    await clerkClient.users.updateUserMetadata(evt.data.id, {
-      publicMetadata: {
-        verified: false,
-      },
-    });
-
     try {
       const { email_addresses, primary_email_address_id } = evt.data;
 
@@ -63,32 +54,55 @@ export const SignUpUsers = async (req: Request, res: Response) => {
       const primaryEmail = email_addresses.find(
         (email) => email.id === primary_email_address_id,
       );
+
+      // ✅ Guard: don't proceed without an email
       if (!primaryEmail) {
-        console.error("No primary Email found");
-        return res.status(404).json({ error: "no email found" });
+        console.error("No primary email found in webhook payload");
+        return res.status(400).json({ error: "no primary email found" });
       }
 
-      const newUser = await prisma.user.create({
+      const username = primaryEmail?.email_address.replace("@gmail.com", "");
+
+      const existingUser = await prisma.user.findUnique({
+        where: { id },
+      });
+
+      if (existingUser) {
+        console.log("User already exists, skipping...");
+        return res.status(200).json({ message: "Webhook received success" });
+      }
+
+      await prisma.user.create({
         data: {
-          id: id,
-          email: primaryEmail.email_address,
+          id,
+          email: primaryEmail?.email_address || "",
           firstName: "",
           lastName: "",
-          username: "",
+          username: username,
           profilePicUrl: "",
+          isBot: false,
         },
       });
-      console.log("New user created:", newUser);
 
-      const newProfile = await prisma.profile.create({
-        data: { user_id: id },
+      const existingProfile = await prisma.profile.findUnique({
+        where: { user_id: id },
       });
-      console.log("Profile created:", newProfile);
+
+      if (!existingProfile) {
+        await prisma.profile.create({
+          data: { user_id: id },
+        });
+      }
+
+      await clerkClient.users.updateUserMetadata(id, {
+        publicMetadata: { verified: false },
+      });
     } catch (error) {
       console.error("Error creating user in database", error);
       return res.status(500).json({ error: "Error creating user" });
     }
   }
+
   return res.status(200).json({ message: "Webhook received success" });
 };
 
