@@ -1,5 +1,5 @@
 import { NavLink, useParams } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useClerk } from "@clerk/clerk-react";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Zodiac } from "@/components/Zodiac";
@@ -8,6 +8,7 @@ import Aurora from "@/components/Aurora";
 import { SpinnerCustom } from "@/components/ui/spinner";
 import Magnet from "@/components/Magnet";
 import VariableProximity from "@/components/VariableProximity";
+
 import { Heart, Repeat2 } from "lucide-react";
 
 import {
@@ -142,6 +143,7 @@ interface RandomUser {
 }
 
 export default function Profile() {
+  const { signOut } = useClerk();
   const containerRef = useRef(null);
   const { getToken, userId } = useAuth();
   const { username } = useParams<{ username: string }>();
@@ -728,7 +730,7 @@ export default function Profile() {
             {/* BASIC INFO */}
             <div className="">
               {profile && (
-                <div className="flex items-center gap-10">
+                <div className="flex items-start gap-10">
                   <div className="flex items-center ml-5">
                     {profile.profilePicUrl ? (
                       <img
@@ -765,7 +767,7 @@ export default function Profile() {
                       <h1 className="font-bold text-sm">@{profile.username}</h1>
                     </div>
                   </div>
-                  <div className="flex flex-col ml-5 mt-1">
+                  <div className="flex flex-col ml-5 mt-3 ">
                     <div className="flex gap-2 border-b">
                       <div className="flex items-baseline-last gap-1 ">
                         <p className="font-bold text-[16px]">
@@ -794,14 +796,20 @@ export default function Profile() {
                           {followingUsers[profile.id] ? "Following" : "Follow"}
                         </button>
                       ) : (
-                        <div>
+                        <div className="flex flex-col">
                           <NavLink to="/createidentity">
                             <button
-                              className={`mt-2 w-full px-4 py-1 rounded text-sm font-medium border transition-colors disabled:opacity-50 bg-transparent border-gray-500 text-white hover:bg-white hover:text-black`}
+                              className={` mt-2 w-full px-4 py-1 rounded text-sm font-medium border transition-colors disabled:opacity-50 bg-transparent border-gray-500 text-white hover:bg-white hover:text-black`}
                             >
                               Edit Account
                             </button>
                           </NavLink>
+                          <button
+                            className="mt-2 w-full px-4 py-1 rounded text-sm font-medium border transition-colors disabled:opacity-50 bg-transparent border-gray-500 text-white hover:bg-red-500 hover:text-black"
+                            onClick={() => signOut({ redirectUrl: "/" })}
+                          >
+                            Logout
+                          </button>
                         </div>
                       )}
                     </div>
