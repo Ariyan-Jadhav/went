@@ -767,7 +767,7 @@ export default function Profile() {
                       <h1 className="font-bold text-sm">@{profile.username}</h1>
                     </div>
                   </div>
-                  <div className="flex flex-col ml-5 mt-3 ">
+                  <div className="flex flex-col ml-5 mt-3 mr-2 ">
                     <div className="flex gap-2 border-b">
                       <div className="flex items-baseline-last gap-1 ">
                         <p className="font-bold text-[16px]">
