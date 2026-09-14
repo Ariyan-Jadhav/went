@@ -21,9 +21,9 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   if (
     isSignedIn &&
     !user?.publicMetadata?.verified &&
-    !location.pathname.startsWith("/createidentity")
+    !location.pathname.startsWith("/SI/auth")
   ) {
-    return <Navigate to="/createidentity" replace state={{ from: location }} />;
+    return <Navigate to="/SI/auth" replace state={{ from: location }} />;
   }
 
   return <>{children}</>;

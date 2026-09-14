@@ -5,6 +5,7 @@ import Feed from "./pages/Feed";
 import Noti from "./pages/Notification";
 import DynamicIsland from "./pages/DynamicIsland";
 import Post from "./pages/Post";
+import SI from "./pages/ShortInitialize";
 import Profile from "./pages/Profile";
 import Createidentity from "./pages/Createidentity";
 import { ProtectedRoute } from "./components/ProtectedRoutes";
@@ -25,6 +26,7 @@ function App() {
       >
         <Route path="/message" element={<ComingSoon />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/SI/auth" element={<SI />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/feed" element={<Feed />} />
